@@ -75,6 +75,7 @@ cfg.system = {
 	showTooltip = true,		-- SHOWS A LIST OF ADDONS AND HOW MUCH SYSTEM THEY USE
 	addonList = 10, 		-- SHOW HOW MANY ADDONS TO SHOW ON HOVER
 	addonListShift = 25,	-- SHOW HOW MANY ADDONS TO SHOW ON HOVER WHILE SHIFT IS DOWN
+	showWorldPing = true,
 }
 
 cfg.gold = {

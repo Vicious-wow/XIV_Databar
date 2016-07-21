@@ -18,11 +18,11 @@ local systemFrame = CreateFrame("Frame",nil, cfg.SXframe)
 systemFrame:SetPoint("RIGHT", -290,0)
 systemFrame:SetSize(120, 16)
 ---------------------------------------------------------------------
-  
+
 local addoncompare = function(a, b)
 	return a.memory > b.memory
 end
- 
+
  local function systemBarOnEnter()
  if not cfg.system.showTooltip then return end
 	GameTooltip:SetOwner(systemFrame, cfg.tooltipPos)
@@ -108,7 +108,7 @@ end)
 pingFrame:SetScript("OnLeave", function()
 	pingIcon:SetVertexColor(unpack(cfg.color.normal))
 	onHover = false
-	systemBarOnLeave() 
+	systemBarOnLeave()
 end)
 
 pingFrame:SetScript("OnClick", function(self, button, down)
@@ -152,7 +152,7 @@ end)
 fpsFrame:SetScript("OnLeave", function()
 	fpsIcon:SetVertexColor(unpack(cfg.color.normal))
 	onHover = false
-	systemBarOnLeave() 
+	systemBarOnLeave()
 end)
 
 fpsFrame:SetScript("OnClick", function(self, button, down)
@@ -183,7 +183,12 @@ end
 local function updatePerformanceText()
 	local fps = floor(GetFramerate())
 	local BWIn, BWOut, LCHome, LCWorld = GetNetStats()
-	pingText:SetText(LCHome.."ms")
+  local pingString = LCHome.."ms";
+  if cfg.system.showWorldPing then
+    pingString = pingString.." "..LCWorld.."ms"
+  end
+  
+	pingText:SetText(pingString)
 	pingFrame:SetSize(pingText:GetStringWidth()+18, 16)
 	fpsText:SetText(fps.."fps")
 	fpsFrame:SetSize(fpsText:GetStringWidth()+18, 16)
