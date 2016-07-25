@@ -81,7 +81,7 @@ end
 
 ---------------------------------------------------------------------
 
-local pingFrame = CreateFrame("BUTTON",nil, systemFrame)
+local pingFrame = CreateFrame("BUTTON","SX_pingFrame", systemFrame)
 pingFrame:SetPoint("CENTER")
 pingFrame:SetSize(16, 16)
 pingFrame:EnableMouse(true)
@@ -187,7 +187,7 @@ local function updatePerformanceText()
   if cfg.system.showWorldPing then
     pingString = pingString.." "..LCWorld.."ms"
   end
-  
+
 	pingText:SetText(pingString)
 	pingFrame:SetSize(pingText:GetStringWidth()+18, 16)
 	fpsText:SetText(fps.."fps")

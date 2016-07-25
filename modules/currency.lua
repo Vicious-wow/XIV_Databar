@@ -4,6 +4,14 @@ local unpack = unpack
 --------------------------------------------------------------
 if not cfg.currency.show then return end
 
+local iconPos = "RIGHT"
+local textPos = "LEFT"
+
+if cfg.currency.textOnRight then
+	iconPos = "LEFT"
+	textPos = "RIGHT"
+end
+
 local currencyFrame = CreateFrame("Frame",nil, cfg.SXframe)
 currencyFrame:SetPoint("LEFT", cfg.SXframe, "CENTER", 340,0)
 currencyFrame:SetSize(16, 16)
@@ -47,15 +55,15 @@ xpFrame:SetScript("OnEnter", function()
 	local nxp = mxp - xp
 	local rxp = GetXPExhaustion()
 	local name, standing, minrep, maxrep, value = GetWatchedFactionInfo()
-	
+
 	if cfg.core.position ~= "BOTTOM" then
 		GameTooltip:SetOwner(xpStatusbar, cfg.tooltipPos)
 	else
 		GameTooltip:SetOwner(xpFrame, cfg.tooltipPos)
 	end
-	
+
 	GameTooltip:AddLine("[|cff6699FFExperience Bar|r]")
-	GameTooltip:AddLine(" ") 
+	GameTooltip:AddLine(" ")
 	GameTooltip:AddDoubleLine(COMBAT_XP_GAIN, format(cfg.SVal(xp)).."|cffffd100/|r"..format(cfg.SVal(mxp)).." |cffffd100/|r "..floor((xp/mxp)*1000)/10 .."%",NORMAL_FONT_COLOR.r,NORMAL_FONT_COLOR.g,NORMAL_FONT_COLOR.b,1,1,1)
 	GameTooltip:AddDoubleLine(NEED, format(cfg.SVal(nxp)).." |cffffd100/|r "..floor((nxp/mxp)*1000)/10 .."%",NORMAL_FONT_COLOR.r,NORMAL_FONT_COLOR.g,NORMAL_FONT_COLOR.b,1,1,1)
 	if rxp then
@@ -64,8 +72,8 @@ xpFrame:SetScript("OnEnter", function()
 	GameTooltip:Show()
 end)
 
-xpFrame:SetScript("OnLeave", function() 
-	xpIcon:SetVertexColor(unpack(cfg.color.normal)) 
+xpFrame:SetScript("OnLeave", function()
+	xpIcon:SetVertexColor(unpack(cfg.color.normal))
 	xpStatusbar:SetStatusBarColor(unpack(cfg.color.normal))
 	if ( GameTooltip:IsShown() ) then GameTooltip:Hide() end
 end)
@@ -81,13 +89,14 @@ rerollFrame:RegisterForClicks("AnyUp")
 
 local rerollIcon = rerollFrame:CreateTexture(nil,"OVERLAY",nil,7)
 rerollIcon:SetSize(16, 16)
-rerollIcon:SetPoint("RIGHT")
+rerollIcon:SetPoint(iconPos)
 rerollIcon:SetTexture(cfg.mediaFolder.."datatexts\\reroll")
 rerollIcon:SetVertexColor(unpack(cfg.color.inactive))
 
 local rerollText = rerollFrame:CreateFontString(nil, "OVERLAY")
 rerollText:SetFont(cfg.text.font, cfg.text.normalFontSize)
-rerollText:SetPoint("RIGHT",rerollIcon,"LEFT",-2,0)
+--rerollText:SetPoint(iconPos,rerollIcon,textPos,-2,0)
+rerollText:SetPoint(textPos)
 rerollText:SetTextColor(unpack(cfg.color.inactive))
 
 rerollFrame:SetScript("OnEnter", function()
@@ -98,19 +107,19 @@ rerollFrame:SetScript("OnEnter", function()
 	GameTooltip:AddLine("[|cff6699FFReroll|r]")
 	GameTooltip:AddLine(" ")
 	local SoIFname, SoIFamount, SoIFicon, SoIFearnedThisWeek, SoIFweeklyMax, SoIFtotalMax, SoIFisDiscovered = GetCurrencyInfo(1129)
-	if SoIFamount > 0 then 
+	if SoIFamount > 0 then
 		GameTooltip:AddLine(SoIFname,1,1,0)
 		GameTooltip:AddDoubleLine("|cffffff00Weekly: |cffffffff"..SoIFearnedThisWeek.."|cffffff00/|cffffffff"..SoIFweeklyMax, "|cffffff00Total: |cffffffff"..SoIFamount.."|cffffff00/|cffffffff"..SoIFtotalMax)
 	else
 		local SoTFname, SoTFamount, SoTFicon, SoTFearnedThisWeek, SoTFweeklyMax, SoTFtotalMax, SoTFisDiscovered = GetCurrencyInfo(994)
-		if SoTFamount > 0 then 
+		if SoTFamount > 0 then
 			GameTooltip:AddDoubleLine(SoTFname, "|cffffff00Total: |cffffffff"..SoTFamount.."|cffffff00/|cffffffff"..SoTFtotalMax)
 		end
 	end
 	GameTooltip:Show()
 end)
 
-rerollFrame:SetScript("OnLeave", function() 
+rerollFrame:SetScript("OnLeave", function()
 	if ( GameTooltip:IsShown() ) then GameTooltip:Hide() end
 	rerollIcon:SetVertexColor(unpack(cfg.color.inactive))
 end)
@@ -134,32 +143,27 @@ honorFrame:RegisterForClicks("AnyUp")
 
 local honorIcon = honorFrame:CreateTexture(nil,"OVERLAY",nil,7)
 honorIcon:SetSize(16, 16)
-honorIcon:SetPoint("RIGHT")
+honorIcon:SetPoint(iconPos)
 honorIcon:SetTexture(cfg.mediaFolder.."datatexts\\honor")
 honorIcon:SetVertexColor(unpack(cfg.color.inactive))
 
 local honorText = honorFrame:CreateFontString(nil, "OVERLAY")
 honorText:SetFont(cfg.text.font, cfg.text.normalFontSize)
-honorText:SetPoint("LEFT")
+honorText:SetPoint(textPos)
 honorText:SetTextColor(unpack(cfg.color.inactive))
 
 honorFrame:SetScript("OnEnter", function()
 	if InCombatLockdown() then return end
-	honorIcon:SetVertexColor(unpack(cfg.color.hover))	
+	honorIcon:SetVertexColor(unpack(cfg.color.hover))
 	if not cfg.currency.showTooltip then return end
 	GameTooltip:SetOwner(currencyFrame, cfg.tooltipPos)
-	GameTooltip:AddLine("[|cff6699FFPvP Currency|r]")
+	GameTooltip:AddLine("[|cff6699FFHonor Level:|r"..UnitHonorLevel("player").."]")
 	GameTooltip:AddLine(" ")
-	local concName, concAmount, _, concEarnedThisWeek, concWeeklyMax, concTotalMax, concIsDiscovered = GetCurrencyInfo(390)
-	local honorName, honorAmount, _, honorEarnedThisWeek, honorWeeklyMax, honorTotalMax, honorIsDiscovered = GetCurrencyInfo(392)
-	
-	GameTooltip:AddDoubleLine(concName,"|cffffff00Weekly: |cffffffff"..concEarnedThisWeek.."|cffffff00/|cffffffff"..format(cfg.SVal(concWeeklyMax)))
-	
-	GameTooltip:AddDoubleLine(honorName, "|cffffff00Total: |cffffffff"..honorAmount.."|cffffff00/|cffffffff"..format(cfg.SVal(honorTotalMax)))
+	GameTooltip:AddDoubleLine(concName,"|cffffff00Honor: |cffffffff"..UnitHonor("player").."|cffffff00/|cffffffff"..UnitHonorMax("player"))
 	GameTooltip:Show()
 end)
 
-honorFrame:SetScript("OnLeave", function() 
+honorFrame:SetScript("OnLeave", function()
 	if ( GameTooltip:IsShown() ) then GameTooltip:Hide() end
 	honorIcon:SetVertexColor(unpack(cfg.color.inactive))
 end)
@@ -183,18 +187,18 @@ garrisonFrame:RegisterForClicks("AnyUp")
 
 local garrisonIcon = garrisonFrame:CreateTexture(nil,"OVERLAY",nil,7)
 garrisonIcon:SetSize(16, 16)
-garrisonIcon:SetPoint("RIGHT")
+garrisonIcon:SetPoint(iconPos)
 garrisonIcon:SetTexture(cfg.mediaFolder.."datatexts\\garres")
 garrisonIcon:SetVertexColor(unpack(cfg.color.inactive))
 
 local garrisonText = garrisonFrame:CreateFontString(nil, "OVERLAY")
 garrisonText:SetFont(cfg.text.font, cfg.text.normalFontSize)
-garrisonText:SetPoint("LEFT")
+garrisonText:SetPoint(textPos)
 garrisonText:SetTextColor(unpack(cfg.color.inactive))
 
 garrisonFrame:SetScript("OnEnter", function()
 	if InCombatLockdown() then return end
-	garrisonIcon:SetVertexColor(unpack(cfg.color.hover))	
+	garrisonIcon:SetVertexColor(unpack(cfg.color.hover))
 	if not cfg.currency.showTooltip then return end
 	GameTooltip:SetOwner(currencyFrame, cfg.tooltipPos)
 	GameTooltip:AddLine("[|cff6699FFGarrison Recources|r]")
@@ -203,19 +207,19 @@ garrisonFrame:SetScript("OnEnter", function()
 	local oilName, oilAmount, _, _, _, oilTotalMax, oilIsDiscovered = GetCurrencyInfo(1101)
 	local apexisName, apexisAmount = GetCurrencyInfo(823)
 	local DICName, DICAmount, _, _, _, DICTotalMax = GetCurrencyInfo(980)
-	
+
 	GameTooltip:AddDoubleLine(grName, "|cffffffff"..format(cfg.SVal(grAmount)).."|cffffff00/|cffffffff"..format(cfg.SVal(grTotalMax)))
 	if oilIsDiscovered then
 		GameTooltip:AddDoubleLine(oilName, "|cffffffff"..format(cfg.SVal(oilAmount)).."|cffffff00/|cffffffff"..format(cfg.SVal(oilTotalMax)))
 	end
 	GameTooltip:AddDoubleLine(apexisName, "|cffffffff"..format(cfg.SVal(apexisAmount)))
-	if DICAmount > 0 then 
+	if DICAmount > 0 then
 		GameTooltip:AddDoubleLine(DICName, "|cffffffff"..format(cfg.SVal(DICAmount)).."|cffffff00/|cffffffff"..format(cfg.SVal(DICTotalMax)))
 	end
 	GameTooltip:Show()
 end)
 
-garrisonFrame:SetScript("OnLeave", function() 
+garrisonFrame:SetScript("OnLeave", function()
 	if ( GameTooltip:IsShown() ) then GameTooltip:Hide() end
 	garrisonIcon:SetVertexColor(unpack(cfg.color.inactive))
 end)
@@ -268,11 +272,11 @@ eventframe:SetScript("OnEvent", function(this, event, arg1, arg2, arg3, arg4, ..
 		mxp = UnitXPMax("player")
 		xp = UnitXP("player")
 		updateXP(xp, mxp)
-		currencyFrame:Hide()		
+		currencyFrame:Hide()
 	else
 		xpFrame:Hide()
 	end
-	
+
 	if event == "MODIFIER_STATE_CHANGED" then
 		if InCombatLockdown() then return end
 		if arg1 == "LSHIFT" or arg1 == "RSHIFT" then
@@ -280,45 +284,38 @@ eventframe:SetScript("OnEvent", function(this, event, arg1, arg2, arg3, arg4, ..
 			if arg2 == 1 then
 				xpFrame:Hide()
 				xpFrame:EnableMouse(false)
-				currencyFrame:Show()		
+				currencyFrame:Show()
 			elseif arg2 == 0 then
 				currencyFrame:Hide()
-				xpFrame:EnableMouse(true)				
-				xpFrame:Show()		
+				xpFrame:EnableMouse(true)
+				xpFrame:Show()
 			end
 		end
 	end
-	
-	
-	
-	
+
+
+
+
 	-- reroll currency
 	local SoIFname, SoIFamount, _, _, _, SoIFtotalMax, SoIFisDiscovered = GetCurrencyInfo(1129)
-	if SoIFamount > 0 then 
+	if SoIFamount > 0 then
 		rerollText:SetText(SoIFamount)
 	else
 		local SoTFname, SoTFamount, _, _, _, SoTFtotalMax, SoTFisDiscovered = GetCurrencyInfo(994)
 		if SoTFamount > 0 then rerollText:SetText(SoTFamount) end
 	end
 	rerollFrame:SetSize(rerollText:GetStringWidth()+18, 16)
-	
+
 	-- honor currency
-	local concName, concAmount, _, concEarnedThisWeek, concWeeklyMax, concTotalMax, concIsDiscovered = GetCurrencyInfo(390)
-	if concAmount > 0 then 
-		honorText:SetText(concAmount)
-	else
-		local honorName, honorAmount, _, honorEarnedThisWeek, honorWeeklyMax, honorTotalMax, honorIsDiscovered = GetCurrencyInfo(392)
-		if honorAmount > 0 then honorText:SetText(honorAmount) end
-	end
+	honorText:SetText(UnitHonor("player"))
 	honorFrame:SetSize(honorText:GetStringWidth()+18, 16)
-	
+
 	currencyFrame:SetSize(rerollFrame:GetWidth()+honorFrame:GetWidth()+6,16)
-	
+
 	-- garrison currency
 	local grName, grAmount, _, grEarnedThisWeek, grWeeklyMax, grTotalMax, grIsDiscovered = GetCurrencyInfo(824)
 	garrisonText:SetText(grAmount)
 	garrisonFrame:SetSize(garrisonText:GetStringWidth()+18, 16)
-	
+
 	currencyFrame:SetSize(rerollFrame:GetWidth()+honorFrame:GetWidth()+garrisonFrame:GetWidth()+6,16)
 end)
-
