@@ -63,6 +63,37 @@ lootSpectBG:SetColorTexture(unpack(cfg.color.barcolor))
 globalLootSpecFrame = lootSpecFrame
 
 ---------------------------------------------
+-- SPEC CHANGE FRAME
+---------------------------------------------
+local specFrame = CreateFrame("BUTTON",'SX_SpecFrame', talentFrame)
+if cfg.core.position ~= "BOTTOM" then
+	specFrame:SetPoint("TOP", talentFrame, "BOTTOM", 0,-6)
+else
+	specFrame:SetPoint("BOTTOM", talentFrame, "TOP", 0,8)
+end
+specFrame:RegisterForClicks("AnyUp")
+specFrame:Hide()
+specFrame:EnableMouse(true)
+
+specFrame:SetScript("OnClick", function(self, button, down)
+	if InCombatLockdown() then return end
+	if button == "RightButton" then
+		specFrame:Hide()
+	end
+end)
+
+local specText = specFrame:CreateFontString(nil, "OVERLAY")
+specText:SetFont(cfg.text.font, cfg.text.normalFontSize)
+specText:SetPoint("TOP")
+specText:SetText("SET SPECIALIZATION")
+specText:SetTextColor(unpack(cfg.color.normal))
+
+local specBG = specFrame:CreateTexture(nil,"OVERLAY",nil,7)
+specBG:SetPoint("TOP")
+specBG:SetColorTexture(unpack(cfg.color.barcolor))
+globalSpecFrame = specFrame
+
+---------------------------------------------
 -- PRIMARY SPEC FRAME
 ---------------------------------------------
 
@@ -90,10 +121,9 @@ primarySpecFrame:SetScript("OnEnter", function()
 	lootspecid = GetLootSpecialization()
 	if lootspecid == 0 then lootspecid = currentSpecID end
 	id, name = GetSpecializationInfoByID(lootspecid)
-	if currentSpecID ~= id then
-		GameTooltip:AddLine("|cffffffffLoot is currently set to |cffffff00"..name.."|cffffffff spec")
-		GameTooltip:AddDoubleLine("<Right-Click>", "Change lootspec", 1, 1, 0, 1, 1, 1)
-	end
+	GameTooltip:AddLine("|cffffffffLoot is currently set to |cffffff00"..name.."|cffffffff spec")
+	GameTooltip:AddDoubleLine("<Left-Click>", "Change spec", 1, 1, 0, 1, 1, 1)
+	GameTooltip:AddDoubleLine("<Right-Click>", "Change lootspec", 1, 1, 0, 1, 1, 1)
 	primarySpecIcon:SetVertexColor(unpack(cfg.color.hover))
 	GameTooltip:Show()
 end)
@@ -110,11 +140,21 @@ end)
 primarySpecFrame:SetScript("OnClick", function(self, button, down)
 	if InCombatLockdown() then return end
 	if button == "LeftButton" then
-		ToggleTalentFrame(1)
+		if globalSpecFrame:IsShown() then
+			globalSpecFrame:Hide()
+		else
+			if globalLootSpecFrame:IsShown() then
+				globalLootSpecFrame:Hide()
+			end
+			globalSpecFrame:Show()
+		end
 	elseif button == "RightButton" then
 		if globalLootSpecFrame:IsShown() then
 			globalLootSpecFrame:Hide()
 		else
+			if globalSpecFrame:IsShown() then
+				globalSpecFrame:Hide()
+			end
 			globalLootSpecFrame:Show()
 		end
 	end
@@ -173,10 +213,14 @@ for index = 1,4 do
 		lootSpecButton:SetScript("OnClick", function(self, button, down)
 			if InCombatLockdown() then return end
 			if button == "LeftButton" then
-				local id = GetSpecializationInfo(index)
-				SetLootSpecialization(id)
-				lootSpecbuttonText:SetTextColor(unpack(cfg.color.normal))
-				lootSpecbuttonIcon:SetVertexColor(unpack(cfg.color.normal))
+				if IsShiftKeyDown() then
+					SetSpecialization(index)
+				else
+					local id = GetSpecializationInfo(index)
+					SetLootSpecialization(id)
+					lootSpecbuttonText:SetTextColor(unpack(cfg.color.normal))
+					lootSpecbuttonIcon:SetVertexColor(unpack(cfg.color.normal))
+				end
 				lootSpecFrame:Hide()
 			elseif button == "RightButton" then
 				lootSpecFrame:Hide()
@@ -184,6 +228,70 @@ for index = 1,4 do
 		end)
 	end
 end
+end
+
+---------------------------------------------------------------------
+
+local function createSpecButtons()
+	local curSpec = GetSpecialization()
+	for index = 1,GetNumSpecializations() do
+		local id, name = GetSpecializationInfo(index)
+		if ( name ) then
+			specFrame:SetSize(specText:GetStringWidth()+16, (index+1)*18)
+			specBG:SetSize(specFrame:GetSize())
+			currentSpecID, currentSpecName = GetSpecializationInfo(index)
+
+			local specButton = CreateFrame("BUTTON",nil, specFrame)
+			specButton:SetPoint("TOPLEFT", specText, 0, index*-18)
+			specButton:SetSize(16, 16)
+			specButton:EnableMouse(true)
+			specButton:RegisterForClicks("AnyUp")
+
+			local specButtonText = specButton:CreateFontString(nil, "OVERLAY")
+			specButtonText:SetFont(cfg.text.font, cfg.text.smallFontSize)
+			specButtonText:SetPoint("RIGHT")
+			if currentSpecName then currentSpecName = string.upper(currentSpecName) end
+			specButtonText:SetText(currentSpecName)
+
+			local specButtonIcon = specButton:CreateTexture(nil,"OVERLAY",nil,7)
+			specButtonIcon:SetSize(16, 16)
+			specButtonIcon:SetPoint("LEFT")
+			specButtonIcon:SetTexture(cfg.mediaFolder.."spec\\"..cfg.CLASS)
+			specButtonIcon:SetTexCoord(unpack(cfg.specCoords[index]))
+
+			--local id = GetSpecializationInfo(index)
+			if GetSpecialization() == index then
+				specButtonText:SetTextColor(unpack(cfg.color.normal))
+				specButtonIcon:SetVertexColor(unpack(cfg.color.normal))
+			else
+				specButtonText:SetTextColor(unpack(cfg.color.inactive))
+				specButtonIcon:SetVertexColor(unpack(cfg.color.inactive))
+			end
+			specButton:SetSize(specButtonText:GetStringWidth()+18,16)
+
+			specButton:SetScript("OnEnter", function() if InCombatLockdown() then return end specButtonIcon:SetVertexColor(unpack(cfg.color.hover)) end)
+			specButton:SetScript("OnLeave", function()
+				local id = GetSpecializationInfo(index)
+				if GetSpecialization() == id then
+					specButtonText:SetTextColor(unpack(cfg.color.normal))
+					specButtonIcon:SetVertexColor(unpack(cfg.color.normal))
+				else
+					specButtonText:SetTextColor(unpack(cfg.color.inactive))
+					specButtonIcon:SetVertexColor(unpack(cfg.color.inactive))
+				end
+			end)
+
+			specButton:SetScript("OnClick", function(self, button, down)
+				if InCombatLockdown() then return end
+				if button == "LeftButton" then
+					SetSpecialization(index)
+					specFrame:Hide()
+				elseif button == "RightButton" then
+					specFrame:Hide()
+				end
+			end)
+		end
+	end
 end
 
 ---------------------------------------------
@@ -199,11 +307,15 @@ eventframe:RegisterEvent("PLAYER_REGEN_DISABLED")
 
 eventframe:SetScript("OnEvent", function(self,event, ...)
 	if event == ("PLAYER_ENTERING_WORLD") then
-	createLootSpecButtons()
+		createSpecButtons()
+		createLootSpecButtons()
 	end
 	if event == ("PLAYER_REGEN_DISABLED") then
 		if lootSpecFrame:IsShown() then
 			lootSpecFrame:Hide()
+		end
+		if specFrame:IsShown() then
+			specFrame:Hide()
 		end
 	end
 
