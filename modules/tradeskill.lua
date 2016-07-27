@@ -15,6 +15,20 @@ local proffessions = {
 	['TAILORING'] = {"Hexweave Cloth", "Secrets of Draenor Tailoring"},
 }
 
+local profIcons = {
+	[164] = 'blacksmithing',
+	[165] = 'leatherworking',
+	[171] = 'alchemy',
+	[182] = 'herbalism',
+	[186] = 'mining',
+	[202] = 'engineering',
+	[333] = 'enchanting',
+	[755] = 'jewelcrafting',
+	[773] = 'inscription',
+	[197] = 'tailoring',
+	[393] = 'skinning'
+}
+
 local prof1OnCooldown = false
 local prof2OnCooldown = false
 
@@ -167,10 +181,10 @@ eventframe:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
 eventframe:SetScript("OnEvent", function(self,event, ...)
 	local prof1, prof2 = GetProfessions()
 	if prof1 then
-		local prof1Name, _, prof1Rank, prof1MaxRank = GetProfessionInfo(prof1)
+		local prof1Name, _, prof1Rank, prof1MaxRank, _, _, prof1SkillLine = GetProfessionInfo(prof1)
 		prof1Name = string.upper(prof1Name)
 		primaryTradeSkillText:SetText(prof1Name)
-		primaryTradeSkillIcon:SetTexture(cfg.mediaFolder.."profession\\"..prof1Name)
+		primaryTradeSkillIcon:SetTexture(cfg.mediaFolder.."profession\\"..profIcons[prof1SkillLine])
 		if prof1Rank == prof1MaxRank then
 			primaryTradeSkillStatusbar:Hide()
 		else
@@ -214,10 +228,10 @@ eventframe:SetScript("OnEvent", function(self,event, ...)
 	end
 
 	if prof2 then
-		local prof2Name, _, prof2rank, prof2maxRank = GetProfessionInfo(prof2)
+		local prof2Name, _, prof2rank, prof2maxRank, _, _, prof2SkillLine = GetProfessionInfo(prof2)
 		prof2Name = string.upper(prof2Name)
 		secondaryTradeSkillText:SetText(prof2Name)
-		secondaryTradeSkillIcon:SetTexture(cfg.mediaFolder.."profession\\"..prof2Name)
+		secondaryTradeSkillIcon:SetTexture(cfg.mediaFolder.."profession\\"..profIcons[prof2SkillLine])
 		if prof2rank == prof2maxRank then
 			secondaryTradeSkillStatusbar:Hide()
 		else
