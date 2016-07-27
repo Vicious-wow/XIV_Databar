@@ -43,7 +43,7 @@ HSFrame:SetScript("OnEnter", function()
 	hsOnHover = true
 end)
 
-HSFrame:SetScript("OnLeave", function() 
+HSFrame:SetScript("OnLeave", function()
 	hsOnHover = false
 	if IsUsableItem(6948) and GetItemCooldown(6948) == 0 or IsPlayerSpell(556) and GetSpellCooldown(556) == 0 then
 		HSIcon:SetVertexColor(unpack(cfg.color.normal))
@@ -62,7 +62,7 @@ HSFrame:SetScript("PreClick", function(self)
      if InCombatLockdown() then return end -- can't change attributes in combat
 
      -- Innkeeper's Daughter
-     if IsUsableItem(64488) and GetItemCooldown(64488) == 0 then
+     if PlayerHasToy(64488) and GetItemCooldown(64488) == 0 then
           local itemName, itemLink, _, _, _, _, _, _, _, itemIcon = GetItemInfo(64488)
           return self:ChangeAction("/use " .. itemName)
 
@@ -106,7 +106,7 @@ end
 
 garrisonFrame:SetScript("PreClick", function(self)
      if InCombatLockdown() then return end -- can't change attributes in combat
-	 
+
 	 if IsShiftKeyDown() then
 		if IsUsableItem(128353) and GetItemCooldown(128353) == 0 then
 			local itemName, itemLink, _, _, _, _, _, _, _, itemIcon = GetItemInfo(128353)
@@ -148,7 +148,7 @@ end)
 
 garrisonFrame:SetScript("OnLeave", function()
 	garrOnHover = false
-	if IsUsableItem(110560) and GetItemCooldown(110560) == 0 then 
+	if IsUsableItem(110560) and GetItemCooldown(110560) == 0 then
 		garrisonIcon:SetVertexColor(unpack(cfg.color.normal))
 	else
 		garrisonIcon:SetVertexColor(unpack(cfg.color.inactive))
@@ -180,21 +180,21 @@ end
 
 local function updateTeleportText()
 local playerLevel = UnitLevel("player")
-	if IsUsableItem(64488) and GetItemCooldown(64488) == 0 
-	or IsUsableItem(6948) and GetItemCooldown(6948) == 0 
+	if PlayerHasToy(64488) and GetItemCooldown(64488) == 0
+	or IsUsableItem(6948) and GetItemCooldown(6948) == 0
 	or IsPlayerSpell(556) and GetSpellCooldown(556) == 0
     or playerLevel > 70 and IsUsableItem(44315) and GetItemCooldown(44315) == 0
     or playerLevel > 40 and IsUsableItem(44314) and GetItemCooldown(44314) == 0
     or playerLevel <= 39 and IsUsableItem(37118) and GetItemCooldown(37118) == 0
-	then 
+	then
 		HSIcon:SetVertexColor(unpack(cfg.color.normal))
 		HSText:SetTextColor(unpack(cfg.color.normal))
 	else
 		HSIcon:SetVertexColor(unpack(cfg.color.inactive))
 		HSText:SetTextColor(unpack(cfg.color.inactive))
 	end
-	
-	if IsUsableItem(110560) and GetItemCooldown(110560) == 0 then 
+
+	if IsUsableItem(110560) and GetItemCooldown(110560) == 0 then
 		garrisonIcon:SetVertexColor(unpack(cfg.color.normal))
 		garrisonText:SetTextColor(unpack(cfg.color.normal))
 	else
@@ -221,7 +221,7 @@ eventframe:RegisterEvent("HEARTHSTONE_BOUND")
 eventframe:RegisterEvent("MODIFIER_STATE_CHANGED")
 
 eventframe:SetScript("OnEvent", function(this, event, arg1, arg2, arg3, arg4, ...)
-if InCombatLockdown() then return end 
+if InCombatLockdown() then return end
 
 HSText:SetText(strupper(GetBindLocation()))
 HSFrame:SetSize(HSText:GetStringWidth()+16, 16)
@@ -233,7 +233,7 @@ else
 	garrisonFrame:Hide()
 end
 
-if event == "MODIFIER_STATE_CHANGED" then 
+if event == "MODIFIER_STATE_CHANGED" then
 	if arg1 == "LSHIFT" or arg1 == "RSHIFT" then
 		if arg2 == 1 then
 			if IsUsableItem(128353) then
