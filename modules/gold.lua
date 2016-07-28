@@ -38,42 +38,42 @@ goldFrame:RegisterForClicks("AnyUp")
 
 	local gold = GetMoney()
 	local logDate = ns.playerData.lastLoginDate
-	
+
 	local sessionGold = ns.playerData["money_on_session_start"]
 	local sessionGoldIcon = ""
 	sessionGold = sessionGold - gold
 
-	if sessionGold < 0 then 
+	if sessionGold < 0 then
 		sessionGoldIcon = positiveSign
 	elseif sessionGold > 0 then
 		sessionGoldIcon = negativeSign
 	else
 	end
-	
+
 	local dayGold = ns.playerData["money_on_first_login_today"]
 	local dayGoldIcon = ""
 	dayGold = dayGold - gold
 
-	if dayGold < 0 then 
+	if dayGold < 0 then
 		dayGoldIcon = positiveSign
 	elseif dayGold > 0 then
 		dayGoldIcon = negativeSign
 	else
 	end
-	
-	
+
+
 	local weekGold = ns.playerData["money_on_first_weekday"]
 	local weekGoldIcon = ""
 	weekGold = weekGold - gold
 
-	if weekGold < 0 then 
+	if weekGold < 0 then
 		weekGoldIcon = positiveSign
 	elseif weekGold > 0 then
 		weekGoldIcon = negativeSign
 	else
 	end
 
-	
+
 	local totalGold = 0
 	for key, val in pairs(ns.realmData[playerFaction]) do
 		for k, v in pairs(val) do
@@ -82,7 +82,7 @@ goldFrame:RegisterForClicks("AnyUp")
 			end
 		end
 	end
-	
+
 	local realmDailyGold = 0
 	for key, val in pairs(ns.realmData[playerFaction]) do
 		for k, v in pairs(val) do
@@ -91,18 +91,18 @@ goldFrame:RegisterForClicks("AnyUp")
 			end
 		end
 	end
-	
+
 	local realmDayGoldIcon = ""
 	realmDailyGold = realmDailyGold - totalGold
 
-	if realmDailyGold < 0 then 
+	if realmDailyGold < 0 then
 		realmDayGoldIcon = positiveSign
 	elseif realmDailyGold > 0 then
 		realmDayGoldIcon = negativeSign
 	else
 	end
-	
-	
+
+
 	local realmWeeklyGold = 0
 	for key, val in pairs(ns.realmData[playerFaction]) do
 		for k, v in pairs(val) do
@@ -114,14 +114,14 @@ goldFrame:RegisterForClicks("AnyUp")
 
 	local realmWeekGoldIcon = ""
 	realmWeeklyGold = realmWeeklyGold - totalGold
-	
-	if realmWeeklyGold < 0 then 
+
+	if realmWeeklyGold < 0 then
 		realmWeekGoldIcon = positiveSign
 	elseif realmWeeklyGold > 0 then
 		realmWeekGoldIcon = negativeSign
 	else
 	end
-	
+
 	GameTooltip:AddDoubleLine(playerName.."|r's Gold",format(goldConverter(gold)))
 	GameTooltip:AddLine(" ")
 
@@ -136,12 +136,12 @@ goldFrame:RegisterForClicks("AnyUp")
 			end
 		end
 	end
-		
+
 	else
 		GameTooltip:AddDoubleLine("Session Balance",sessionGoldIcon..format(goldConverter(sessionGold)))
 		GameTooltip:AddDoubleLine("Daily Balance",dayGoldIcon..format(goldConverter(dayGold)))
 		GameTooltip:AddDoubleLine("Weekly Balance",weekGoldIcon..format(goldConverter(weekGold)))
-		
+
 	end
 	GameTooltip:AddLine(" ")
 	GameTooltip:AddDoubleLine("Realm Gold","|cffffffff"..format(goldConverter(totalGold)))
@@ -151,7 +151,7 @@ goldFrame:RegisterForClicks("AnyUp")
 	end
 	GameTooltip:Show()
  end
- 
+
  local function freeSpaceBags()
 	local freeSlots = 0
 	for i=0, 4,1 do
@@ -187,7 +187,7 @@ goldFrame:SetScript("OnClick", function(self, button, down)
 	if InCombatLockdown() then return end
 	if button == "LeftButton" then
 		OpenAllBags()
-	elseif button == "RightButton" then 
+	elseif button == "RightButton" then
 		CloseAllBags()
 	end
 end)
@@ -216,27 +216,27 @@ eventframe:SetScript("OnEvent", function(this, event, arg1, arg2, arg3, arg4, ..
 			end
 		end
 	end
-	
-	if event=="BAG_UPDATE" then
+
+	if event=="BAG_UPDATE" and cfg.gold.showFreeBagSpace then
 		spaceText:SetText("("..freeSpaceBags()..")")
 	end
 
-	
+
 	local gold = GetMoney()
-	
+
 	ns.playerData["money_on_log_out"] = gold
-	
+
 	local g, s, c = abs(gold/10000), abs(mod(gold/100, 100)), abs(mod(gold, 100))
-	
-	if g > 1 then 
+
+	if g > 1 then
 		goldText:SetText(floor(g).."g")
-	elseif s > 1 then 
+	elseif s > 1 then
 		goldText:SetText(floor(s).."s")
-	else 
+	else
 		goldText:SetText(floor(c).."c")
 	end
 	if gold == 0 then goldText:SetText("0") end
 
-	
+
 	goldFrame:SetSize(goldText:GetStringWidth()+18, 16)
 end)

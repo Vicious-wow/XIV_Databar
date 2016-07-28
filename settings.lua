@@ -83,6 +83,7 @@ cfg.gold = {
 	showTooltip = true,		-- SHOWS THE GOLD OF YOUR OTHER CHARACTERS ON THE SAME SERVER AND SAME SIDE
 	show = true,			-- USES THIS MODULE
 	firstWeekday = 2, 		-- 1 is Sunday, 2 is Monday, different countries have different first day of the week
+	showFreeBagSpace = false,
 }
 
 cfg.heartstone = {
