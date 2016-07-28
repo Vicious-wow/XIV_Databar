@@ -60,7 +60,7 @@ eventframe:SetScript("OnEvent", function(self,event, ...)
 		local overallilvl, equippedilvl = GetAverageItemLevel()
 		armorText:SetText(floor(equippedilvl).." ilvl")
 	else
-		armorText:SetText(floor(durMin).."%")
+		armorText:SetText(floor(durMin).."% - "..floor(select(2,GetAverageItemLevel())).." ilvl")
 	end
 	
 	if durMin >= cfg.armor.minArmor then 

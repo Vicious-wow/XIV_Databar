@@ -23,7 +23,7 @@ local positiveSign = "|cff00ff00+ "
 local negativeSign = "|cffff0000- "
 
 local goldFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-goldFrame:SetPoint("RIGHT",-230,0)
+goldFrame:SetPoint("RIGHT",-270,0)
 goldFrame:SetSize(16, 16)
 goldFrame:EnableMouse(true)
 goldFrame:RegisterForClicks("AnyUp")
@@ -151,16 +151,28 @@ goldFrame:RegisterForClicks("AnyUp")
 	end
 	GameTooltip:Show()
  end
+ 
+ local function freeSpaceBags()
+	local freeSlots = 0
+	for i=0, 4,1 do
+		freeSlots = freeSlots+select(1,GetContainerNumFreeSlots(i))
+	end
+	return freeSlots
+end
 
 local goldIcon = goldFrame:CreateTexture(nil,"OVERLAY",nil,7)
-goldIcon:SetPoint("LEFT")
+goldIcon:SetPoint("LEFT",goldFrame,17,0)
 goldIcon:SetTexture(cfg.mediaFolder.."datatexts\\gold")
 goldIcon:SetVertexColor(unpack(cfg.color.normal))
 
 local goldText = goldFrame:CreateFontString(nil, "OVERLAY")
 goldText:SetFont(cfg.text.font, cfg.text.normalFontSize)
-goldText:SetPoint("RIGHT", goldFrame,2,0)
+goldText:SetPoint("LEFT", goldIcon,15,0)
 goldText:SetTextColor(unpack(cfg.color.normal))
+
+local spaceText = goldFrame:CreateFontString(nil,"OVERLAY")
+spaceText:SetPoint("LEFT", goldIcon,-17,0)
+spaceText:SetFont(cfg.text.font, cfg.text.normalFontSize)
 
 goldFrame:SetScript("OnEnter", function()
 	if InCombatLockdown() then return end
@@ -189,11 +201,12 @@ eventframe:RegisterEvent("PLAYER_TRADE_MONEY")
 eventframe:RegisterEvent("TRADE_MONEY_CHANGED")
 eventframe:RegisterEvent("TRADE_CLOSED")
 eventframe:RegisterEvent("MODIFIER_STATE_CHANGED")
+eventframe:RegisterEvent("BAG_UPDATE")
 
 eventframe:SetScript("OnEvent", function(this, event, arg1, arg2, arg3, arg4, ...)
 
-goldFrameOnEnter()
-if event == "MODIFIER_STATE_CHANGED" then
+	goldFrameOnEnter()
+	if event == "MODIFIER_STATE_CHANGED" then
 		if InCombatLockdown() then return end
 		if arg1 == "LSHIFT" or arg1 == "RSHIFT" then
 			if arg2 == 1 then
@@ -202,6 +215,10 @@ if event == "MODIFIER_STATE_CHANGED" then
 				goldFrameOnEnter()
 			end
 		end
+	end
+	
+	if event=="BAG_UPDATE" then
+		spaceText:SetText("("..freeSpaceBags()..")")
 	end
 
 	

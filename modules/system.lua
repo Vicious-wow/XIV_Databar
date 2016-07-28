@@ -15,7 +15,7 @@ local onHover = false
   end
 
 local systemFrame = CreateFrame("Frame",nil, cfg.SXframe)
-systemFrame:SetPoint("RIGHT", -290,0)
+systemFrame:SetPoint("RIGHT", -350,0)
 systemFrame:SetSize(120, 16)
 ---------------------------------------------------------------------
 
