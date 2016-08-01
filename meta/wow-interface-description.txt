@@ -1,0 +1,58 @@
+A continuation of [URL="http://www.wowinterface.com/downloads/info23745-SX_DataBar.html"]SX_Databar by saxitoxin[/URL].
+
+[SIZE="5"]Microbar (left to right)[/SIZE]
+[LIST]
+[*] Game menu
+[*] Guild - *shows number of guild members online
+[*] Social - *shows number of friends online
+[*] Character info
+[*] Spells & Abilities
+[*] Spec & Talents
+[*] Achievements
+[*] Quest Log
+[*] Group Finder
+[*] Adventure Guide 
+[*] PvP (Group Finder tab)
+[*] Collections
+[*] Shop 
+[*] Customer Support 
+[/LIST]
+
+[SIZE="5"]Other elements (left to right)[/SIZE]
+[LIST]
+[*] Durability - faded out when you are above 20%, higlighted when below 20% durability, show the Ilvl when over 75%
+[*] Specialization - Active spec is displayed. Left click to change spec, mouseover shows loot spec if not same as spec and you can right click to change loot spec
+[*] Time - show the same time as you have selected ingame, left click to open in-game calendar, right click to edit time settings, hover shows the other time
+[*] Professions - Click to open profession tab for that profession, when not max level a small bar appears underneath which shows progress to next level
+[*] Currencies/ xpBar - Click to open currency tab
+[LIST]
+[*] Rerolls
+[*] Honor
+[*] Garrison resources
+[*] Show a xpBar for characters below max level
+[/LIST]
+[*] System info - shows fps and ms, leftclick to collect garbage, right click to open graphical settings
+[*] Gold - hover shows gold earned this session, today and weekly, also shows gold across all characters on server with total at the bottom, left click to open bags, right click to close bags
+[*] Hearth - garrison hearth, normal hearth (displays location), click to use respective hearthstone, faded out if hearthstone is on cooldown, shift changes the garrison heart to shipyard compass
+[/LIST]
+
+[SIZE="5"]Settings[/SIZE]
+it is possible to edit some element in the settings.lua file
+You can do this by using Notepad or download Notepad ++
+
+[SIZE="4"]CREDITS:[/SIZE]
+[LIST]
+* [URL="http://www.wowinterface.com/forums/member.php?action=getinfo&userid=178966"]saxitoxin[/URL] for the SX_Databar AddOn
+* MikeprodTM for some changes to ilvl and free bag space code
+[/LIST]
+
+[SIZE="4"]ORIGINAL CREDITS:[/SIZE]
+[LIST]
+[*] u/sammojo for the idéa, textures and the description of the bar
+[*] lightspark for the saved variable for the goldsaving code
+[*] taffu for the SLDT addon that I have used to learn how to display different things
+[*] and all the other great coders here at wowinterface that have contributed any kind of code to the forums
+[/LIST]
+
+[SIZE="4"]Issues:[/SIZE]
+https://github.com/MilleXIV/XIV_Databar/issues
