@@ -19,12 +19,20 @@ cfg.mediaFolder = "Interface\\AddOns\\"..addon.."\\media\\"
 
 cfg.color = {
 	normal = {1,1,1,.75},						-- SETS THE SAME COLOR FOR THE TEXT
-	inactive = {1,1,1,.25},						-- SET THE COLOR FOR THE INACTICE ICONS
+	inactive = {1,1,1,.25},						-- SET THE COLOR FOR THE INACTIVE ICONS
 	hover = {cfg.cc.r,cfg.cc.g,cfg.cc.b,.75},	-- DOES NOT CHANGE THE TEXTCOLOR
 	barcolor = {.094,.094,.094,.75},			-- THE COLOR OF THE BAR
-	--barcolor = {.05,.05,.05,0},			-- THE COLOR OF THE BAR
+	classColor = false
 }
+
 if cfg.CLASS == "PRIEST" then cfg.color.hover = {.5,.5,0,.75} end -- ADDED BEACUSE NORMALY THE PRIEST COLOR IS THE SAME AS THE NORMAL COLOR
+
+if cfg.color.classColor then 
+	local tmp=cfg.color.normal
+	cfg.color.normal=cfg.color.hover
+	cfg.color.hover=tmp
+end
+
 
 cfg.text = {
 	font = cfg.mediaFolder.."homizio_bold.ttf",	-- SETS THE FONT
