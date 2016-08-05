@@ -67,6 +67,7 @@ cfg.tradeSkill = {
 cfg.currency = {
 	show = true,			-- USES THIS MODULE
 	showXPbar = true,		-- SHOW A XP-BAR ON YOUR CHARACTERS THAT HAS NOT REACHED MAX LVL
+	showAPbar= true,
 	showTooltip = true,		-- SHOWS YOUR RECOURCES ACCORING TO THE DESCRIPTION OR YOUR XP INFO
 	textOnRight = true,
 }
