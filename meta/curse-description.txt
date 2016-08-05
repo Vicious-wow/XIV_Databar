@@ -1,0 +1,45 @@
+A continuation of [[http://www.wowinterface.com/downloads/info23745-SX_DataBar.html|SX_Databar by saxitoxin.]]
+
+== Microbar (left to right)* ==
+* Game menu
+* Guild - *shows number of guild members online
+* Social - *shows number of friends online
+* Character info
+* Spells & Abilities
+* Spec & Talents
+* Achievements
+* Quest Log
+* Group Finder
+* Adventure Guide 
+* PvP (Group Finder tab)
+* Collections
+* Shop 
+* Customer Support 
+
+== Other elements (left to right) ==
+* Durability - faded out when you are above 20%, higlighted when below 20% durability, show the Ilvl when over 75%
+* Specialization - Active spec is displayed. Left click to change spec, mouseover shows loot spec if not same as spec and you can right click to change loot spec
+* Time - show the same time as you have selected ingame, left click to open in-game calendar, right click to edit time settings, hover shows the other time
+* Professions - Click to open profession tab for that profession, when not max level a small bar appears underneath which shows progress to next level
+* Currencies/ xpBar - Click to open currency tab
+** Rerolls
+** Honor
+** Garrison resources
+** Show a xpBar for characters below max level
+* System info - shows fps and ms, leftclick to collect garbage, right click to open graphical settings
+* Gold - hover shows gold earned this session, today and weekly, also shows gold across all characters on server with total at the bottom, left click to open bags, right click to close bags
+* Hearth - garrison hearth, normal hearth (displays location), click to use respective hearthstone, faded out if hearthstone is on cooldown, shift changes the garrison heart to shipyard compass
+
+== Settings ==
+it is possible to edit some element in the settings.lua file
+You can do this by using Notepad or download Notepad ++
+
+=== CREDITS: ===
+saitoxin for the SX_Databar AddOn
+MikeprodTM for some changes to ilvl and free bag space code
+
+=== ORIGINAL CREDITS: ===
+u/sammojo for the idéa, textures and the description of the bar
+lightspark for the saved variable for the goldsaving code
+taffu for the SLDT addon that I have used to learn how to display different things
+and all the other great coders here at wowinterface that have contributed any kind of code to the forums
