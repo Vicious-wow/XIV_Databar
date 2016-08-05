@@ -90,7 +90,6 @@ artiFrame:RegisterForClicks("AnyUp")
 local artiIcon = artiFrame:CreateTexture(nil,"OVERLAY",nil,7)
 artiIcon:SetSize(16, 16)
 artiIcon:SetPoint("LEFT")
-artiIcon:SetTexture(GetItemIcon(select(1,C_ArtifactUI.GetEquippedArtifactInfo())))
 artiIcon:SetVertexColor(unpack(cfg.color.normal))
 
 local artiText = artiFrame:CreateFontString(nil, "OVERLAY")
@@ -316,6 +315,7 @@ local function updateXP(xp, mxp)
 end
 
 function GetNumArtifactTraitsPurchasableFromXP(rkSpent, currAP)
+	artiIcon:SetTexture(GetItemIcon(select(1,C_ArtifactUI.GetEquippedArtifactInfo())))
 	artiText:SetText("Artifact rank "..rkSpent)
 	artiFrame:SetSize(artiText:GetStringWidth()+18, 16)
 	artiStatusbar:SetSize(artiText:GetStringWidth(),3)

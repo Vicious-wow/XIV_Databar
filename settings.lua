@@ -25,14 +25,13 @@ cfg.color = {
 	classColor = false
 }
 
-if cfg.CLASS == "PRIEST" then cfg.color.hover = {.5,.5,0,.75} end -- ADDED BEACUSE NORMALY THE PRIEST COLOR IS THE SAME AS THE NORMAL COLOR
-
 if cfg.color.classColor then 
 	local tmp=cfg.color.normal
 	cfg.color.normal=cfg.color.hover
 	cfg.color.hover=tmp
 end
 
+if cfg.CLASS == "PRIEST" then cfg.color.hover = {.5,.5,0,.75} end -- ADDED BEACUSE NORMALY THE PRIEST COLOR IS THE SAME AS THE NORMAL COLOR
 
 cfg.text = {
 	font = cfg.mediaFolder.."homizio_bold.ttf",	-- SETS THE FONT
