@@ -79,6 +79,68 @@ xpFrame:SetScript("OnLeave", function()
 end)
 
 ---------------------------------------------
+-- Artifact BAR
+---------------------------------------------
+local artiFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
+artiFrame:SetPoint("LEFT", cfg.SXframe, "CENTER", 200,0)
+artiFrame:SetSize(16, 16)
+artiFrame:EnableMouse(true)
+artiFrame:RegisterForClicks("AnyUp")
+
+local artiIcon = artiFrame:CreateTexture(nil,"OVERLAY",nil,7)
+artiIcon:SetSize(16, 16)
+artiIcon:SetPoint("LEFT")
+artiIcon:SetTexture(GetItemIcon(select(1,C_ArtifactUI.GetEquippedArtifactInfo())))
+artiIcon:SetVertexColor(unpack(cfg.color.normal))
+
+local artiText = artiFrame:CreateFontString(nil, "OVERLAY")
+artiText:SetFont(cfg.text.font, cfg.text.normalFontSize)
+artiText:SetPoint("RIGHT",artiFrame,2,0 )
+artiText:SetTextColor(unpack(cfg.color.normal))
+
+local artiStatusbar = CreateFrame("StatusBar", nil, artiFrame)
+artiStatusbar:SetStatusBarTexture(1,1,1)
+artiStatusbar:SetStatusBarColor(unpack(cfg.color.normal))
+artiStatusbar:SetPoint("TOPLEFT", artiText, "BOTTOMLEFT",0,-2)
+
+local artiStatusbarBG = artiStatusbar:CreateTexture(nil,"BACKGROUND",nil,7)
+artiStatusbarBG:SetPoint("TOPLEFT", artiText, "BOTTOMLEFT",0,-2)
+artiStatusbarBG:SetColorTexture(unpack(cfg.color.inactive))
+
+artiFrame:SetScript("OnEnter", function()
+	if InCombatLockdown() then return end
+	artiIcon:SetVertexColor(unpack(cfg.color.hover))
+	artiStatusbar:SetStatusBarColor(unpack(cfg.color.hover))
+	if not cfg.currency.showTooltip then return end
+	
+	local currentAP = select(5,C_ArtifactUI.GetEquippedArtifactInfo())
+	local traitsSpent = select(6,C_ArtifactUI.GetEquippedArtifactInfo())
+	local numLearnableTraits,currentAP,xpForNextTrait=GetNumArtifactTraitsPurchasableFromXP(traitsSpent,currentAP)
+
+	if cfg.core.position ~= "BOTTOM" then
+		GameTooltip:SetOwner(artiStatusbar, cfg.tooltipPos)
+	else
+		GameTooltip:SetOwner(artiFrame, cfg.tooltipPos)
+	end
+
+	GameTooltip:AddLine("[|cff6699FFArtifact Power Bar|r]")
+	GameTooltip:AddLine(" ")
+	GameTooltip:AddLine(format(ARTIFACTS_NUM_PURCHASED_RANKS,traitsSpent))
+	GameTooltip:AddLine(format(ARTIFACT_POWER_BAR,currentAP,xpForNextTrait).." with "..numLearnableTraits.." learnable traits")
+	GameTooltip:Show()
+end)
+
+artiFrame:SetScript("OnLeave", function()
+	artiIcon:SetVertexColor(unpack(cfg.color.normal))
+	artiStatusbar:SetStatusBarColor(unpack(cfg.color.normal))
+	if ( GameTooltip:IsShown() ) then GameTooltip:Hide() end
+end)
+
+artiFrame:SetScript("OnClick",function()
+	SocketInventoryItem(16)
+end)
+
+---------------------------------------------
 -- REROLL
 ---------------------------------------------
 local rerollFrame = CreateFrame("BUTTON",nil, currencyFrame)
@@ -253,13 +315,35 @@ local function updateXP(xp, mxp)
 	end
 end
 
+function GetNumArtifactTraitsPurchasableFromXP(rkSpent, currAP)
+	artiText:SetText("Artifact rank "..rkSpent)
+	artiFrame:SetSize(artiText:GetStringWidth()+18, 16)
+	artiStatusbar:SetSize(artiText:GetStringWidth(),3)
+	artiStatusbarBG:SetSize(artiText:GetStringWidth(),3)
+	local numRk = 0;
+	local xpForNextRk = C_ArtifactUI.GetCostForPointAtRank(rkSpent);
+	while currAP >= xpForNextRk and xpForNextRk > 0 do
+		currAP = currAP - xpForNextRk;
+
+		rkSpent = rkSpent + 1;
+		numRk = numRk + 1;
+
+		xpForNextRk = C_ArtifactUI.GetCostForPointAtRank(rkSpent);
+	end
+	artiStatusbar:SetMinMaxValues(0, xpForNextRk)
+	artiStatusbar:SetValue(currAP)
+	return numRk, currAP, xpForNextRk;
+end
+
 ---------------------------------------------
 -- EVENT HANDELING
 ---------------------------------------------
 
 local eventframe = CreateFrame("Frame")
 eventframe:RegisterEvent("PLAYER_ENTERING_WORLD")
+eventframe:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 eventframe:RegisterEvent("PLAYER_XP_UPDATE")
+eventframe:RegisterEvent("ARTIFACT_XP_UPDATE");
 eventframe:RegisterEvent("PLAYER_LEVEL_UP")
 eventframe:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
 eventframe:RegisterEvent("CHAT_MSG_CURRENCY")
@@ -275,6 +359,16 @@ eventframe:SetScript("OnEvent", function(this, event, arg1, arg2, arg3, arg4, ..
 		currencyFrame:Hide()
 	else
 		xpFrame:Hide()
+	end
+	
+	if HasArtifactEquipped() and cfg.currency.showAPbar then
+		local currentAP = select(5,C_ArtifactUI.GetEquippedArtifactInfo())
+		local traitsSpent = select(6,C_ArtifactUI.GetEquippedArtifactInfo())
+		GetNumArtifactTraitsPurchasableFromXP(traitsSpent,currentAP)
+		currencyFrame:Hide()
+		artiFrame:Show()
+	else
+		artiFrame:Hide()
 	end
 
 	if event == "MODIFIER_STATE_CHANGED" then
