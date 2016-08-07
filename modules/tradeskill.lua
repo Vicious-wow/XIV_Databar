@@ -93,7 +93,7 @@ primaryTradeSkillFrame:SetScript("OnClick", function(self, button, down)
 			elseif(GetProfessionInfo(prof1) == ('Skinning')) then
 				ToggleSpellBook(BOOKTYPE_PROFESSION)
 			elseif(GetProfessionInfo(prof1) == ('Mining')) then
-				CastSpellByName("Smelting")
+				ToggleSpellBook(BOOKTYPE_PROFESSION)
 			else
 				CastSpellByName((GetProfessionInfo(prof1)))
 			end
@@ -160,7 +160,7 @@ secondaryTradeSkillFrame:SetScript("OnClick", function(self, button, down)
 			elseif(GetProfessionInfo(prof2) == ('Skinning')) then
 				ToggleSpellBook(BOOKTYPE_PROFESSION)
 			elseif(GetProfessionInfo(prof2) == ('Mining')) then
-				CastSpellByName("Smelting")
+				ToggleSpellBook(BOOKTYPE_PROFESSION)
 			else
 				CastSpellByName((GetProfessionInfo(prof2)))
 			end
