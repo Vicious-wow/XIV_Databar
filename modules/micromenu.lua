@@ -1,371 +1,173 @@
-local addon, ns = ...
-local cfg = ns.cfg
-local unpack = unpack
---------------------------------------------------------------
-if not cfg.micromenu.show then return end
----------------------------------------------
--- GAME MENU
----------------------------------------------
+local AddOnName, Engine = ...;
+local _G = _G;
+local xb = Engine[1];
+local L = Engine[2];
+local P = {};
 
-PlayerFrame.name:SetFont("Interface\\AddOns\\oUF_Drk\\media\\BigNoodleTitling.ttf", 11, "THINOUTLINE")
-TargetFrame.name:SetFont("Interface\\AddOns\\oUF_Drk\\media\\BigNoodleTitling.ttf", 11, "THINOUTLINE")
+MenuModule = xb:NewModule("MenuModule")
 
-local isBeautiful = IsAddOnLoaded("Blizzard_RaidUI") --!Beautycase check
-
-if isBeautiful then
-	subframes.name:SetFont("Interface\\AddOns\\oUF_Drk\\media\\BigNoodleTitling.ttf",11,"THINOUTLINE")
+function MenuModule:GetName()
+  return L['Micromenu'];
 end
 
+function MenuModule:OnInitialize()
+  P = xb.db.profile
+  self.mediaFolder = xb.constants.mediaPath..'microbar\\'
+  self.icons = {}
+  self.frames = {}
+end
 
-local gameMenuFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-gameMenuFrame:SetSize(32, 32)
-gameMenuFrame:SetPoint("LEFT",2,0)
-gameMenuFrame:EnableMouse(true)
-gameMenuFrame:RegisterForClicks("AnyUp")
-local gameMenuIcon = gameMenuFrame:CreateTexture(nil,"OVERLAY",nil,7)
-gameMenuIcon:SetPoint("CENTER")
-gameMenuIcon:SetTexture(cfg.mediaFolder.."microbar\\menu")
-gameMenuIcon:SetVertexColor(unpack(cfg.color.normal))
+function MenuModule:OnEnable()
+  self.microMenuFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
+  xb:RegisterFrame('microMenuFrame', self.microMenuFrame)
 
-gameMenuFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	gameMenuIcon:SetVertexColor(unpack(cfg.color.hover))
-end)
+  self:CreateFrames()
+  self:RegisterFrameEvents()
+  self:CreateIcons()
+  self:Refresh()
+end
 
-gameMenuFrame:SetScript("OnLeave", function() gameMenuIcon:SetVertexColor(unpack(cfg.color.normal)) end)
+function MenuModule:OnDisable()
+end
 
-gameMenuFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then 
-		ToggleFrame(GameMenuFrame)
-	elseif button == "RightButton" then 
-		if IsShiftKeyDown() then ReloadUI()
-		elseif IsAltKeyDown() then 
-			if cfg.useConfig then 
-				--if cfg.SXconfigFrame:IsShown() then
-				ToggleFrame(cfg.SXconfigFrame)
-				--else
-				--ToggleFrame(cfg.SXconfigFrame)
-				--end
-			end 
-		else ToggleFrame(AddonList) end
-	end
-end)
+function MenuModule:Refresh()
+  if self.frames.menu == nil then return; end
 
----------------------------------------------
--- CHARACTER FRAME
----------------------------------------------
+  self.iconSize = xb:GetHeight();
 
-local characterFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-characterFrame:SetSize(32, 32)
-characterFrame:SetPoint("LEFT",174,0)
-characterFrame:EnableMouse(true)
-characterFrame:RegisterForClicks("AnyUp")
-local characterFrameIcon = characterFrame:CreateTexture(nil,"OVERLAY",nil,7)
-characterFrameIcon:SetAllPoints()
-characterFrameIcon:SetTexture(cfg.mediaFolder.."microbar\\char")
-characterFrameIcon:SetVertexColor(unpack(cfg.color.normal))
- 
-characterFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	characterFrameIcon:SetVertexColor(unpack(cfg.color.hover))
-end)
+  local colors = P.color
+  local totalWidth = 0;
+  for name, frame in pairs(self.frames) do
+    self:IconDefaults(name)
+    totalWidth = totalWidth + frame:GetWidth() + 2
+    if name == 'menu' then
+      frame:SetPoint("LEFT", 2, 0)
+    else
+      frame:SetPoint("LEFT", frame:GetParent(), "RIGHT", 2, 0)
+    end
+  end
+  self.microMenuFrame:SetPoint("LEFT")
+  self.microMenuFrame:SetSize(totalWidth, xb:GetHeight())
+end
 
-characterFrame:SetScript("OnLeave", function() characterFrameIcon:SetVertexColor(unpack(cfg.color.normal)) end)
+function MenuModule:CreateFrames()
+  self.frames.menu = CreateFrame("BUTTON", nil, xb:GetFrame('microMenuFrame'))
 
-characterFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then 
-		ToggleCharacter("PaperDollFrame")
-	end
-end)
+  self.frames.socialParent = CreateFrame("FRAME", nil, self.frames.menu)
+  self.frames.chat = CreateFrame("BUTTON", nil, self.frames.socialParent)
+  self.frames.guild = CreateFrame("BUTTON", nil, self.frames.chat)
+  self.frames.social = CreateFrame("BUTTON", nil, self.frames.guild)
 
----------------------------------------------
--- SPELLS
----------------------------------------------
+  self.frames.microbar = CreateFrame("FRAME", nil, self.frames.social)
+  self.frames.char = CreateFrame("BUTTON", nil, self.frames.microbar)
+  self.frames.spell = CreateFrame("BUTTON", nil, self.frames.char)
+  self.frames.talent = CreateFrame("BUTTON", nil, self.frames.spell)
+  self.frames.ach = CreateFrame("BUTTON", nil, self.frames.talent)
+  self.frames.quest = CreateFrame("BUTTON", nil, self.frames.ach)
+  self.frames.lfg = CreateFrame("BUTTON", nil, self.frames.quest)
+  self.frames.journal = CreateFrame("BUTTON", nil, self.frames.lfg)
+  self.frames.pvp = CreateFrame("BUTTON", nil, self.frames.journal)
+  self.frames.pet = CreateFrame("BUTTON", nil, self.frames.pvp)
+  self.frames.shop = CreateFrame("BUTTON", nil, self.frames.pet)
+  self.frames.help = CreateFrame("BUTTON", nil, self.frames.shop)
+end
 
-local spellFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-spellFrame:SetSize(32, 32)
-spellFrame:SetPoint("LEFT",characterFrame,"RIGHT",4,0)
-spellFrame:EnableMouse(true)
-spellFrame:RegisterForClicks("AnyUp")
-local spellFrameIcon = spellFrame:CreateTexture(nil,"OVERLAY",nil,7)
-spellFrameIcon:SetSize(32,32)
-spellFrameIcon:SetPoint("CENTER")
-spellFrameIcon:SetTexture(cfg.mediaFolder.."microbar\\spell")
-spellFrameIcon:SetVertexColor(unpack(cfg.color.normal))
- 
-spellFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	spellFrameIcon:SetVertexColor(unpack(cfg.color.hover))
-end)
+function MenuModule:CreateIcons()
+  for name, frame in pairs(self.frames) do
+    if frame['Click'] ~= nil then --Odd way of checking if it's a button
+      self.icons[name] = frame:CreateTexture(nil, "OVERLAY")
+      self.icons[name]:SetTexture(self.mediaFolder..name)
+    end
+  end
+end
 
-spellFrame:SetScript("OnLeave", function() spellFrameIcon:SetVertexColor(unpack(cfg.color.normal)) end)
+function MenuModule:IconDefaults(name)
+  local colors = P.color
+  if self.frames[name] == nil then return; end
+  if self.frames[name]['Click'] ~= nil then
+    self.frames[name]:SetSize(self.iconSize, self.iconSize)
+  else
+    self.frames[name]:SetSize(floor(self.iconSize / 3), self.iconSize)
+  end
 
-spellFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then 
-		ToggleFrame(SpellBookFrame)
-	end
-end)
+  if self.icons[name] == nil then return; end
+  self.icons[name]:SetPoint('CENTER')
+  self.icons[name]:SetSize(self.iconSize, self.iconSize)
+  self.icons[name]:SetVertexColor(colors.normal.r, colors.normal.g, colors.normal.b, colors.normal.a)
+end
 
----------------------------------------------
--- TALENT
----------------------------------------------
+function MenuModule:RegisterFrameEvents()
+  for name, frame in pairs(self.frames) do
+    frame:EnableMouse(true)
 
-local talentFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-talentFrame:SetSize(32, 32)
-talentFrame:SetPoint("LEFT",spellFrame,"RIGHT",4,0)
-talentFrame:EnableMouse(true)
-talentFrame:RegisterForClicks("AnyUp")
-local talentFrameIcon = talentFrame:CreateTexture(nil,"OVERLAY",nil,7)
-talentFrameIcon:SetSize(32,32)
-talentFrameIcon:SetPoint("CENTER")
-talentFrameIcon:SetTexture(cfg.mediaFolder.."microbar\\talent")
-talentFrameIcon:SetVertexColor(unpack(cfg.color.normal))
- 
-talentFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	talentFrameIcon:SetVertexColor(unpack(cfg.color.hover))
-end)
+    if frame['Click'] ~= nil then
+      frame:RegisterForClicks("AnyUp")
+    end
+    frame:SetScript("OnEnter", self:DefaultHover(name))
+    frame:SetScript("OnLeave", self:DefaultLeave(name))
+  end
+  self.frames.menu:SetScript('OnClick', self:MainMenuClick())
+end
 
-talentFrame:SetScript("OnLeave", function() talentFrameIcon:SetVertexColor(unpack(cfg.color.normal)) end)
+function MenuModule:DefaultHover(name)
+  return function()
+    if InCombatLockdown() then return; end
+    if self.icons[name] ~= nil then
+      self.icons[name]:SetVertexColor(unpack(xb:HoverColors()))
+    end
+  end
+end
 
-talentFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then 
-		TalentMicroButton:Click()
-	end
-end)
+function MenuModule:DefaultLeave(name)
+  return function()
+    if InCombatLockdown() then return; end
+    if self.icons[name] ~= nil then
+      self.icons[name]:SetVertexColor(P.color.normal.r, P.color.normal.g, P.color.normal.b, P.color.normal.a)
+    end
+  end
+end
 
----------------------------------------------
--- ACHIV
----------------------------------------------
+function MenuModule:MainMenuClick()
+  return function(self, button, down)
+    if InCombatLockdown() then return; end
+  	if button == "LeftButton" then
+  		ToggleFrame(GameMenuFrame)
+  	elseif button == "RightButton" then
+  		if IsShiftKeyDown() then
+        ReloadUI()
+  		else
+        ToggleFrame(AddonList)
+      end
+  	end
+  end
+end
 
-local achievementFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-achievementFrame:SetSize(32, 32)
-achievementFrame:SetPoint("LEFT",talentFrame,"RIGHT",4,0)
-achievementFrame:EnableMouse(true)
-achievementFrame:RegisterForClicks("AnyUp")
-local achievementFrameIcon = achievementFrame:CreateTexture(nil,"OVERLAY",nil,7)
-achievementFrameIcon:SetSize(32,32)
-achievementFrameIcon:SetPoint("CENTER")
-achievementFrameIcon:SetTexture(cfg.mediaFolder.."microbar\\ach")
-achievementFrameIcon:SetVertexColor(unpack(cfg.color.normal))
- 
-achievementFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	achievementFrameIcon:SetVertexColor(unpack(cfg.color.hover))
-end)
+function MenuModule:GetDefaultOptions()
+  return 'microMenu', {
+      enabled = true,
+      showTooltips = true
+    }
+end
 
-achievementFrame:SetScript("OnLeave", function() achievementFrameIcon:SetVertexColor(unpack(cfg.color.normal)) end)
-
-achievementFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then 
-		securecall(ToggleAchievementFrame)
-	end
-end)
-
----------------------------------------------
--- QUEST
----------------------------------------------
-
-local questFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-questFrame:SetSize(32, 32)
-questFrame:SetPoint("LEFT",achievementFrame,"RIGHT",4,0)
-questFrame:EnableMouse(true)
-questFrame:RegisterForClicks("AnyUp")
-local questFrameIcon = questFrame:CreateTexture(nil,"OVERLAY",nil,7)
-questFrameIcon:SetSize(32,32)
-questFrameIcon:SetPoint("CENTER")
-questFrameIcon:SetTexture(cfg.mediaFolder.."microbar\\quest")
-questFrameIcon:SetVertexColor(unpack(cfg.color.normal))
- 
-questFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	questFrameIcon:SetVertexColor(unpack(cfg.color.hover))
-end)
-
-questFrame:SetScript("OnLeave", function() questFrameIcon:SetVertexColor(unpack(cfg.color.normal)) end)
-
-questFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then 
-		QuestLogMicroButton:Click()
-	end
-end)
-
----------------------------------------------
--- LFG
----------------------------------------------
-
-local lfgFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-lfgFrame:SetSize(32, 32)
-lfgFrame:SetPoint("LEFT",questFrame,"RIGHT",4,0)
-lfgFrame:EnableMouse(true)
-lfgFrame:RegisterForClicks("AnyUp")
-local lfgFrameIcon = lfgFrame:CreateTexture(nil,"OVERLAY",nil,7)
-lfgFrameIcon:SetSize(32,32)
-lfgFrameIcon:SetPoint("CENTER")
-lfgFrameIcon:SetTexture(cfg.mediaFolder.."microbar\\lfg")
-lfgFrameIcon:SetVertexColor(unpack(cfg.color.normal))
- 
-lfgFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	lfgFrameIcon:SetVertexColor(unpack(cfg.color.hover))
-end)
-
-lfgFrame:SetScript("OnLeave", function() lfgFrameIcon:SetVertexColor(unpack(cfg.color.normal)) end)
-
-lfgFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then 
-		securecall(PVEFrame_ToggleFrame, 'GroupFinderFrame')
-	end
-end)
-
----------------------------------------------
--- ADVENTURE GUIDE
----------------------------------------------
-
-local adventureFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-adventureFrame:SetSize(32, 32)
-adventureFrame:SetPoint("LEFT",lfgFrame,"RIGHT",4,0)
-adventureFrame:EnableMouse(true)
-adventureFrame:RegisterForClicks("AnyUp")
-local adventureFrameIcon = adventureFrame:CreateTexture(nil,"OVERLAY",nil,7)
-adventureFrameIcon:SetSize(32,32)
-adventureFrameIcon:SetPoint("CENTER")
-adventureFrameIcon:SetTexture(cfg.mediaFolder.."microbar\\journal")
-adventureFrameIcon:SetVertexColor(unpack(cfg.color.normal))
- 
-adventureFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	adventureFrameIcon:SetVertexColor(unpack(cfg.color.hover))
-end)
-
-adventureFrame:SetScript("OnLeave", function() adventureFrameIcon:SetVertexColor(unpack(cfg.color.normal)) end)
-
-adventureFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then 
-		EJMicroButton:Click()
-	end
-end)
-
----------------------------------------------
--- PvP
----------------------------------------------
-
-local pvpFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-pvpFrame:SetSize(32, 32)
-pvpFrame:SetPoint("LEFT",adventureFrame,"RIGHT",4,0)
-pvpFrame:EnableMouse(true)
-pvpFrame:RegisterForClicks("AnyUp")
-local pvpFrameIcon = pvpFrame:CreateTexture(nil,"OVERLAY",nil,7)
-pvpFrameIcon:SetSize(32,32)
-pvpFrameIcon:SetPoint("CENTER")
-pvpFrameIcon:SetTexture(cfg.mediaFolder.."microbar\\pvp")
-pvpFrameIcon:SetVertexColor(unpack(cfg.color.normal))
- 
-pvpFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	pvpFrameIcon:SetVertexColor(unpack(cfg.color.hover))
-end)
-
-pvpFrame:SetScript("OnLeave", function() pvpFrameIcon:SetVertexColor(unpack(cfg.color.normal)) end)
-
-pvpFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then 
-		securecall(PVEFrame_ToggleFrame, 'PVPUIFrame', HonorFrame)
-	end
-end)
-
----------------------------------------------
--- MOUNTS
----------------------------------------------
-
-local mountFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-mountFrame:SetSize(32, 32)
-mountFrame:SetPoint("LEFT",pvpFrame,"RIGHT",4,0)
-mountFrame:EnableMouse(true)
-mountFrame:RegisterForClicks("AnyUp")
-local mountFrameIcon = mountFrame:CreateTexture(nil,"OVERLAY",nil,7)
-mountFrameIcon:SetSize(32,32)
-mountFrameIcon:SetPoint("CENTER")
-mountFrameIcon:SetTexture(cfg.mediaFolder.."microbar\\pet")
-mountFrameIcon:SetVertexColor(unpack(cfg.color.normal))
- 
-mountFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	mountFrameIcon:SetVertexColor(unpack(cfg.color.hover))
-end)
-
-mountFrame:SetScript("OnLeave", function() mountFrameIcon:SetVertexColor(unpack(cfg.color.normal)) end)
-
-mountFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then 
-		securecall(ToggleCollectionsJournal, 1)
-	end
-end)
-
----------------------------------------------
--- SHOP
----------------------------------------------
-
-local shopFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-shopFrame:SetSize(32, 32)
-shopFrame:SetPoint("LEFT",mountFrame,"RIGHT",4,0)
-shopFrame:EnableMouse(true)
-shopFrame:RegisterForClicks("AnyUp")
-local shopFrameIcon = shopFrame:CreateTexture(nil,"OVERLAY",nil,7)
-shopFrameIcon:SetSize(32,32)
-shopFrameIcon:SetPoint("CENTER")
-shopFrameIcon:SetTexture(cfg.mediaFolder.."microbar\\shop")
-shopFrameIcon:SetVertexColor(unpack(cfg.color.normal))
- 
-shopFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	shopFrameIcon:SetVertexColor(unpack(cfg.color.hover))
-end)
-
-shopFrame:SetScript("OnLeave", function() shopFrameIcon:SetVertexColor(unpack(cfg.color.normal)) end)
-
-shopFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then 
-		StoreMicroButton:Click()
-	end
-end)
-
----------------------------------------------
--- HELP
----------------------------------------------
-
-local helpFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-helpFrame:SetSize(32, 32)
-helpFrame:SetPoint("LEFT",shopFrame,"RIGHT",4,0)
-helpFrame:EnableMouse(true)
-helpFrame:RegisterForClicks("AnyUp")
-local helpFrameIcon = helpFrame:CreateTexture(nil,"OVERLAY",nil,7)
-helpFrameIcon:SetSize(32,32)
-helpFrameIcon:SetPoint("CENTER")
-helpFrameIcon:SetTexture(cfg.mediaFolder.."microbar\\help")
-helpFrameIcon:SetVertexColor(unpack(cfg.color.normal))
- 
-helpFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	helpFrameIcon:SetVertexColor(unpack(cfg.color.hover))
-end)
-
-helpFrame:SetScript("OnLeave", function() helpFrameIcon:SetVertexColor(unpack(cfg.color.normal)) end)
-
-helpFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then 
-		securecall(ToggleHelpFrame)
-	end
-end)
+function MenuModule:GetConfig()
+  return {
+    name = self:GetName(),
+    type = "group",
+    args = {
+      enable = {
+        name = L['Enabled'],
+        order = 0,
+        type = "toggle",
+        get = function() return P.modules.microMenu.enabled; end,
+        set = function(_, val) P.modules.microMenu.enabled = val; end
+      },
+      showTooltips = {
+        name = L['Show Social Tooltips'],
+        order = 0,
+        type = "toggle",
+        get = function() return P.modules.microMenu.showTooltips; end,
+        set = function(_, val) P.modules.microMenu.showTooltips = val; end
+      }
+    }
+  }
+end

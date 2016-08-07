@@ -9,12 +9,13 @@
 embeds.xml
 locales\locales.xml
 core.lua
+modules\load_modules.xml
 
 settings.lua
 
 modules\config.lua
 modules\social.lua
-modules\micromenu.lua
+modules\old\micromenu.lua
 modules\armor.lua
 modules\talent.lua
 modules\clock.lua
