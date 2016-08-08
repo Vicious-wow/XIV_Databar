@@ -6,7 +6,6 @@ if not L then return; end
 L['General'] = true;
 L['Text'] = true;
 
-L['Profiles'] = true;
 L['Modules'] = true;
 
 -- General
@@ -34,7 +33,3 @@ L['Hover'] = true;
 L['Test Module'] = true;
 
 L['Micromenu'] = true;
-
-
------------- PROPER NOUNS - DO NOT LOCALIZE ------------
-L['Homizio Bold'] = true;

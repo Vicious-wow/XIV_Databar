@@ -58,7 +58,7 @@ XIVBar.constants = {
   playerClass = select(2, UnitClass("player"))
 }
 
-P = {};
+local P = {};
 
 Engine[1] = XIVBar;
 Engine[2] = L;
@@ -71,7 +71,8 @@ _G[AddOnName] = Engine;
 
 function XIVBar:OnInitialize()
   self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults)
-  self.LSM:Register(self.LSM.MediaType.FONT, L['Homizio Bold'], self.constants.mediaPath.."homizio_bold.ttf")
+  self.LSM:Register(self.LSM.MediaType.FONT, 'Homizio Bold', self.constants.mediaPath.."homizio_bold.ttf")
+  self.frames = {}
 
   local options = {
     name = "XIV Bar",
@@ -118,7 +119,7 @@ function XIVBar:OnInitialize()
 
   --LibStub("AceConfig-3.0"):RegisterOptionsTable(AddOnName.."-Profiles", )
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-  self.profilesOptionFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AddOnName, L['Profiles'], "XIV Bar", "profiles")
+  self.profilesOptionFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AddOnName, 'Profiles', "XIV Bar", "profiles")
 
 
 
@@ -126,7 +127,6 @@ function XIVBar:OnInitialize()
 end
 
 function XIVBar:OnEnable()
-  self.frames = {}
   self:CreateMainBar()
   self:Refresh()
 end
