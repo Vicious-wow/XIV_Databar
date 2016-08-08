@@ -11,10 +11,10 @@ function TestModule:GetName()
 end
 
 function TestModule:OnInitialize()
-  P = xb.db.profile
 end
 
 function TestModule:OnEnable()
+  P = xb.db.profile
   xb:RegisterFrame('testModuleFrame', CreateFrame("FRAME", nil, xb:GetFrame('bar')))
   self:Refresh()
 end

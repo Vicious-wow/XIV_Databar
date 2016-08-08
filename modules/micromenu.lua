@@ -11,7 +11,6 @@ function MenuModule:GetName()
 end
 
 function MenuModule:OnInitialize()
-  P = xb.db.profile
   self.mediaFolder = xb.constants.mediaPath..'microbar\\'
   self.icons = {}
   self.frames = {}
@@ -20,6 +19,7 @@ function MenuModule:OnInitialize()
 end
 
 function MenuModule:OnEnable()
+  P = xb.db.profile
   self.microMenuFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
   xb:RegisterFrame('microMenuFrame', self.microMenuFrame)
 
@@ -28,6 +28,7 @@ function MenuModule:OnEnable()
   self:CreateIcons()
   self:Refresh()
   self:UpdateGuildText()
+  self:UpdateFriendText()
 end
 
 function MenuModule:OnDisable()
@@ -57,6 +58,7 @@ function MenuModule:Refresh()
   self.microMenuFrame:SetSize(totalWidth, xb:GetHeight())
 
   for name, frame in pairs(self.text) do
+    frame:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, P.text.font), P.text.smallFontSize)
     frame:SetPoint('CENTER', self.frames[name], self.textPosition)
     self.bgTexture[name]:SetColorTexture(P.color.barColor.r, P.color.barColor.g, P.color.barColor.b, P.color.barColor.a)
     self.bgTexture[name]:SetPoint('CENTER', frame)
@@ -64,25 +66,25 @@ function MenuModule:Refresh()
 end
 
 function MenuModule:CreateFrames()
-  self.frames.menu = CreateFrame("BUTTON", nil, xb:GetFrame('microMenuFrame'))
+  self.frames.menu = self.frames.menu or CreateFrame("BUTTON", nil, xb:GetFrame('microMenuFrame'))
 
-  self.frames.socialParent = CreateFrame("FRAME", nil, self.frames.menu)
-  self.frames.chat = CreateFrame("BUTTON", nil, self.frames.socialParent)
-  self.frames.guild = CreateFrame("BUTTON", nil, self.frames.chat)
-  self.frames.social = CreateFrame("BUTTON", nil, self.frames.guild)
+  self.frames.socialParent = self.frames.socialParent or CreateFrame("FRAME", nil, self.frames.menu)
+  self.frames.chat = self.frames.chat or CreateFrame("BUTTON", nil, self.frames.socialParent)
+  self.frames.guild = self.frames.guild or CreateFrame("BUTTON", nil, self.frames.chat)
+  self.frames.social = self.frames.social or CreateFrame("BUTTON", nil, self.frames.guild)
 
-  self.frames.microbar = CreateFrame("FRAME", nil, self.frames.social)
-  self.frames.char = CreateFrame("BUTTON", nil, self.frames.microbar)
-  self.frames.spell = CreateFrame("BUTTON", nil, self.frames.char)
-  self.frames.talent = CreateFrame("BUTTON", nil, self.frames.spell)
-  self.frames.ach = CreateFrame("BUTTON", nil, self.frames.talent)
-  self.frames.quest = CreateFrame("BUTTON", nil, self.frames.ach)
-  self.frames.lfg = CreateFrame("BUTTON", nil, self.frames.quest)
-  self.frames.journal = CreateFrame("BUTTON", nil, self.frames.lfg)
-  self.frames.pvp = CreateFrame("BUTTON", nil, self.frames.journal)
-  self.frames.pet = CreateFrame("BUTTON", nil, self.frames.pvp)
-  self.frames.shop = CreateFrame("BUTTON", nil, self.frames.pet)
-  self.frames.help = CreateFrame("BUTTON", nil, self.frames.shop)
+  self.frames.microbar = self.frames.microbar or CreateFrame("FRAME", nil, self.frames.social)
+  self.frames.char = self.frames.char or CreateFrame("BUTTON", nil, self.frames.microbar)
+  self.frames.spell = self.frames.spell or CreateFrame("BUTTON", nil, self.frames.char)
+  self.frames.talent = self.frames.talent or CreateFrame("BUTTON", nil, self.frames.spell)
+  self.frames.ach = self.frames.ach or CreateFrame("BUTTON", nil, self.frames.talent)
+  self.frames.quest = self.frames.quest or CreateFrame("BUTTON", nil, self.frames.ach)
+  self.frames.lfg = self.frames.lfg or CreateFrame("BUTTON", nil, self.frames.quest)
+  self.frames.journal = self.frames.journal or CreateFrame("BUTTON", nil, self.frames.lfg)
+  self.frames.pvp = self.frames.pvp or CreateFrame("BUTTON", nil, self.frames.journal)
+  self.frames.pet = self.frames.pet or CreateFrame("BUTTON", nil, self.frames.pvp)
+  self.frames.shop = self.frames.shop or CreateFrame("BUTTON", nil, self.frames.pet)
+  self.frames.help = self.frames.help or CreateFrame("BUTTON", nil, self.frames.shop)
 
   self.text.guild = self.frames.guild:CreateFontString(nil, 'OVERLAY')
   self.bgTexture.guild = self.frames.guild:CreateTexture(nil, "OVERLAY")
@@ -128,8 +130,10 @@ function MenuModule:RegisterFrameEvents()
   self.frames.menu:SetScript('OnClick', self:MainMenuClick())
 
   self.frames.chat:SetScript('OnClick', self:ChatClick())
+
   self.frames.guild:SetScript('OnClick', self:GuildClick())
   self:RegisterEvent('GUILD_ROSTER_UPDATE', 'UpdateGuildText')
+
   self.frames.social:SetScript('OnClick', self:SocialClick())
   self:RegisterEvent('BN_FRIEND_ACCOUNT_ONLINE', 'UpdateFriendText')
   self:RegisterEvent('BN_FRIEND_ACCOUNT_OFFLINE', 'UpdateFriendText')
@@ -142,6 +146,7 @@ function MenuModule:UpdateGuildText()
   if IsInGuild() then
     local _, onlineMembers = GetNumGuildMembers()
     self.text.guild:SetText(onlineMembers)
+    self.bgTexture.guild:SetPoint('CENTER', self.text.guild)
   else
     self.text.guild:Hide()
     self.bgTexture.guild:Hide()
@@ -153,14 +158,7 @@ function MenuModule:UpdateFriendText()
   local _, friendsOnline = GetNumFriends()
   local totalFriends = bnOnlineMembers + friendsOnline
   self.text.social:SetText(totalFriends)
-
-  if IsInGuild() then
-    local _, onlineMembers = GetNumGuildMembers()
-    self.text.guild:SetText(onlineMembers)
-  else
-    self.text.guild:Hide()
-    self.bgTexture.guild:Hide()
-  end
+  self.bgTexture.social:SetPoint('CENTER', self.text.social)
 end
 
 function MenuModule:DefaultHover(name)
@@ -207,27 +205,28 @@ end
 
 function MenuModule:GuildClick()
   return function(self, button, down)
-  	if InCombatLockdown() then return end
-  	--[[if button == "LeftButton" then
+  	if InCombatLockdown() then return; end
+  	if button == "LeftButton" then
+      ToggleGuildFrame()
   		if ( IsInGuild() ) then
-  			ToggleGuildFrame()
   			GuildFrameTab2:Click()
-  		else
-  			ToggleGuildFinder()
   		end
-  	end]]--
-    ToggleGuildFrame()
+  	end
   end
 end
 
 function MenuModule:SocialClick()
   return function(self, button, down)
+    if InCombatLockdown() then return; end
+  	if button == "LeftButton" then
+  		ToggleFriendsFrame()
+  	end
   end
 end
 
 function MenuModule:CharacterClick()
   return function(self, button, down)
-  	if InCombatLockdown() then return end
+  	if InCombatLockdown() then return; end
   	if button == "LeftButton" then
   		ToggleCharacter("PaperDollFrame")
   	end

@@ -70,7 +70,7 @@ XIVBar.LSM = LibStub('LibSharedMedia-3.0');
 _G[AddOnName] = Engine;
 
 function XIVBar:OnInitialize()
-
+  self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults)
   self.LSM:Register(self.LSM.MediaType.FONT, L['Homizio Bold'], self.constants.mediaPath.."homizio_bold.ttf")
 
   local options = {
@@ -96,6 +96,7 @@ function XIVBar:OnInitialize()
       } -- modules
     }
   }
+
   for name, module in self:IterateModules() do
     if module['GetConfig'] ~= nil then
       options.args.modules.args[name] = module:GetConfig()
@@ -106,7 +107,7 @@ function XIVBar:OnInitialize()
     end
   end
 
-  self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults, "Default")
+  self.db:RegisterDefaults(self.defaults)
   P = self.db.profile
 
   LibStub("AceConfig-3.0"):RegisterOptionsTable(AddOnName, options)
@@ -127,6 +128,7 @@ end
 function XIVBar:OnEnable()
   self.frames = {}
   self:CreateMainBar()
+  self:Refresh()
 end
 
 function XIVBar:ToggleConfig()
@@ -176,7 +178,6 @@ end
 function XIVBar:CreateMainBar()
   self:RegisterFrame('bar', CreateFrame("FRAME", "XIV_Databar", UIParent))
   self:RegisterFrame('bgTexture', self.frames.bar:CreateTexture(nil, "BACKGROUND"))
-  self:Refresh()
 end
 
 function XIVBar:GetHeight()
@@ -184,18 +185,17 @@ function XIVBar:GetHeight()
 end
 
 function XIVBar:Refresh()
-  local mainBar = self.frames.bar
-  local bgTexture = self.frames.bgTexture
+  if self.frames.bar == nil then return; end
+  --error(debugstack())
   local barColor = P.color.barColor
+  self.frames.bar:ClearAllPoints()
+  self.frames.bar:SetPoint(self.db.profile.general.barPosition)
+  self.frames.bar:SetPoint("LEFT")
+  self.frames.bar:SetPoint("RIGHT")
+  self.frames.bar:SetHeight(self:GetHeight())
 
-  mainBar:ClearAllPoints()
-  mainBar:SetPoint(P.general.barPosition)
-  mainBar:SetPoint("LEFT")
-  mainBar:SetPoint("RIGHT")
-  mainBar:SetHeight(self:GetHeight())
-
-  bgTexture:SetAllPoints()
-  bgTexture:SetColorTexture(barColor.r, barColor.g, barColor.b, barColor.a)
+  self.frames.bgTexture:SetAllPoints()
+  self.frames.bgTexture:SetColorTexture(barColor.r, barColor.g, barColor.b, barColor.a)
 
   for name, module in self:IterateModules() do
     if module['Refresh'] == nil then return; end
@@ -220,8 +220,8 @@ function XIVBar:GetGeneralOptions()
         order = 1,
         values = {TOP = L['Top'], BOTTOM = L['Bottom']},
         style = "dropdown",
-        get = function() return P.general.barPosition; end,
-        set = function(info, value) P.general.barPosition = value; self:Refresh(); end,
+        get = function() return self.db.profile.general.barPosition; end,
+        set = function(info, value) self.db.profile.general.barPosition = value; self:Refresh(); end,
       },
       barColor = {
         name = L['Bar Color'],
