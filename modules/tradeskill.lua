@@ -4,6 +4,10 @@ local unpack = unpack
 --------------------------------------------------------------
 if not cfg.tradeSkill.show then return end
 
+if not IsAddOnLoaded("Blizzard_TradeSkillUI") then
+	TradeSkillFrame_LoadUI();
+end
+
 local proffessions = {
 	['ALCHEMY'] = {"Alchemical Catalyst", "Secrets of Draenor Alchemy", "Northrend Alchemy Research"},
 	['BLACKSMITHING'] = {"Truesteel Ignot", "Secrets of Draenor Blacksmithing"},

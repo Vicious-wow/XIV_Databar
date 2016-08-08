@@ -4,7 +4,7 @@ local xb = Engine[1];
 local L = Engine[2];
 local P = {};
 
-MenuModule = xb:NewModule("MenuModule")
+MenuModule = xb:NewModule("MenuModule", 'AceEvent-3.0')
 
 function MenuModule:GetName()
   return L['Micromenu'];
@@ -15,6 +15,8 @@ function MenuModule:OnInitialize()
   self.mediaFolder = xb.constants.mediaPath..'microbar\\'
   self.icons = {}
   self.frames = {}
+  self.text = {}
+  self.bgTexture = {}
 end
 
 function MenuModule:OnEnable()
@@ -25,6 +27,7 @@ function MenuModule:OnEnable()
   self:RegisterFrameEvents()
   self:CreateIcons()
   self:Refresh()
+  self:UpdateGuildText()
 end
 
 function MenuModule:OnDisable()
@@ -34,6 +37,10 @@ function MenuModule:Refresh()
   if self.frames.menu == nil then return; end
 
   self.iconSize = xb:GetHeight();
+  self.textPosition = "TOP"
+  if P.general.barPosition == 'TOP' then
+    self.textPosition = 'BOTTOM'
+  end
 
   local colors = P.color
   local totalWidth = 0;
@@ -48,6 +55,12 @@ function MenuModule:Refresh()
   end
   self.microMenuFrame:SetPoint("LEFT")
   self.microMenuFrame:SetSize(totalWidth, xb:GetHeight())
+
+  for name, frame in pairs(self.text) do
+    frame:SetPoint('CENTER', self.frames[name], self.textPosition)
+    self.bgTexture[name]:SetColorTexture(P.color.barColor.r, P.color.barColor.g, P.color.barColor.b, P.color.barColor.a)
+    self.bgTexture[name]:SetPoint('CENTER', frame)
+  end
 end
 
 function MenuModule:CreateFrames()
@@ -70,6 +83,12 @@ function MenuModule:CreateFrames()
   self.frames.pet = CreateFrame("BUTTON", nil, self.frames.pvp)
   self.frames.shop = CreateFrame("BUTTON", nil, self.frames.pet)
   self.frames.help = CreateFrame("BUTTON", nil, self.frames.shop)
+
+  self.text.guild = self.frames.guild:CreateFontString(nil, 'OVERLAY')
+  self.bgTexture.guild = self.frames.guild:CreateTexture(nil, "OVERLAY")
+
+  self.text.social = self.frames.social:CreateFontString(nil, 'OVERLAY')
+  self.bgTexture.social = self.frames.social:CreateTexture(nil, "OVERLAY")
 end
 
 function MenuModule:CreateIcons()
@@ -107,6 +126,41 @@ function MenuModule:RegisterFrameEvents()
     frame:SetScript("OnLeave", self:DefaultLeave(name))
   end
   self.frames.menu:SetScript('OnClick', self:MainMenuClick())
+
+  self.frames.chat:SetScript('OnClick', self:ChatClick())
+  self.frames.guild:SetScript('OnClick', self:GuildClick())
+  self:RegisterEvent('GUILD_ROSTER_UPDATE', 'UpdateGuildText')
+  self.frames.social:SetScript('OnClick', self:SocialClick())
+  self:RegisterEvent('BN_FRIEND_ACCOUNT_ONLINE', 'UpdateFriendText')
+  self:RegisterEvent('BN_FRIEND_ACCOUNT_OFFLINE', 'UpdateFriendText')
+  self:RegisterEvent('FRIENDLIST_UPDATE', 'UpdateFriendText')
+
+  self.frames.char:SetScript('OnClick', self:CharacterClick())
+end
+
+function MenuModule:UpdateGuildText()
+  if IsInGuild() then
+    local _, onlineMembers = GetNumGuildMembers()
+    self.text.guild:SetText(onlineMembers)
+  else
+    self.text.guild:Hide()
+    self.bgTexture.guild:Hide()
+  end
+end
+
+function MenuModule:UpdateFriendText()
+  local _, bnOnlineMembers = BNGetNumFriends()
+  local _, friendsOnline = GetNumFriends()
+  local totalFriends = bnOnlineMembers + friendsOnline
+  self.text.social:SetText(totalFriends)
+
+  if IsInGuild() then
+    local _, onlineMembers = GetNumGuildMembers()
+    self.text.guild:SetText(onlineMembers)
+  else
+    self.text.guild:Hide()
+    self.bgTexture.guild:Hide()
+  end
 end
 
 function MenuModule:DefaultHover(name)
@@ -138,6 +192,44 @@ function MenuModule:MainMenuClick()
   		else
         ToggleFrame(AddonList)
       end
+  	end
+  end
+end
+
+function MenuModule:ChatClick()
+  return function(self, button, down)
+    if InCombatLockdown() then return; end
+  	if button == "LeftButton" then
+      ChatFrame_OpenMenu()
+    end
+  end
+end
+
+function MenuModule:GuildClick()
+  return function(self, button, down)
+  	if InCombatLockdown() then return end
+  	--[[if button == "LeftButton" then
+  		if ( IsInGuild() ) then
+  			ToggleGuildFrame()
+  			GuildFrameTab2:Click()
+  		else
+  			ToggleGuildFinder()
+  		end
+  	end]]--
+    ToggleGuildFrame()
+  end
+end
+
+function MenuModule:SocialClick()
+  return function(self, button, down)
+  end
+end
+
+function MenuModule:CharacterClick()
+  return function(self, button, down)
+  	if InCombatLockdown() then return end
+  	if button == "LeftButton" then
+  		ToggleCharacter("PaperDollFrame")
   	end
   end
 end
