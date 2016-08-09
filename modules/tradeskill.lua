@@ -88,15 +88,7 @@ primaryTradeSkillFrame:SetScript("OnClick", function(self, button, down)
 	if button == "LeftButton" then
 		local prof1, prof2 = GetProfessions()
 		if prof1 then
-			if (GetProfessionInfo(prof1) == ('Herbalism')) then
-				ToggleSpellBook(BOOKTYPE_PROFESSION)
-			elseif(GetProfessionInfo(prof1) == ('Skinning')) then
-				ToggleSpellBook(BOOKTYPE_PROFESSION)
-			elseif(GetProfessionInfo(prof1) == ('Mining')) then
-				ToggleSpellBook(BOOKTYPE_PROFESSION)
-			else
-				CastSpellByName((GetProfessionInfo(prof1)))
-			end
+			CastSpell(select(6,GetProfessionInfo(prof1))+1,BOOKTYPE_PROFESSION)
 		end
 	elseif button == "RightButton" then
 		ToggleSpellBook(BOOKTYPE_PROFESSION)
@@ -155,16 +147,8 @@ secondaryTradeSkillFrame:SetScript("OnClick", function(self, button, down)
 	if button == "LeftButton" then
 		local prof1, prof2 = GetProfessions()
 		if prof2 then
-			if (GetProfessionInfo(prof2) == ('Herbalism')) then
-				ToggleSpellBook(BOOKTYPE_PROFESSION)
-			elseif(GetProfessionInfo(prof2) == ('Skinning')) then
-				ToggleSpellBook(BOOKTYPE_PROFESSION)
-			elseif(GetProfessionInfo(prof2) == ('Mining')) then
-				ToggleSpellBook(BOOKTYPE_PROFESSION)
-			else
-				CastSpellByName((GetProfessionInfo(prof2)))
-			end
-		end
+			CastSpell(select(6,GetProfessionInfo(prof2))+1,BOOKTYPE_PROFESSION)
+		end 
 	elseif button == "RightButton" then
 		ToggleSpellBook(BOOKTYPE_PROFESSION)
 	end
