@@ -37,7 +37,7 @@ function TestModule:GetConfig()
     type = "group",
     args = {
       enable = {
-        name = L['Enabled'],
+        name = ENABLE,
         order = 0,
         type = "toggle",
         get = function() return P.modules.testModule.enabled; end,

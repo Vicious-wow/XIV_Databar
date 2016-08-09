@@ -1,8 +1,7 @@
-local AddOnName, Engine = ...;
+local AddOnName, XIVBar = ...;
 local _G = _G;
-local xb = Engine[1];
-local L = Engine[2];
-local P = {};
+local xb = XIVBar;
+local L = XIVBar.L;
 
 MenuModule = xb:NewModule("MenuModule", 'AceEvent-3.0')
 
@@ -16,10 +15,11 @@ function MenuModule:OnInitialize()
   self.frames = {}
   self.text = {}
   self.bgTexture = {}
+  self.functions = {}
+  self:CreateClickFunctions()
 end
 
 function MenuModule:OnEnable()
-  P = xb.db.profile
   self.microMenuFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
   xb:RegisterFrame('microMenuFrame', self.microMenuFrame)
 
@@ -39,28 +39,32 @@ function MenuModule:Refresh()
 
   self.iconSize = xb:GetHeight();
   self.textPosition = "TOP"
-  if P.general.barPosition == 'TOP' then
+  if xb.db.profile.general.barPosition == 'TOP' then
     self.textPosition = 'BOTTOM'
   end
 
-  local colors = P.color
+  local colors = xb.db.profile.color
   local totalWidth = 0;
   for name, frame in pairs(self.frames) do
     self:IconDefaults(name)
-    totalWidth = totalWidth + frame:GetWidth() + 2
     if name == 'menu' then
-      frame:SetPoint("LEFT", 2, 0)
+      frame:SetPoint("LEFT", xb.db.profile.modules.microMenu.iconSpacing, 0)
+      totalWidth = totalWidth + frame:GetWidth() + xb.db.profile.modules.microMenu.iconSpacing
+    elseif name == 'chat' then
+      frame:SetPoint("LEFT", frame:GetParent(), "RIGHT", xb.db.profile.modules.microMenu.mainMenuSpacing, 0)
+      totalWidth = totalWidth + frame:GetWidth() + xb.db.profile.modules.microMenu.mainMenuSpacing
     else
-      frame:SetPoint("LEFT", frame:GetParent(), "RIGHT", 2, 0)
+      frame:SetPoint("LEFT", frame:GetParent(), "RIGHT", xb.db.profile.modules.microMenu.iconSpacing, 0)
+      totalWidth = totalWidth + frame:GetWidth() + xb.db.profile.modules.microMenu.iconSpacing
     end
   end
   self.microMenuFrame:SetPoint("LEFT")
   self.microMenuFrame:SetSize(totalWidth, xb:GetHeight())
 
   for name, frame in pairs(self.text) do
-    frame:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, P.text.font), P.text.smallFontSize)
+    frame:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, xb.db.profile.text.font), xb.db.profile.text.smallFontSize)
     frame:SetPoint('CENTER', self.frames[name], self.textPosition)
-    self.bgTexture[name]:SetColorTexture(P.color.barColor.r, P.color.barColor.g, P.color.barColor.b, P.color.barColor.a)
+    self.bgTexture[name]:SetColorTexture(xb.db.profile.color.barColor.r, xb.db.profile.color.barColor.g, xb.db.profile.color.barColor.b, xb.db.profile.color.barColor.a)
     self.bgTexture[name]:SetPoint('CENTER', frame)
   end
 end
@@ -68,13 +72,13 @@ end
 function MenuModule:CreateFrames()
   self.frames.menu = self.frames.menu or CreateFrame("BUTTON", nil, xb:GetFrame('microMenuFrame'))
 
-  self.frames.socialParent = self.frames.socialParent or CreateFrame("FRAME", nil, self.frames.menu)
-  self.frames.chat = self.frames.chat or CreateFrame("BUTTON", nil, self.frames.socialParent)
+  --self.frames.socialParent = self.frames.socialParent or CreateFrame("FRAME", nil, self.frames.menu)
+  self.frames.chat = self.frames.chat or CreateFrame("BUTTON", nil, self.frames.menu)
   self.frames.guild = self.frames.guild or CreateFrame("BUTTON", nil, self.frames.chat)
   self.frames.social = self.frames.social or CreateFrame("BUTTON", nil, self.frames.guild)
 
-  self.frames.microbar = self.frames.microbar or CreateFrame("FRAME", nil, self.frames.social)
-  self.frames.char = self.frames.char or CreateFrame("BUTTON", nil, self.frames.microbar)
+  --self.frames.microbar = self.frames.microbar or CreateFrame("FRAME", nil, self.frames.social)
+  self.frames.char = self.frames.char or CreateFrame("BUTTON", nil, self.frames.social)
   self.frames.spell = self.frames.spell or CreateFrame("BUTTON", nil, self.frames.char)
   self.frames.talent = self.frames.talent or CreateFrame("BUTTON", nil, self.frames.spell)
   self.frames.ach = self.frames.ach or CreateFrame("BUTTON", nil, self.frames.talent)
@@ -103,7 +107,7 @@ function MenuModule:CreateIcons()
 end
 
 function MenuModule:IconDefaults(name)
-  local colors = P.color
+  local colors = xb.db.profile.color
   if self.frames[name] == nil then return; end
   if self.frames[name]['Click'] ~= nil then
     self.frames[name]:SetSize(self.iconSize, self.iconSize)
@@ -123,23 +127,18 @@ function MenuModule:RegisterFrameEvents()
 
     if frame['Click'] ~= nil then
       frame:RegisterForClicks("AnyUp")
+      if self.functions[name] ~= nil then
+        frame:SetScript('OnClick', self.functions[name])
+      end
     end
     frame:SetScript("OnEnter", self:DefaultHover(name))
     frame:SetScript("OnLeave", self:DefaultLeave(name))
   end
-  self.frames.menu:SetScript('OnClick', self:MainMenuClick())
 
-  self.frames.chat:SetScript('OnClick', self:ChatClick())
-
-  self.frames.guild:SetScript('OnClick', self:GuildClick())
   self:RegisterEvent('GUILD_ROSTER_UPDATE', 'UpdateGuildText')
-
-  self.frames.social:SetScript('OnClick', self:SocialClick())
   self:RegisterEvent('BN_FRIEND_ACCOUNT_ONLINE', 'UpdateFriendText')
   self:RegisterEvent('BN_FRIEND_ACCOUNT_OFFLINE', 'UpdateFriendText')
   self:RegisterEvent('FRIENDLIST_UPDATE', 'UpdateFriendText')
-
-  self.frames.char:SetScript('OnClick', self:CharacterClick())
 end
 
 function MenuModule:UpdateGuildText()
@@ -174,69 +173,133 @@ function MenuModule:DefaultLeave(name)
   return function()
     if InCombatLockdown() then return; end
     if self.icons[name] ~= nil then
-      self.icons[name]:SetVertexColor(P.color.normal.r, P.color.normal.g, P.color.normal.b, P.color.normal.a)
+      self.icons[name]:SetVertexColor(xb.db.profile.color.normal.r, xb.db.profile.color.normal.g, xb.db.profile.color.normal.b, xb.db.profile.color.normal.a)
     end
   end
 end
 
-function MenuModule:MainMenuClick()
-  return function(self, button, down)
+function MenuModule:CreateClickFunctions()
+  self.functions.menu = function(self, button, down)
     if InCombatLockdown() then return; end
-  	if button == "LeftButton" then
-  		ToggleFrame(GameMenuFrame)
-  	elseif button == "RightButton" then
-  		if IsShiftKeyDown() then
+    if button == "LeftButton" then
+      ToggleFrame(GameMenuFrame)
+    elseif button == "RightButton" then
+      if IsShiftKeyDown() then
         ReloadUI()
-  		else
+      else
         ToggleFrame(AddonList)
       end
-  	end
-  end
-end
+    end
+  end; --menu
 
-function MenuModule:ChatClick()
-  return function(self, button, down)
+  self.functions.chat = function(self, button, down)
     if InCombatLockdown() then return; end
-  	if button == "LeftButton" then
+    if button == "LeftButton" then
       ChatFrame_OpenMenu()
     end
-  end
-end
+  end; --chat
 
-function MenuModule:GuildClick()
-  return function(self, button, down)
-  	if InCombatLockdown() then return; end
-  	if button == "LeftButton" then
-      ToggleGuildFrame()
-  		if ( IsInGuild() ) then
-  			GuildFrameTab2:Click()
-  		end
-  	end
-  end
-end
-
-function MenuModule:SocialClick()
-  return function(self, button, down)
+  self.functions.guild = function(self, button, down)
     if InCombatLockdown() then return; end
-  	if button == "LeftButton" then
-  		ToggleFriendsFrame()
-  	end
-  end
-end
+    if button == "LeftButton" then
+      ToggleGuildFrame()
+      if IsInGuild() then
+        GuildFrameTab2:Click()
+      end
+    end
+  end; --guild
 
-function MenuModule:CharacterClick()
-  return function(self, button, down)
-  	if InCombatLockdown() then return; end
-  	if button == "LeftButton" then
-  		ToggleCharacter("PaperDollFrame")
+  self.functions.social = function(self, button, down)
+    if InCombatLockdown() then return; end
+    if button == "LeftButton" then
+      ToggleFriendsFrame()
+    end
+  end; --social
+
+  self.functions.char = function(self, button, down)
+    if InCombatLockdown() then return; end
+    if button == "LeftButton" then
+      ToggleCharacter("PaperDollFrame")
+    end
+  end; --char
+
+  self.functions.spell = function(self, button, down)
+    if InCombatLockdown() then return; end
+    if button == "LeftButton" then
+  		ToggleFrame(SpellBookFrame)
   	end
-  end
+  end; --spell
+
+  self.functions.talent = function(self, button, down)
+    if InCombatLockdown() then return; end
+    if button == "LeftButton" then
+  		ToggleTalentFrame()
+  	end
+  end; --talent
+
+  self.functions.journal = function(self, button, down)
+    if InCombatLockdown() then return; end
+    if button == "LeftButton" then
+  		ToggleEncounterJournal()
+  	end
+  end; --journal
+
+  self.functions.lfg = function(self, button, down)
+    if InCombatLockdown() then return; end
+    if button == "LeftButton" then
+  		ToggleLFDParentFrame()
+  	end
+  end; --lfg
+
+  self.functions.pet = function(self, button, down)
+    if InCombatLockdown() then return; end
+    if button == "LeftButton" then
+  		ToggleCollectionsJournal()
+  	end
+  end; --pet
+
+  self.functions.ach = function(self, button, down)
+    if InCombatLockdown() then return; end
+    if button == "LeftButton" then
+  		ToggleAchievementFrame()
+  	end
+  end; --ach
+
+  self.functions.quest = function(self, button, down)
+    if InCombatLockdown() then return; end
+    if button == "LeftButton" then
+  		ToggleQuestLog()
+  	end
+  end; --quest
+
+  self.functions.pvp = function(self, button, down)
+    if InCombatLockdown() then return; end
+    if button == "LeftButton" then
+  		TogglePVPUI()
+  	end
+  end; --pvp
+
+  self.functions.shop = function(self, button, down)
+    if InCombatLockdown() then return; end
+    if button == "LeftButton" then
+  		ToggleStoreUI()
+  	end
+  end; --shop
+
+  self.functions.help = function(self, button, down)
+    if InCombatLockdown() then return; end
+    if button == "LeftButton" then
+  		ToggleHelpFrame()
+  	end
+  end; --help
 end
 
 function MenuModule:GetDefaultOptions()
   return 'microMenu', {
       enabled = true,
-      showTooltips = true
+      showTooltips = true,
+      mainMenuSpacing = 2,
+      iconSpacing = 2
     }
 end
 
@@ -246,18 +309,38 @@ function MenuModule:GetConfig()
     type = "group",
     args = {
       enable = {
-        name = L['Enabled'],
+        name = ENABLE,
         order = 0,
         type = "toggle",
-        get = function() return P.modules.microMenu.enabled; end,
-        set = function(_, val) P.modules.microMenu.enabled = val; end
+        get = function() return xb.db.profile.modules.microMenu.enabled; end,
+        set = function(_, val) xb.db.profile.modules.microMenu.enabled = val; self:Refresh(); end
       },
       showTooltips = {
         name = L['Show Social Tooltips'],
-        order = 0,
+        order = 1,
         type = "toggle",
-        get = function() return P.modules.microMenu.showTooltips; end,
-        set = function(_, val) P.modules.microMenu.showTooltips = val; end
+        get = function() return xb.db.profile.modules.microMenu.showTooltips; end,
+        set = function(_, val) xb.db.profile.modules.microMenu.showTooltips = val; self:Refresh(); end
+      },
+      mainMenuSpacing = {
+        name = L['Main Menu Icon Right Spacing'],
+        order = 2,
+        type="range",
+        min = 2,
+        max = 20,
+        step = 1,
+        get = function() return xb.db.profile.modules.microMenu.mainMenuSpacing; end,
+        set = function(_, val) xb.db.profile.modules.microMenu.mainMenuSpacing = val; self:Refresh(); end
+      },
+      iconSpacing = {
+        name = L['Icon Spacing'],
+        order = 2,
+        type="range",
+        min = 2,
+        max = 20,
+        step = 1,
+        get = function() return xb.db.profile.modules.microMenu.iconSpacing; end,
+        set = function(_, val) xb.db.profile.modules.microMenu.iconSpacing = val; self:Refresh(); end
       }
     }
   }

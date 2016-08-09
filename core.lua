@@ -1,8 +1,10 @@
-local AddOnName, Engine = ...;
+local AddOnName, XIVBar = ...;
 local _G = _G;
 local pairs, unpack, select = pairs, unpack, select
-local XIVBar = LibStub("AceAddon-3.0"):NewAddon(AddOnName, "AceConsole-3.0", "AceEvent-3.0");
-local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, false);
+LibStub("AceAddon-3.0"):NewAddon(XIVBar, AddOnName, "AceConsole-3.0", "AceEvent-3.0");
+local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true);
+
+XIVBar.L = L
 
 XIVBar.defaults = {
   profile = {
@@ -39,7 +41,7 @@ XIVBar.defaults = {
     text = {
       fontSize = 12,
       smallFontSize = 11,
-      font =  L['Homizio Bold']
+      font =  'Homizio Bold'
     },
 
 
@@ -58,21 +60,47 @@ XIVBar.constants = {
   playerClass = select(2, UnitClass("player"))
 }
 
-local P = {};
-
-Engine[1] = XIVBar;
-Engine[2] = L;
-Engine[3] = P;
-_G.XIVBar = Engine;
-
 XIVBar.LSM = LibStub('LibSharedMedia-3.0');
-
-_G[AddOnName] = Engine;
 
 function XIVBar:OnInitialize()
   self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults)
   self.LSM:Register(self.LSM.MediaType.FONT, 'Homizio Bold', self.constants.mediaPath.."homizio_bold.ttf")
   self.frames = {}
+
+  --[[local options = {
+    name = "XIV Bar",
+    handler = XIVBar,
+    type = 'group',
+    args = {
+      general = {
+        name = L['General'],
+        type = "group",
+        order = 3,
+        inline = true,
+        args = {
+          barPosition = {
+            name = L['Bar Position'],
+            type = "select",
+            order = 1,
+            values = {TOP = L['Top'], BOTTOM = L['Bottom']},
+            style = "dropdown",
+            get = function() return self.db.profile.general.barPosition; end,
+            set = function(info, value) self.db.profile.general.barPosition = value; self:Refresh(); end,
+          },
+          barColor = {
+            name = L['Bar Color'],
+            type = "color",
+            order = 2,
+            hasAlpha = true,
+            set = function(info, r, g, b, a)
+              XIVBar:SetColor('barColor', r, g, b, a)
+            end,
+            get = function() return XIVBar:GetColor('barColor') end
+          },
+        }
+      }
+    }
+  }]]--
 
   local options = {
     name = "XIV Bar",
@@ -109,7 +137,6 @@ function XIVBar:OnInitialize()
   end
 
   self.db:RegisterDefaults(self.defaults)
-  P = self.db.profile
 
   LibStub("AceConfig-3.0"):RegisterOptionsTable(AddOnName, options)
   self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AddOnName, "XIV Bar", nil, "general")
@@ -117,9 +144,11 @@ function XIVBar:OnInitialize()
   --options.args.modules = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
   self.modulesOptionFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AddOnName, L['Modules'], "XIV Bar", "modules")
 
-  --LibStub("AceConfig-3.0"):RegisterOptionsTable(AddOnName.."-Profiles", )
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
   self.profilesOptionFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AddOnName, 'Profiles', "XIV Bar", "profiles")
+
+  --LibStub("AceConfig-3.0"):RegisterOptionsTable(AddOnName.."-Profiles", )
+
 
 
 
@@ -136,20 +165,21 @@ function XIVBar:ToggleConfig()
 end
 
 function XIVBar:SetColor(name, r, g, b, a)
-  P.color[name].r = r
-  P.color[name].g = g
-  P.color[name].b = b
-  P.color[name].a = a
+  self.db.profile.color[name].r = r
+  self.db.profile.color[name].g = g
+  self.db.profile.color[name].b = b
+  self.db.profile.color[name].a = a
 
   self:Refresh()
 end
 
 function XIVBar:GetColor(name)
-  d = P.color[name]
+  d = self.db.profile.color[name]
   return d.r, d.g, d.b, d.a
 end
 
 function XIVBar:HoverColors()
+  local P = self.db.profile
   local colors = {
     P.color.hover.r,
     P.color.hover.g,
@@ -176,18 +206,20 @@ function XIVBar:GetFrame(name)
 end
 
 function XIVBar:CreateMainBar()
-  self:RegisterFrame('bar', CreateFrame("FRAME", "XIV_Databar", UIParent))
-  self:RegisterFrame('bgTexture', self.frames.bar:CreateTexture(nil, "BACKGROUND"))
+  if self.frames.bar == nil then
+    self:RegisterFrame('bar', CreateFrame("FRAME", "XIV_Databar", UIParent))
+    self:RegisterFrame('bgTexture', self.frames.bar:CreateTexture(nil, "BACKGROUND"))
+  end
 end
 
 function XIVBar:GetHeight()
-  return (P.text.fontSize * 2) + 3
+  return (self.db.profile.text.fontSize * 2) + 3
 end
 
 function XIVBar:Refresh()
   if self.frames.bar == nil then return; end
   --error(debugstack())
-  local barColor = P.color.barColor
+  local barColor = self.db.profile.color.barColor
   self.frames.bar:ClearAllPoints()
   self.frames.bar:SetPoint(self.db.profile.general.barPosition)
   self.frames.bar:SetPoint("LEFT")
@@ -255,8 +287,8 @@ function XIVBar:GetTextOptions()
         order = 1,
         values = fontList,
         style = "dropdown",
-        get = function() return P.text.font; end,
-        set = function(info, val) P.text.font = val; self:Refresh(); end
+        get = function() return self.db.profile.text.font; end,
+        set = function(info, val) self.db.profile.text.font = val; self:Refresh(); end
       },
       fontSize = {
         name = L['Font Size'],
@@ -265,8 +297,8 @@ function XIVBar:GetTextOptions()
         min = 10,
         max = 20,
         step = 1,
-        get = function() return P.text.fontSize; end,
-        set = function(info, val) P.text.fontSize = val; self:Refresh(); end
+        get = function() return self.db.profile.text.fontSize; end,
+        set = function(info, val) self.db.profile.text.fontSize = val; self:Refresh(); end
       },
       smallFontSize = {
         name = L['Small Font Size'],
@@ -275,8 +307,8 @@ function XIVBar:GetTextOptions()
         min = 10,
         max = 20,
         step = 1,
-        get = function() return P.text.smallFontSize; end,
-        set = function(info, val) P.text.smallFontSize = val; self:Refresh(); end
+        get = function() return self.db.profile.text.smallFontSize; end,
+        set = function(info, val) self.db.profile.text.smallFontSize = val; self:Refresh(); end
       },
     }
   }
@@ -304,8 +336,8 @@ function XIVBar:GetTextColorOptions()
         name = L['Use Class Colors for Hover'],
         type = "toggle",
         order = 2,
-        set = function(info, val) P.color.useCC = val; self:Refresh(); end,
-        get = function() return P.color.useCC end
+        set = function(info, val) self.db.profile.color.useCC = val; self:Refresh(); end,
+        get = function() return self.db.profile.color.useCC end
       }, -- normal
       inactive = {
         name = L['Inactive'],
@@ -327,7 +359,7 @@ function XIVBar:GetTextColorOptions()
           XIVBar:SetColor('hover', r, g, b, a)
         end,
         get = function() return XIVBar:GetColor('hover') end,
-        disabled = function() return P.color.useCC end
+        disabled = function() return self.db.profile.color.useCC end
       }, -- normal
     }
   }

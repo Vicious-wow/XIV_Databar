@@ -1,7 +1,6 @@
 local AddOnName, Engine = ...;
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0");
-local L = AceLocale:NewLocale(AddOnName, "enUS", true, true);
-if not L then return; end
+local L = AceLocale:NewLocale(AddOnName, "enUS", true, false);
 
 L['General'] = true;
 L['Text'] = true;
@@ -33,3 +32,6 @@ L['Hover'] = true;
 L['Test Module'] = true;
 
 L['Micromenu'] = true;
+L['Show Social Tooltips'] = true;
+L['Main Menu Icon Right Spacing'] = true;
+L['Icon Spacing'] = true;
