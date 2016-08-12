@@ -20,22 +20,37 @@ function MenuModule:OnInitialize()
 end
 
 function MenuModule:OnEnable()
-  self.microMenuFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
-  xb:RegisterFrame('microMenuFrame', self.microMenuFrame)
 
-  self:CreateFrames()
-  self:RegisterFrameEvents()
-  self:CreateIcons()
-  self:Refresh()
-  self:UpdateGuildText()
-  self:UpdateFriendText()
+  if self.microMenuFrame == nil then
+    self.microMenuFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
+    xb:RegisterFrame('microMenuFrame', self.microMenuFrame)
+  end
+
+  self.microMenuFrame:Show()
+
+  if xb.db.profile.modules.microMenu.enabled then
+    self:CreateFrames()
+    self:RegisterFrameEvents()
+    self:CreateIcons()
+    self:Refresh()
+    self:UpdateGuildText()
+    self:UpdateFriendText()
+  end
 end
 
 function MenuModule:OnDisable()
+  for _, frame in pairs(self.frames) do
+    frame:Hide()
+  end
+  self.microMenuFrame:Hide()
+  self:Refresh()
+  self:UnregisterFrameEvents()
 end
 
 function MenuModule:Refresh()
   if self.frames.menu == nil then return; end
+
+  if not xb.db.profile.modules.microMenu.enabled then return; end
 
   self.iconSize = xb:GetHeight();
   self.textPosition = "TOP"
@@ -46,6 +61,7 @@ function MenuModule:Refresh()
   local colors = xb.db.profile.color
   local totalWidth = 0;
   for name, frame in pairs(self.frames) do
+    frame:Show()
     self:IconDefaults(name)
     if name == 'menu' then
       frame:SetPoint("LEFT", xb.db.profile.modules.microMenu.iconSpacing, 0)
@@ -90,18 +106,20 @@ function MenuModule:CreateFrames()
   self.frames.shop = self.frames.shop or CreateFrame("BUTTON", nil, self.frames.pet)
   self.frames.help = self.frames.help or CreateFrame("BUTTON", nil, self.frames.shop)
 
-  self.text.guild = self.frames.guild:CreateFontString(nil, 'OVERLAY')
-  self.bgTexture.guild = self.frames.guild:CreateTexture(nil, "OVERLAY")
+  self.text.guild = self.text.guild or self.frames.guild:CreateFontString(nil, 'OVERLAY')
+  self.bgTexture.guild = self.bgTexture.guild or self.frames.guild:CreateTexture(nil, "OVERLAY")
 
-  self.text.social = self.frames.social:CreateFontString(nil, 'OVERLAY')
-  self.bgTexture.social = self.frames.social:CreateTexture(nil, "OVERLAY")
+  self.text.social = self.text.social or self.frames.social:CreateFontString(nil, 'OVERLAY')
+  self.bgTexture.social = self.bgTexture.social or self.frames.social:CreateTexture(nil, "OVERLAY")
 end
 
 function MenuModule:CreateIcons()
   for name, frame in pairs(self.frames) do
     if frame['Click'] ~= nil then --Odd way of checking if it's a button
-      self.icons[name] = frame:CreateTexture(nil, "OVERLAY")
-      self.icons[name]:SetTexture(self.mediaFolder..name)
+      if self.icons[name] == nil then
+        self.icons[name] = frame:CreateTexture(nil, "OVERLAY")
+        self.icons[name]:SetTexture(self.mediaFolder..name)
+      end
     end
   end
 end
@@ -139,6 +157,13 @@ function MenuModule:RegisterFrameEvents()
   self:RegisterEvent('BN_FRIEND_ACCOUNT_ONLINE', 'UpdateFriendText')
   self:RegisterEvent('BN_FRIEND_ACCOUNT_OFFLINE', 'UpdateFriendText')
   self:RegisterEvent('FRIENDLIST_UPDATE', 'UpdateFriendText')
+end
+
+function MenuModule:UnregisterFrameEvents()
+  self:UnregisterEvent('GUILD_ROSTER_UPDATE')
+  self:UnregisterEvent('BN_FRIEND_ACCOUNT_ONLINE')
+  self:UnregisterEvent('BN_FRIEND_ACCOUNT_OFFLINE')
+  self:UnregisterEvent('FRIENDLIST_UPDATE')
 end
 
 function MenuModule:UpdateGuildText()
@@ -313,7 +338,14 @@ function MenuModule:GetConfig()
         order = 0,
         type = "toggle",
         get = function() return xb.db.profile.modules.microMenu.enabled; end,
-        set = function(_, val) xb.db.profile.modules.microMenu.enabled = val; self:Refresh(); end
+        set = function(_, val)
+          xb.db.profile.modules.microMenu.enabled = val
+          if val then
+            self:Enable()
+          else
+            self:Disable()
+          end
+        end
       },
       showTooltips = {
         name = L['Show Social Tooltips'],

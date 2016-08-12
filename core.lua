@@ -30,7 +30,8 @@ XIVBar.defaults = {
         b = 1,
         a = 0.25
       },
-      useCC = true,
+      useCC = false,
+      useHoverCC = true,
       hover = {
         r = 1,
         g = 1,
@@ -179,19 +180,18 @@ function XIVBar:GetColor(name)
 end
 
 function XIVBar:HoverColors()
-  local P = self.db.profile
   local colors = {
-    P.color.hover.r,
-    P.color.hover.g,
-    P.color.hover.b,
-    P.color.hover.a
+    self.db.profile.color.hover.r,
+    self.db.profile.color.hover.g,
+    self.db.profile.color.hover.b,
+    self.db.profile.color.hover.a
   }
-  if P.color.useCC then
+  if self.db.profile.color.useHoverCC then
     colors = {
       RAID_CLASS_COLORS[self.constants.playerClass].r,
       RAID_CLASS_COLORS[self.constants.playerClass].g,
       RAID_CLASS_COLORS[self.constants.playerClass].b,
-      P.color.hover.a
+      self.db.profile.color.hover.a
     }
   end
   return colors
@@ -227,7 +227,16 @@ function XIVBar:Refresh()
   self.frames.bar:SetHeight(self:GetHeight())
 
   self.frames.bgTexture:SetAllPoints()
-  self.frames.bgTexture:SetColorTexture(barColor.r, barColor.g, barColor.b, barColor.a)
+  if self.db.profile.color.useCC then
+    self.frames.bgTexture:SetColorTexture(
+      RAID_CLASS_COLORS[self.constants.playerClass].r,
+      RAID_CLASS_COLORS[self.constants.playerClass].g,
+      RAID_CLASS_COLORS[self.constants.playerClass].b,
+      barColor.a
+    )
+  else
+    self.frames.bgTexture:SetColorTexture(barColor.r, barColor.g, barColor.b, barColor.a)
+  end
 
   for name, module in self:IterateModules() do
     if module['Refresh'] == nil then return; end
@@ -255,15 +264,23 @@ function XIVBar:GetGeneralOptions()
         get = function() return self.db.profile.general.barPosition; end,
         set = function(info, value) self.db.profile.general.barPosition = value; self:Refresh(); end,
       },
+      barCC = {
+        name = L['Use Class Colors for Bar'],
+        type = "toggle",
+        order = 2,
+        set = function(info, val) self.db.profile.color.useCC = val; self:Refresh(); end,
+        get = function() return self.db.profile.color.useCC end
+      }, -- normal
       barColor = {
         name = L['Bar Color'],
         type = "color",
-        order = 2,
+        order = 3,
         hasAlpha = true,
         set = function(info, r, g, b, a)
           XIVBar:SetColor('barColor', r, g, b, a)
         end,
-        get = function() return XIVBar:GetColor('barColor') end
+        get = function() return XIVBar:GetColor('barColor') end,
+        disabled = function() return self.db.profile.color.useCC end
       },
     }
   }
@@ -336,8 +353,8 @@ function XIVBar:GetTextColorOptions()
         name = L['Use Class Colors for Hover'],
         type = "toggle",
         order = 2,
-        set = function(info, val) self.db.profile.color.useCC = val; self:Refresh(); end,
-        get = function() return self.db.profile.color.useCC end
+        set = function(info, val) self.db.profile.color.useHoverCC = val; self:Refresh(); end,
+        get = function() return self.db.profile.color.useHoverCC end
       }, -- normal
       inactive = {
         name = L['Inactive'],
@@ -359,7 +376,7 @@ function XIVBar:GetTextColorOptions()
           XIVBar:SetColor('hover', r, g, b, a)
         end,
         get = function() return XIVBar:GetColor('hover') end,
-        disabled = function() return self.db.profile.color.useCC end
+        disabled = function() return self.db.profile.color.useHoverCC end
       }, -- normal
     }
   }

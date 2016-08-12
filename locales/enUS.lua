@@ -12,6 +12,7 @@ L['Bar Position'] = true;
 L['Top'] = true;
 L['Bottom'] = true;
 L['Bar Color'] = true;
+L['Use Class Colors for Bar'] = true;
 
 -- Media
 L['Font'] = true;
