@@ -1,4 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
   <!--<Script file="test.lua" />-->
   <Script file="micromenu.lua" />
+  <Script file="clock.lua" />
 </Ui>

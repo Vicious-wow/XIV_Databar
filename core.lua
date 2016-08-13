@@ -218,7 +218,7 @@ end
 
 function XIVBar:Refresh()
   if self.frames.bar == nil then return; end
-  --error(debugstack())
+  
   local barColor = self.db.profile.color.barColor
   self.frames.bar:ClearAllPoints()
   self.frames.bar:SetPoint(self.db.profile.general.barPosition)

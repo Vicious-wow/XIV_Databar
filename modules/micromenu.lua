@@ -3,7 +3,7 @@ local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 
-MenuModule = xb:NewModule("MenuModule", 'AceEvent-3.0')
+local MenuModule = xb:NewModule("MenuModule", 'AceEvent-3.0')
 
 function MenuModule:GetName()
   return L['Micromenu'];
@@ -204,6 +204,8 @@ function MenuModule:DefaultLeave(name)
 end
 
 function MenuModule:CreateClickFunctions()
+  if self.functions.menu ~= nil then return; end
+
   self.functions.menu = function(self, button, down)
     if InCombatLockdown() then return; end
     if button == "LeftButton" then

@@ -36,3 +36,9 @@ L['Micromenu'] = true;
 L['Show Social Tooltips'] = true;
 L['Main Menu Icon Right Spacing'] = true;
 L['Icon Spacing'] = true;
+
+L['Armor'] = true;
+
+L['Clock'] = true;
+L['Time Format'] = true;
+L['Use Server Time'] = true;
