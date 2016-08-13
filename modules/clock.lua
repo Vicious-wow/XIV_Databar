@@ -65,19 +65,23 @@ function ClockModule:Refresh()
   if self.clockFrame == nil then return; end
   if not db.modules.clock.enabled then return; end
 
-  --self.clockText:SetAllPoints()
   self.clockText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.modules.clock.fontSize)
   ClockModule:SetClockColor()
-  --self.clockFrame:SetSize(self.clockText:GetStringWidth(), self.clockText:GetStringHeight())
-  self.clockFrame:SetSize(100, 30)
-  self.clockFrame:SetPoint('CENTER', self.clockFrame:GetParent())
+
+  self.clockFrame:SetSize(self.clockText:GetStringWidth(), self.clockText:GetStringHeight())
+  self.clockFrame:SetPoint('CENTER')
+
   self.clockTextFrame:SetSize(self.clockText:GetStringWidth(), self.clockText:GetStringHeight())
   self.clockTextFrame:SetPoint('CENTER')
+
   self.clockText:SetPoint('CENTER')
+
+  self.eventText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.text.smallFontSize)
+  self.eventText:SetPoint('CENTER', self.clockText, xb.miniTextPosition)
 end
 
 function ClockModule:CreateFrames()
-  self.clockTextFrame = self.clockTextFrame or CreateFrame("BUTTON", 'XIV_ClockTextFrame', self.clockFrame)
+  self.clockTextFrame = self.clockTextFrame or CreateFrame("BUTTON", nil, self.clockFrame)
   self.clockText = self.clockText or self.clockTextFrame:CreateFontString(nil, "OVERLAY")
   self.eventText = self.eventText or self.clockTextFrame:CreateFontString(nil, "OVERLAY")
 end
@@ -98,6 +102,12 @@ function ClockModule:RegisterFrameEvents()
       end
       local dateString = date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime)
       ClockModule.clockText:SetText(dateString)
+
+      local eventInvites = CalendarGetNumPendingInvites()
+      if eventInvites > 0 then
+        ClockModule.eventText:SetText(string.format("%s  (|cffffff00%i|r)", L['New Event!'], eventInvites))
+      end
+
       ClockModule:Refresh()
       ClockModule.elapsed = 0
     end
@@ -106,11 +116,37 @@ function ClockModule:RegisterFrameEvents()
   self.clockTextFrame:SetScript('OnEnter', function()
     if InCombatLockdown() then return; end
     ClockModule:SetClockColor()
+    GameTooltip:SetOwner(ClockModule.clockTextFrame, 'ANCHOR_'..xb.miniTextPosition)
+    GameTooltip:AddLine("[|cff6699FFClock|r]")
+    GameTooltip:AddLine(" ")
+    local clockTime = nil
+    local ttTimeText = ''
+    if xb.db.profile.modules.clock.serverTime then
+      clockTime = time()
+      ttTimeText = L['Local Time'];
+    else
+      clockTime = GetServerTime()
+      ttTimeText = L['Realm Time'];
+    end
+    GameTooltip:AddDoubleLine(ttTimeText, date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime), 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Open Calendar'], 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Open Clock'], 1, 1, 0, 1, 1, 1)
+    GameTooltip:Show()
   end)
 
   self.clockTextFrame:SetScript('OnLeave', function()
     if InCombatLockdown() then return; end
     ClockModule:SetClockColor()
+  end)
+
+  self.clockTextFrame:SetScript('OnClick', function(_, button)
+    if InCombatLockdown() then return; end
+    if button == 'LeftButton' then
+      ToggleCalendar()
+    elseif button == 'RightButton' then
+      ToggleTimeManager()
+    end
   end)
 end
 

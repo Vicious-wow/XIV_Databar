@@ -6,6 +6,8 @@ L['General'] = true;
 L['Text'] = true;
 
 L['Modules'] = true;
+L['Left-Click'] = true;
+L['Right-Click'] = true;
 
 -- General
 L['Bar Position'] = true;
@@ -42,3 +44,8 @@ L['Armor'] = true;
 L['Clock'] = true;
 L['Time Format'] = true;
 L['Use Server Time'] = true;
+L['New Event!'] = true;
+L['Local Time'] = true;
+L['Realm Time'] = true;
+L['Open Calendar'] = true;
+L['Open Clock'] = true;

@@ -53,10 +53,6 @@ function MenuModule:Refresh()
   if not xb.db.profile.modules.microMenu.enabled then return; end
 
   self.iconSize = xb:GetHeight();
-  self.textPosition = "TOP"
-  if xb.db.profile.general.barPosition == 'TOP' then
-    self.textPosition = 'BOTTOM'
-  end
 
   local colors = xb.db.profile.color
   local totalWidth = 0;
@@ -79,7 +75,7 @@ function MenuModule:Refresh()
 
   for name, frame in pairs(self.text) do
     frame:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, xb.db.profile.text.font), xb.db.profile.text.smallFontSize)
-    frame:SetPoint('CENTER', self.frames[name], self.textPosition)
+    frame:SetPoint('CENTER', self.frames[name], xb.miniTextPosition)
     self.bgTexture[name]:SetColorTexture(xb.db.profile.color.barColor.r, xb.db.profile.color.barColor.g, xb.db.profile.color.barColor.b, xb.db.profile.color.barColor.a)
     self.bgTexture[name]:SetPoint('CENTER', frame)
   end
