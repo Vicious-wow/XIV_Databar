@@ -198,6 +198,12 @@ function XIVBar:HoverColors()
 end
 
 function XIVBar:RegisterFrame(name, frame)
+  frame:SetScript('OnHide', function()
+    self:SendMessage('XIVBar_FrameHide', name)
+  end)
+  frame:SetScript('OnShow', function()
+    self:SendMessage('XIVBar_FrameShow', name)
+  end)
   self.frames[name] = frame
 end
 
@@ -208,7 +214,7 @@ end
 function XIVBar:CreateMainBar()
   if self.frames.bar == nil then
     self:RegisterFrame('bar', CreateFrame("FRAME", "XIV_Databar", UIParent))
-    self:RegisterFrame('bgTexture', self.frames.bar:CreateTexture(nil, "BACKGROUND"))
+    self.frames.bgTexture = self.frames.bgTexture or self.frames.bar:CreateTexture(nil, "BACKGROUND")
   end
 end
 
@@ -249,7 +255,14 @@ function XIVBar:Refresh()
   end
 end
 
-
+function XIVBar:RGBAToHex(r, g, b, a)
+  a = a or 1
+  r = r <= 1 and r >= 0 and r or 0
+  g = g <= 1 and g >= 0 and g or 0
+  b = b <= 1 and b >= 0 and b or 0
+  a = a <= 1 and a >= 0 and a or 1
+  return string.format("%02x%02x%02x%02x", r*255, g*255, b*255, a*255)
+end
 
 
 
