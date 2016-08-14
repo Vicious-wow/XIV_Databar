@@ -138,6 +138,7 @@ function ClockModule:RegisterFrameEvents()
   self.clockTextFrame:SetScript('OnLeave', function()
     if InCombatLockdown() then return; end
     ClockModule:SetClockColor()
+    GameTooltip:Hide()
   end)
 
   self.clockTextFrame:SetScript('OnClick', function(_, button)

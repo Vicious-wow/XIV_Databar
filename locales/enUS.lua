@@ -38,6 +38,14 @@ L['Micromenu'] = true;
 L['Show Social Tooltips'] = true;
 L['Main Menu Icon Right Spacing'] = true;
 L['Icon Spacing'] = true;
+L['Guild'] = true;
+L['Online'] = true;
+L['AFK'] = true;
+L['DND'] = true;
+L['Open Guild Page'] = true;
+L['Social'] = true;
+L['No Tag'] = true;
+L['Level'] = true;
 
 L['Armor'] = true;
 

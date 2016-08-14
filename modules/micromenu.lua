@@ -11,12 +11,43 @@ end
 
 function MenuModule:OnInitialize()
   self.mediaFolder = xb.constants.mediaPath..'microbar\\'
+  self.socialIconPath = "Interface\\FriendsFrame\\"
   self.icons = {}
   self.frames = {}
   self.text = {}
   self.bgTexture = {}
   self.functions = {}
   self:CreateClickFunctions()
+  self.socialIcons = {
+    App = {
+      icon = self.socialIconPath..'Battlenet-Battleneticon.blp',
+      text = BNET_CLIENT_APP
+    },
+    D3 = {
+      icon = self.socialIconPath..'Battlenet-D3icon.blp',
+      text = 'Diablo 3'
+    },
+    S2 = {
+      icon = self.socialIconPath..'Battlenet-Sc2icon.blp',
+      text = 'Starcraft 2'
+    },
+    WTCG = {
+      icon = self.socialIconPath..'Battlenet-WTCGicon.blp',
+      text = 'Hearthstone'
+    },
+    Hero = {
+      icon = self.socialIconPath..'Battlenet-HotSicon.blp',
+      text = 'Heroes of the Storm'
+    },
+    Pro = {
+      icon = self.socialIconPath..'Battlenet-OVERWATCHicon.blp',
+      text = 'Overwatch'
+    },
+    WoW = {
+      icon = self.socialIconPath..'Battlenet-WoWicon.blp',
+      text = 'World of Warcraft'
+    }
+  }
 end
 
 function MenuModule:OnEnable()
@@ -145,8 +176,24 @@ function MenuModule:RegisterFrameEvents()
         frame:SetScript('OnClick', self.functions[name])
       end
     end
-    frame:SetScript("OnEnter", self:DefaultHover(name))
-    frame:SetScript("OnLeave", self:DefaultLeave(name))
+    if name == 'guild' then
+      local leaveFunc = self:DefaultLeave(name)
+      frame:SetScript("OnEnter", self:GuildHover(self:DefaultHover(name)))
+      frame:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+        leaveFunc()
+      end)
+    elseif name == 'social' then
+      local leaveFunc = self:DefaultLeave(name)
+      frame:SetScript("OnEnter", self:SocialHover(self:DefaultHover(name)))
+      frame:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+        leaveFunc()
+      end)
+    else
+      frame:SetScript("OnEnter", self:DefaultHover(name))
+      frame:SetScript("OnLeave", self:DefaultLeave(name))
+    end
   end
 
   self:RegisterEvent('GUILD_ROSTER_UPDATE', 'UpdateGuildText')
@@ -196,6 +243,122 @@ function MenuModule:DefaultLeave(name)
     if self.icons[name] ~= nil then
       self.icons[name]:SetVertexColor(xb.db.profile.color.normal.r, xb.db.profile.color.normal.g, xb.db.profile.color.normal.b, xb.db.profile.color.normal.a)
     end
+  end
+end
+
+function MenuModule:SocialHover(hoverFunc)
+  return function()
+    local totalBNFriends, totalBNOnlineFriends = BNGetNumFriends()
+    local totalFriends, totalOnlineFriends = GetNumFriends()
+
+    if (totalOnlineFriends + totalBNOnlineFriends) > 0 then
+      GameTooltip:SetOwner(MenuModule.frames.social, 'ANCHOR_'..xb.miniTextPosition)
+      GameTooltip:AddLine('[|cff6699FF'..L['Social']..'|r]')
+      GameTooltip:AddLine(' ')
+    end
+
+    if totalBNOnlineFriends then
+
+      for i = 1, BNGetNumFriends() do
+        local _, battleName, battleTag, _, charName, _, gameClient, isOnline, _, isAfk, isDnd, _, note = BNGetFriendInfo(i)
+        if isOnline then
+          if not battleTag then
+            battleTag = '['..L['No Tag']..']'
+          end
+
+          local status = L['Online']
+          local statusIcon = FRIENDS_TEXTURE_ONLINE
+          local socialIcon = MenuModule.socialIcons[gameClient].icon
+          local gameName = MenuModule.socialIcons[gameClient].text
+
+          if isAfk then
+            statusIcon = FRIENDS_TEXTURE_AFK
+            status = L['AFK']
+          end
+          if isDnd then
+            statusIcon = FRIENDS_TEXTURE_DND
+            status = L['DND']
+          end
+
+          if gameClient == BNET_CLIENT_WOW then
+            charName = "(|cffecd672"..charName.."|r)"
+          else
+            charName = ''
+          end
+
+          if note ~= '' then
+            note = "(|cffecd672"..note.."|r)"
+          end
+
+          local lineLeft = string.format("|T%s:16|t|cff82c5ff %s|r %s", statusIcon, battleName, note)
+          local lineRight = string.format("%s %s |T%s:16|t", charName, gameName, socialIcon)
+          GameTooltip:AddDoubleLine(lineLeft, lineRight)
+        end -- isOnline
+      end -- for in BNGetNumFriends
+    end -- totalBNOnlineFriends
+
+    if totalOnlineFriends then
+      for i = 1, GetNumFriends() do
+        local name, level, class, area, isOnline, status, note = GetFriendInfo(i)
+        if online then
+          local status = L['Online']
+          local statusIcon = FRIENDS_TEXTURE_ONLINE
+          if isAfk then
+            statusIcon = FRIENDS_TEXTURE_AFK
+            status = L['AFK']
+          end
+          if isDnd then
+            statusIcon = FRIENDS_TEXTURE_DND
+            status = L['DND']
+          end
+
+          local lineLeft = string.format("|T%s:16|t %s, "..L['Level']..":%s %s", statusIcon, name, level, class)
+          local lineRight = string.format("%s", area)
+          GameTooltip:AddDoubleLine(lineLeft, lineRight)
+        end -- isOnline
+      end -- for in GetNumFriends
+    end -- totalOnlineFriends
+
+    if (totalOnlineFriends + totalBNOnlineFriends) > 0 then
+      GameTooltip:Show()
+    end
+    hoverFunc()
+  end
+end
+
+function MenuModule:GuildHover(hoverFunc)
+  return function()
+    if not IsInGuild() then
+      hoverFunc()
+      return
+    end
+    GameTooltip:SetOwner(MenuModule.frames.guild, 'ANCHOR_'..xb.miniTextPosition)
+    GameTooltip:AddLine("[|cff6699FF"..L['Guild'].."|r]")
+    GameTooltip:AddLine(" ")
+    local gName, _, _, _ = GetGuildInfo('player')
+    GameTooltip:AddDoubleLine(L['Guild']..':', gName, 1, 1, 0, 0, 1, 0)
+
+    local totalGuild, _ = GetNumGuildMembers()
+    for i = 0, totalGuild do
+      local name, _, _, level, _, zone, note, _, isOnline, status, class, _, _, isMobile, _ = GetGuildRosterInfo(i)
+      if isOnline then
+        local colorHex = RAID_CLASS_COLORS[class].colorStr
+        if status == 1 then
+          status = L['AFK'];
+        elseif status == 2 then
+          status = L['DND'];
+        else
+          status = ''
+        end
+        local lineLeft = string.format('%s |c%s%s|r %s %s', level, colorHex, name, status, note)
+        local lineRight = string.format('%s|cffffffff %s', (isMobile and "|cffffff00[M]|r " or ""), zone or '')
+        GameTooltip:AddDoubleLine(lineLeft, lineRight)
+      end
+    end
+    GameTooltip:AddLine(' ')
+    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Open Guild Page'], 1, 1, 0, 1, 1, 1)
+    GameTooltip:Show()
+    hoverFunc()
   end
 end
 
