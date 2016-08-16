@@ -48,6 +48,9 @@ L['No Tag'] = true;
 L['Level'] = true;
 
 L['Armor'] = true;
+L['Always Show Item Level'] = true;
+L['Minimum Durability to Become Active'] = true;
+L['Maximum Durability to Show Item Level'] = true;
 
 L['Clock'] = true;
 L['Time Format'] = true;

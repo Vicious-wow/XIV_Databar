@@ -108,7 +108,7 @@ function MenuModule:Refresh()
     frame:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, xb.db.profile.text.font), xb.db.profile.text.smallFontSize)
     frame:SetPoint('CENTER', self.frames[name], xb.miniTextPosition)
     self.bgTexture[name]:SetColorTexture(xb.db.profile.color.barColor.r, xb.db.profile.color.barColor.g, xb.db.profile.color.barColor.b, xb.db.profile.color.barColor.a)
-    self.bgTexture[name]:SetPoint('CENTER', frame)
+    self.bgTexture[name]:SetPoint('CENTER', frame, 'CENTER')
   end
 end
 

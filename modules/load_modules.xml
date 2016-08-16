@@ -2,4 +2,5 @@
   <!--<Script file="test.lua" />-->
   <Script file="micromenu.lua" />
   <Script file="clock.lua" />
+  <Script file="armor.lua" />
 </Ui>

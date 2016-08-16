@@ -117,7 +117,7 @@ function ClockModule:RegisterFrameEvents()
     if InCombatLockdown() then return; end
     ClockModule:SetClockColor()
     GameTooltip:SetOwner(ClockModule.clockTextFrame, 'ANCHOR_'..xb.miniTextPosition)
-    GameTooltip:AddLine("[|cff6699FFClock|r]")
+    GameTooltip:AddLine("[|cff6699FF"..L['Clock'].."|r]")
     GameTooltip:AddLine(" ")
     local clockTime = nil
     local ttTimeText = ''
@@ -189,7 +189,7 @@ function ClockModule:GetConfig()
         set = function(_, val) xb.db.profile.modules.clock.enabled = val; end,
         width = "full"
       },
-      enable = {
+      useServerTime = {
         name = L['Use Server Time'],
         order = 1,
         type = "toggle",
