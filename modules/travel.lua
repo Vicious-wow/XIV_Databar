@@ -86,12 +86,12 @@ end
 function TravelModule:RegisterFrameEvents()
   self.hearthButton:EnableMouse(true)
   self.hearthButton:RegisterForClicks("AnyUp")
-  self.hearthButton:SetAttribute('*type', 'macro')
+  self.hearthButton:SetAttribute('type', 'macro')
 
   self.portButton:EnableMouse(true)
   self.portButton:RegisterForClicks("AnyUp")
-  self.portButton:SetAttribute('type1', 'macro')
-  self.portButton:SetAttribute('type2', 'portFunction')
+  self.portButton:SetAttribute('*type1', 'macro')
+  self.portButton:SetAttribute('*type2', 'portFunction')
 
   self.portPopup:EnableMouse(true)
   self.portPopup:RegisterForClicks('RightButtonUp')
@@ -143,7 +143,7 @@ function TravelModule:SetHearthColor()
         if GetItemCooldown(v) == 0 then
           hearthName, _ = GetItemInfo(v)
           hearthActive = true
-          self.hearthButton:SetAttribute("macrotext", "/cast "..tostring(v))
+          self.hearthButton:SetAttribute("macrotext", "/cast "..hearthName)
           break
         end
       end -- if toy/item
@@ -151,7 +151,7 @@ function TravelModule:SetHearthColor()
         if GetSpellCooldown(v) == 0 then
           hearthName, _ = GetSpellInfo(v)
           hearthActive = true
-          self.hearthButton:SetAttribute("macrotext", "/cast "..tostring(v))
+          self.hearthButton:SetAttribute("macrotext", "/cast "..hearthName)
         end
       end -- if is spell
     end -- for hearthstones
@@ -182,14 +182,14 @@ function TravelModule:SetPortColor()
       if GetItemCooldown(v) == 0 then
         hearthName, _ = GetItemInfo(v)
         hearthActive = true
-        self.portButton:SetAttribute("macrotext", "/cast "..tostring(v))
+        self.portButton:SetAttribute("macrotext", "/cast "..hearthName)
       end
     end -- if toy/item
     if IsPlayerSpell(v) then
       if GetSpellCooldown(v) == 0 then
         hearthName, _ = GetSpellInfo(v)
         hearthActive = true
-        self.portButton:SetAttribute("macrotext", "/cast "..tostring(v))
+        self.portButton:SetAttribute("macrotext", "/cast "..hearthName)
       end
     end -- if is spell
 
