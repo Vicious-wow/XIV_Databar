@@ -10,6 +10,7 @@ XIVBar.defaults = {
   profile = {
     general = {
       barPosition = "BOTTOM",
+      barPadding = 3,
     },
     color = {
       barColor = {
@@ -58,7 +59,9 @@ XIVBar.defaults = {
 XIVBar.constants = {
   mediaPath = "Interface\\AddOns\\"..AddOnName.."\\media\\",
   playerName = UnitName("player"),
-  playerClass = select(2, UnitClass("player"))
+  playerClass = select(2, UnitClass("player")),
+  playerLevel = UnitLevel("player"),
+  popupPadding = 3
 }
 
 XIVBar.LSM = LibStub('LibSharedMedia-3.0');
@@ -219,7 +222,7 @@ function XIVBar:CreateMainBar()
 end
 
 function XIVBar:GetHeight()
-  return (self.db.profile.text.fontSize * 2) + 3
+  return (self.db.profile.text.fontSize * 2) + self.db.profile.general.barPadding
 end
 
 function XIVBar:Refresh()
@@ -264,6 +267,14 @@ function XIVBar:RGBAToHex(r, g, b, a)
   return string.format("%02x%02x%02x%02x", r*255, g*255, b*255, a*255)
 end
 
+function XIVBar:HexToRGBA(hex)
+  local rhex, ghex, bhex, ahex = string.sub(hex, 1, 2), string.sub(hex, 3, 4), string.sub(hex, 5, 6), string.sub(hex, 7, 8)
+  if not (rhex and ghex and bhex and ahex) then
+    return 0, 0, 0, 0
+  end
+  return (tonumber(rhex, 16) / 255), (tonumber(ghex, 16) / 255), (tonumber(bhex, 16) / 255), (tonumber(ahex, 16) / 255)
+end
+
 
 
 function XIVBar:GetGeneralOptions()
@@ -300,6 +311,16 @@ function XIVBar:GetGeneralOptions()
         get = function() return XIVBar:GetColor('barColor') end,
         disabled = function() return self.db.profile.color.useCC end
       },
+      barPadding = {
+        name = L['Bar Padding'],
+        type = 'range',
+        order = 4,
+        min = 0,
+        max = 10,
+        step = 1,
+        get = function() return self.db.profile.general.barPadding; end,
+        set = function(info, val) self.db.profile.general.barPadding = val; self:Refresh(); end
+      }
     }
   }
 end

@@ -3,4 +3,5 @@
   <Script file="micromenu.lua" />
   <Script file="clock.lua" />
   <Script file="armor.lua" />
+  <Script file="travel.lua" />
 </Ui>

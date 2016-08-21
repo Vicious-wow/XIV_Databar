@@ -101,7 +101,7 @@ function MenuModule:Refresh()
       totalWidth = totalWidth + frame:GetWidth() + xb.db.profile.modules.microMenu.iconSpacing
     end
   end
-  self.microMenuFrame:SetPoint("LEFT")
+  self.microMenuFrame:SetPoint("LEFT", xb.db.profile.general.barPadding, 0)
   self.microMenuFrame:SetSize(totalWidth, xb:GetHeight())
 
   for name, frame in pairs(self.text) do
@@ -260,12 +260,13 @@ function MenuModule:SocialHover(hoverFunc)
     if totalBNOnlineFriends then
 
       for i = 1, BNGetNumFriends() do
-        local _, battleName, battleTag, _, charName, _, gameClient, isOnline, _, isAfk, isDnd, _, note = BNGetFriendInfo(i)
+        local _, battleName, battleTag, _, charName, gameAccount, gameClient, isOnline, _, isAfk, isDnd, _, note = BNGetFriendInfo(i)
         if isOnline then
           if not battleTag then
             battleTag = '['..L['No Tag']..']'
           end
 
+          local _, _, _, realmName, _ = BNGetGameAccountInfo(gameAccount)
           local status = L['Online']
           local statusIcon = FRIENDS_TEXTURE_ONLINE
           local socialIcon = MenuModule.socialIcons[gameClient].icon
@@ -281,7 +282,7 @@ function MenuModule:SocialHover(hoverFunc)
           end
 
           if gameClient == BNET_CLIENT_WOW then
-            charName = "(|cffecd672"..charName.."|r)"
+            charName = "(|cffecd672"..charName.."-"..realmName.."|r)"
           else
             charName = ''
           end

@@ -15,6 +15,7 @@ L['Top'] = true;
 L['Bottom'] = true;
 L['Bar Color'] = true;
 L['Use Class Colors for Bar'] = true;
+L['Bar Padding'] = true;
 
 -- Media
 L['Font'] = true;
@@ -60,3 +61,5 @@ L['Local Time'] = true;
 L['Realm Time'] = true;
 L['Open Calendar'] = true;
 L['Open Clock'] = true;
+
+L['Travel'] = true;
