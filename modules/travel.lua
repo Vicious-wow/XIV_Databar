@@ -55,6 +55,8 @@ function TravelModule:OnInitialize()
   end
 
   self.portButtons = {}
+  self.extraPadding = (xb.constants.popupPadding * 3)
+  self.optionTextExtra = 4
 end
 
 function TravelModule:OnEnable()
@@ -206,8 +208,15 @@ function TravelModule:CreatePortPopup()
   if not self.portPopup then return; end
 
   local db = xb.db.profile
+  self.portOptionString = self.portOptionString or self.portPopup:CreateFontString(nil, 'OVERLAY')
+  self.portOptionString:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.text.fontSize + self.optionTextExtra)
+  self.portOptionString:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self.portOptionString:SetText(L['Port Options'])
+  self.portOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
+  self.portOptionString:SetPoint('CENTER')
+
   local popupWidth = self.portPopup:GetWidth()
-  local popupHeight = xb.constants.popupPadding
+  local popupHeight = xb.constants.popupPadding + db.text.fontSize + self.optionTextExtra
   local changedWidth = false
   for i, v in ipairs(self.portOptions) do
     if self.portButtons[v.portId] == nil then
@@ -259,17 +268,22 @@ function TravelModule:CreatePortPopup()
     if button.isSettable then
       button:SetPoint('LEFT', xb.constants.popupPadding, 0)
       button:SetPoint('TOP', 0, -(popupHeight + xb.constants.popupPadding))
+      button:SetPoint('RIGHT')
       popupHeight = popupHeight + xb.constants.popupPadding + db.text.fontSize
     else
       button:Hide()
     end
   end -- for id/button in portButtons
   if changedWidth then
-    popupWidth = popupWidth + (xb.constants.popupPadding * 3)
+    popupWidth = popupWidth + self.extraPadding
   end
 
   if popupWidth < self.portButton:GetWidth() then
     popupWidth = self.portButton:GetWidth()
+  end
+
+  if popupWidth < (self.portOptionString:GetStringWidth()  + self.extraPadding) then
+    popupWidth = (self.portOptionString:GetStringWidth()  + self.extraPadding)
   end
   self.portPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
 end
