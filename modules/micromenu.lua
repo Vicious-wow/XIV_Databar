@@ -248,6 +248,10 @@ end
 
 function MenuModule:SocialHover(hoverFunc)
   return function()
+    if not xb.db.profile.modules.microMenu.showTooltips then
+      hoverFunc()
+      return
+    end
     local totalBNFriends, totalBNOnlineFriends = BNGetNumFriends()
     local totalFriends, totalOnlineFriends = GetNumFriends()
 
@@ -330,6 +334,10 @@ end
 function MenuModule:GuildHover(hoverFunc)
   return function()
     if not IsInGuild() then
+      hoverFunc()
+      return
+    end
+    if not xb.db.profile.modules.microMenu.showTooltips then
       hoverFunc()
       return
     end

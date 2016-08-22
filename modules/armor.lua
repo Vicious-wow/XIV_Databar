@@ -30,6 +30,7 @@ function ArmorModule:OnEnable()
   if self.armorFrame == nil then
     self.armorFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
     xb:RegisterFrame('armorFrame', self.armorFrame)
+    self.armorFrame:Show()
   end
   self:CreateFrames()
   self:RegisterFrameEvents()
@@ -38,6 +39,7 @@ end
 
 function ArmorModule:OnDisable()
   self:UnregisterEvent('UPDATE_INVENTORY_DURABILITY')
+  self.armorFrame:Hide()
 end
 
 function ArmorModule:CreateFrames()
