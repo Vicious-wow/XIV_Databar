@@ -23,9 +23,10 @@ function TravelModule:OnInitialize()
     44314, -- Scroll of Recall 2
     44315, -- Scroll of Recall 3
   }
+  local compassName, _ = GetItemInfo(128353)
   self.portOptions = {
     -- dalaran rings, guild capes?
-    {portId = 128353, text = GARRISON_LOCATION_TOOLTIP}, -- admiral's compass
+    {portId = 128353, text = compassName}, -- admiral's compass
     {portId = 140192, text = GetMapNameByID(1014)}, -- dalaran hearthstone
     {portId = self.garrisonHearth, text = GARRISON_LOCATION_TOOLTIP}, -- needs to be var for default options
   }
@@ -86,6 +87,9 @@ function TravelModule:CreateFrames()
 end
 
 function TravelModule:RegisterFrameEvents()
+  self:RegisterEvent('SPELLS_CHANGED', 'Refresh')
+  self:RegisterEvent('BAG_UPDATE_DELAYED', 'Refresh')
+  self:RegisterEvent('HEARTHSTONE_BOUND', 'Refresh')
   self.hearthButton:EnableMouse(true)
   self.hearthButton:RegisterForClicks("AnyUp")
   self.hearthButton:SetAttribute('type', 'macro')
@@ -332,12 +336,16 @@ function TravelModule:Refresh()
   self.popupTexture:SetAllPoints()
   self.portPopup:Hide()
 
-  self.hearthFrame:SetSize(self.hearthButton:GetWidth() + self.portButton:GetWidth() + db.general.barPadding, xb:GetHeight())
+  local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
+  if self.portButton:IsVisible() then
+    totalWidth = totalWidth + self.portButton:GetWidth()
+  end
+  self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
   self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
 end
 
 function TravelModule:GetDefaultOptions()
   return 'travel', {
-    portItem = {portId = self.garrisonHearth, text = GARRISON_LOCATION_TOOLTIP}
+    portItem = {portId = 110560, text = GARRISON_LOCATION_TOOLTIP}
   }
 end

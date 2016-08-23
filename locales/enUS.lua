@@ -16,6 +16,7 @@ L['Bottom'] = true;
 L['Bar Color'] = true;
 L['Use Class Colors for Bar'] = true;
 L['Bar Padding'] = true;
+L['Module Spacing'] = true;
 
 -- Media
 L['Font'] = true;
@@ -64,3 +65,15 @@ L['Open Clock'] = true;
 
 L['Travel'] = true;
 L['Port Options'] = true;
+
+L['Gold'] = true;
+L['Always Show Silver and Copper'] = true;
+L['Show Free Bag Space'] = true;
+L['Shorten Gold'] = true;
+L['Toggle Bags'] = true;
+L['Total'] = true;
+
+L['Currency'] = true;
+L['Show XP Bar Below Max Level'] = true;
+L['Show Tooltips'] = true;
+L['Text on Right'] = true;

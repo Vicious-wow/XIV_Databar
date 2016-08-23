@@ -117,7 +117,7 @@ function ArmorModule:Refresh()
   self.armorButton:SetAllPoints()
 
   local relativeAnchorPoint = 'RIGHT'
-  local xOffset = 30
+  local xOffset = xb.db.profile.general.moduleSpacing
   if not xb:GetFrame('microMenuFrame'):IsVisible() then
     relativeAnchorPoint = 'LEFT'
     xOffset = 0

@@ -11,6 +11,7 @@ XIVBar.defaults = {
     general = {
       barPosition = "BOTTOM",
       barPadding = 3,
+      moduleSpacing = 30
     },
     color = {
       barColor = {
@@ -61,6 +62,8 @@ XIVBar.constants = {
   playerName = UnitName("player"),
   playerClass = select(2, UnitClass("player")),
   playerLevel = UnitLevel("player"),
+  playerFactionLocal = select(2, UnitFactionGroup("player")),
+  playerRealm = GetRealmName(),
   popupPadding = 3
 }
 
@@ -320,6 +323,16 @@ function XIVBar:GetGeneralOptions()
         step = 1,
         get = function() return self.db.profile.general.barPadding; end,
         set = function(info, val) self.db.profile.general.barPadding = val; self:Refresh(); end
+      },
+      moduleSpacing = {
+        name = L['Module Spacing'],
+        type = 'range',
+        order = 5,
+        min = 10,
+        max = 50,
+        step = 1,
+        get = function() return self.db.profile.general.moduleSpacing; end,
+        set = function(info, val) self.db.profile.general.moduleSpacing = val; self:Refresh(); end
       }
     }
   }
