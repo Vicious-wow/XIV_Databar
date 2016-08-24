@@ -32,7 +32,7 @@ end
 
 function CurrencyModule:OnEnable()
   if self.currencyFrame == nil then
-    self.currencyFrame = CreateFrame("FRAME", nil, xb:GetFrame('goldFrame'))
+    self.currencyFrame = CreateFrame("FRAME", 'XIV_currencyFrame', xb:GetFrame('goldFrame'))
     xb:RegisterFrame('currencyFrame', self.currencyFrame)
   end
 
@@ -44,6 +44,8 @@ end
 function CurrencyModule:OnDisable()
   self.currencyFrame:Hide()
   self:UnregisterEvent('CURRENCY_DISPLAY_UPDATE')
+  self:UnregisterEvent('PLAYER_XP_UPDATE')
+  self:UnregisterEvent('PLAYER_LEVEL_UP')
 end
 
 function CurrencyModule:Refresh()
@@ -55,8 +57,40 @@ function CurrencyModule:Refresh()
   for i = 1, 3 do
     self.curButtons[i]:Hide()
   end
+  self.xpFrame:Hide()
 
   if xb.constants.playerLevel < MAX_PLAYER_LEVEL and db.modules.currency.showXPbar then
+    --self.xpFrame = self.xpFrame or CreateFrame("BUTTON", nil, self.currencyFrame)
+
+    local textHeight = floor((xb:GetHeight() - 4) / 2)
+    self.xpIcon:SetTexture(xb.constants.mediaPath..'datatexts\\exp')
+    self.xpIcon:SetSize(iconSize, iconSize)
+    self.xpIcon:SetPoint('LEFT')
+    self.xpIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+
+    self.xpText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), textHeight)
+    self.xpText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    self.xpText:SetText(string.upper(LEVEL..' '..tostring(xb.constants.playerLevel)..' '..UnitClass('player')))
+    self.xpText:SetPoint('TOPLEFT', self.xpIcon, 'TOPRIGHT', 5, 0)
+
+    self.xpBar:SetStatusBarTexture(1, 1, 1)
+    if db.modules.currency.xpBarCC then
+      self.xpBar:SetStatusBarColor(xb:GetClassColors())
+    else
+      self.xpBar:SetStatusBarColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    end
+    self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
+    self.xpBar:SetValue(UnitXP('player'))
+    self.xpBar:SetSize(self.xpText:GetStringWidth(), (iconSize - textHeight - 2))
+    self.xpBar:SetPoint('BOTTOMLEFT', self.xpIcon, 'BOTTOMRIGHT', 5, 0)
+
+    self.xpBarBg:SetAllPoints()
+    self.xpBarBg:SetColorTexture(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    --self.xpBar = self.xpBar or CreateFrame('STATUSBAR', nil, self.xpFrame)
+    --self.xpBarBg = self.xpBarBg or self.xpBar:CreateTexture(nil, 'BACKGROUND')
+    self.currencyFrame:SetSize(iconSize + self.xpText:GetStringWidth() + 5, xb:GetHeight())
+    self.xpFrame:SetAllPoints()
+    self.xpFrame:Show()
   else -- show xp bar/show currencies
     local iconsWidth = 0
     for i = 1, 3 do
@@ -154,7 +188,9 @@ function CurrencyModule:RegisterFrameEvents()
     end)
   end
   self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
-  self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
+  self:RegisterEvent('PLAYER_XP_UPDATE', 'Refresh')
+  self:RegisterEvent('PLAYER_LEVEL_UP', 'Refresh')
+  --self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
 
   self.currencyFrame:EnableMouse(true)
   self.currencyFrame:SetScript('OnEnter', function()
@@ -166,6 +202,17 @@ function CurrencyModule:RegisterFrameEvents()
     if xb.db.profile.modules.currency.showTooltip then
       GameTooltip:Hide()
     end
+  end)
+
+  self.xpFrame:SetScript('OnEnter', function()
+    if InCombatLockdown() then return; end
+    self.xpText:SetTextColor(unpack(xb:HoverColors()))
+  end)
+
+  self.xpFrame:SetScript('OnLeave', function()
+    if InCombatLockdown() then return; end
+    local db = xb.db.profile
+    self.xpText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
   end)
   --[[
   self.goldButton:EnableMouse(true)
@@ -206,6 +253,7 @@ function CurrencyModule:RegisterFrameEvents()
 end
 
 function CurrencyModule:ShowTooltip()
+  if xb.constants.playerLevel < MAX_PLAYER_LEVEL and xb.db.profile.modules.currency.showXPbar then return; end
   GameTooltip:SetOwner(self.currencyFrame, 'ANCHOR_'..xb.miniTextPosition)
   GameTooltip:AddLine("[|cff6699FF"..L['Currency'].."|r]")
   GameTooltip:AddLine(" ")
@@ -245,6 +293,7 @@ function CurrencyModule:GetDefaultOptions()
   return 'currency', {
       enabled = true,
       showXPbar = true,
+      xpBarCC = false,
       showTooltip = true,
       textOnRight = true,
       currencyOne = '0',
@@ -271,19 +320,26 @@ function CurrencyModule:GetConfig()
         order = 1,
         type = "toggle",
         get = function() return xb.db.profile.modules.currency.showXPbar; end,
-        set = function(_, val) xb.db.profile.modules.currency.showXPbar = val; self:Refresh(); end,
-        width = "full"
+        set = function(_, val) xb.db.profile.modules.currency.showXPbar = val; self:Refresh(); end
+      },
+      xpBarCC = {
+        name = L['Use Class Colors for XP Bar'],
+        order = 2,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.currency.xpBarCC; end,
+        set = function(_, val) xb.db.profile.modules.currency.xpBarCC = val; self:Refresh(); end,
+        disabled = function() return not xb.db.profile.modules.currency.showXPbar end
       },
       showTooltip = {
         name = L['Show Tooltips'],
-        order = 2,
+        order = 3,
         type = "toggle",
         get = function() return xb.db.profile.modules.currency.showTooltip; end,
         set = function(_, val) xb.db.profile.modules.currency.showTooltip = val; self:Refresh(); end
       },
       textOnRight = {
         name = L['Text on Right'],
-        order = 3,
+        order = 4,
         type = "toggle",
         get = function() return xb.db.profile.modules.currency.textOnRight; end,
         set = function(_, val) xb.db.profile.modules.currency.textOnRight = val; self:Refresh(); end
@@ -291,8 +347,9 @@ function CurrencyModule:GetConfig()
       currency = {
         type = 'group',
         name = L['Currency Select'],
-        order = 4,
+        order = 5,
         inline = true,
+        --disabled = function() return (xb.constants.playerLevel < MAX_PLAYER_LEVEL and xb.db.profile.modules.currency.showXPbar); end, -- keep around in case
         args = {
           currencyOne = {
             name = L['First Currency'], -- DROPDOWN, GoldModule:GetCurrencyOptions

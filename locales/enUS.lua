@@ -75,6 +75,7 @@ L['Total'] = true;
 
 L['Currency'] = true;
 L['Show XP Bar Below Max Level'] = true;
+L['Use Class Colors for XP Bar'] = true;
 L['Show Tooltips'] = true;
 L['Text on Right'] = true;
 L['Toggle Currency Frame'] = true;

@@ -15,10 +15,10 @@ XIVBar.defaults = {
     },
     color = {
       barColor = {
-        r = 0.25,
-        g = 0.25,
-        b = 0.25,
-        a = 1
+        r = 0.094,
+        g = 0.094,
+        b = 0.094,
+        a = 0.75
       },
       normal = {
         r = 0.8,
@@ -245,12 +245,7 @@ function XIVBar:Refresh()
 
   self.frames.bgTexture:SetAllPoints()
   if self.db.profile.color.useCC then
-    self.frames.bgTexture:SetColorTexture(
-      RAID_CLASS_COLORS[self.constants.playerClass].r,
-      RAID_CLASS_COLORS[self.constants.playerClass].g,
-      RAID_CLASS_COLORS[self.constants.playerClass].b,
-      barColor.a
-    )
+    self.frames.bgTexture:SetColorTexture(self:GetClassColors())
   else
     self.frames.bgTexture:SetColorTexture(barColor.r, barColor.g, barColor.b, barColor.a)
   end
@@ -259,6 +254,10 @@ function XIVBar:Refresh()
     if module['Refresh'] == nil then return; end
     module:Refresh()
   end
+end
+
+function XIVBar:GetClassColors()
+  return RAID_CLASS_COLORS[self.constants.playerClass].r, RAID_CLASS_COLORS[self.constants.playerClass].g, RAID_CLASS_COLORS[self.constants.playerClass].b, self.db.profile.color.barColor.a
 end
 
 function XIVBar:RGBAToHex(r, g, b, a)
