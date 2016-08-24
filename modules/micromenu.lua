@@ -196,7 +196,9 @@ function MenuModule:RegisterFrameEvents()
     end
   end
 
-  self:RegisterEvent('GUILD_ROSTER_UPDATE', 'UpdateGuildText')
+  self:RegisterEvent('GUILD_ROSTER_UPDATE', function()
+    self:UpdateGuildText(true)
+  end)
   self:RegisterEvent('BN_FRIEND_ACCOUNT_ONLINE', 'UpdateFriendText')
   self:RegisterEvent('BN_FRIEND_ACCOUNT_OFFLINE', 'UpdateFriendText')
   self:RegisterEvent('FRIENDLIST_UPDATE', 'UpdateFriendText')
@@ -209,7 +211,10 @@ function MenuModule:UnregisterFrameEvents()
   self:UnregisterEvent('FRIENDLIST_UPDATE')
 end
 
-function MenuModule:UpdateGuildText()
+function MenuModule:UpdateGuildText(isEvent)
+  if isEvent == nil then
+    GuildRoster()
+  end
   if IsInGuild() then
     local _, onlineMembers = GetNumGuildMembers()
     self.text.guild:SetText(onlineMembers)
@@ -341,6 +346,7 @@ function MenuModule:GuildHover(hoverFunc)
       hoverFunc()
       return
     end
+    GuildRoster()
     GameTooltip:SetOwner(MenuModule.frames.guild, 'ANCHOR_'..xb.miniTextPosition)
     GameTooltip:AddLine("[|cff6699FF"..L['Guild'].."|r]")
     GameTooltip:AddLine(" ")

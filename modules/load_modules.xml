@@ -5,4 +5,5 @@
   <Script file="armor.lua" />
   <Script file="travel.lua" />
   <Script file="gold.lua" />
+  <Script file="currency.lua" />
 </Ui>

@@ -148,9 +148,11 @@ function TravelModule:SetHearthColor()
       if (PlayerHasToy(v) or IsUsableItem(v)) then
         if GetItemCooldown(v) == 0 then
           hearthName, _ = GetItemInfo(v)
-          hearthActive = true
-          self.hearthButton:SetAttribute("macrotext", "/cast "..hearthName)
-          break
+          if hearthName ~= nil then
+            hearthActive = true
+            self.hearthButton:SetAttribute("macrotext", "/cast "..hearthName)
+            break
+          end
         end
       end -- if toy/item
       if IsPlayerSpell(v) then
