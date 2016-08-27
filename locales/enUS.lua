@@ -83,3 +83,11 @@ L['Currency Select'] = true;
 L['First Currency'] = true;
 L['Second Currency'] = true;
 L['Third Currency'] = true;
+
+L['System'] = true;
+L['Show World Ping'] = true;
+L['Number of Addons To Show'] = true;
+L['Addons to Show in Tooltip'] = true;
+L['Show All Addons in Tooltip with Shift'] = true;
+L['Memory Usage'] = true;
+L['Garbage Collect'] = true;

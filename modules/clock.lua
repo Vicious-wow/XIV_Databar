@@ -65,8 +65,13 @@ function ClockModule:Refresh()
   if self.clockFrame == nil then return; end
   if not db.modules.clock.enabled then return; end
 
+  if InCombatLockdown() then
+    self:SetClockColor()
+    return
+  end
+
   self.clockText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.modules.clock.fontSize)
-  ClockModule:SetClockColor()
+  self:SetClockColor()
 
   self.clockFrame:SetSize(self.clockText:GetStringWidth(), self.clockText:GetStringHeight())
   self.clockFrame:SetPoint('CENTER')

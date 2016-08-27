@@ -32,7 +32,7 @@ end
 
 function CurrencyModule:OnEnable()
   if self.currencyFrame == nil then
-    self.currencyFrame = CreateFrame("FRAME", 'XIV_currencyFrame', xb:GetFrame('goldFrame'))
+    self.currencyFrame = CreateFrame("FRAME", 'XIV_currencyFrame', xb:GetFrame('clockFrame'))
     xb:RegisterFrame('currencyFrame', self.currencyFrame)
   end
 
@@ -49,6 +49,18 @@ function CurrencyModule:OnDisable()
 end
 
 function CurrencyModule:Refresh()
+
+  xb.constants.playerLevel = UnitLevel("player")
+  if InCombatLockdown() then
+    self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
+    self.xpBar:SetValue(UnitXP('player'))
+    self.xpText:SetText(string.upper(LEVEL..' '..UnitLevel("player")..' '..UnitClass('player')))
+    self:RegisterEvent('PLAYER_REGEN_ENABLED', function()
+      self:Refresh()
+      self:UnregisterEvent('PLAYER_REGEN_ENABLED')
+    end)
+    return
+  end
   local db = xb.db.profile
   if self.currencyFrame == nil then return; end
   if not db.modules.currency.enabled then return; end
@@ -70,7 +82,7 @@ function CurrencyModule:Refresh()
 
     self.xpText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), textHeight)
     self.xpText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    self.xpText:SetText(string.upper(LEVEL..' '..tostring(xb.constants.playerLevel)..' '..UnitClass('player')))
+    self.xpText:SetText(string.upper(LEVEL..' '..UnitLevel("player")..' '..UnitClass('player')))
     self.xpText:SetPoint('TOPLEFT', self.xpIcon, 'TOPRIGHT', 5, 0)
 
     self.xpBar:SetStatusBarTexture(1, 1, 1)
@@ -86,8 +98,6 @@ function CurrencyModule:Refresh()
 
     self.xpBarBg:SetAllPoints()
     self.xpBarBg:SetColorTexture(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    --self.xpBar = self.xpBar or CreateFrame('STATUSBAR', nil, self.xpFrame)
-    --self.xpBarBg = self.xpBarBg or self.xpBar:CreateTexture(nil, 'BACKGROUND')
     self.currencyFrame:SetSize(iconSize + self.xpText:GetStringWidth() + 5, xb:GetHeight())
     self.xpFrame:SetAllPoints()
     self.xpFrame:Show()
@@ -105,7 +115,7 @@ function CurrencyModule:Refresh()
   end -- show currencies
 
   --self.currencyFrame:SetSize(self.goldButton:GetSize())
-  self.currencyFrame:SetPoint('RIGHT', self.currencyFrame:GetParent(), 'LEFT', -(db.general.moduleSpacing), 0)
+  self.currencyFrame:SetPoint('LEFT', self.currencyFrame:GetParent(), 'RIGHT', db.general.moduleSpacing, 0)
 end
 
 function CurrencyModule:StyleCurrencyFrame(curId, i)

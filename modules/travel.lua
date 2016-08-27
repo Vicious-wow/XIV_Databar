@@ -297,6 +297,13 @@ end
 function TravelModule:Refresh()
   if self.hearthFrame == nil then return; end
 
+  if InCombatLockdown() then
+    self.hearthText:SetText(GetBindLocation())
+    self.portText:SetText(xb.db.modules.travel.portItem.text)
+    self:SetHearthColor()
+    self:SetPortColor()
+  end
+
   local db = xb.db.profile
   --local iconSize = (xb:GetHeight() / 2)
   local iconSize = db.text.fontSize + db.general.barPadding

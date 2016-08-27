@@ -83,6 +83,14 @@ function MenuModule:Refresh()
 
   if not xb.db.profile.modules.microMenu.enabled then return; end
 
+  if InCombatLockdown() then
+    self:RegisterEvent('PLAYER_REGEN_ENABLED', function()
+      self:Refresh()
+      self:UnregisterEvent('PLAYER_REGEN_ENABLED')
+    end)
+    return
+  end
+
   self.iconSize = xb:GetHeight();
 
   local colors = xb.db.profile.color
@@ -183,6 +191,16 @@ function MenuModule:RegisterFrameEvents()
         GameTooltip:Hide()
         leaveFunc()
       end)
+      frame:SetScript('OnUpdate', function(self, elapsed)
+        if self.elapsed then
+          self.elapsed = self.elapsed + elapsed
+          if elapsed > 10 then
+            MenuModule:UpdateGuildText()
+          end
+        else
+          self.elapsed = elapsed
+        end
+      end)
     elseif name == 'social' then
       local leaveFunc = self:DefaultLeave(name)
       frame:SetScript("OnEnter", self:SocialHover(self:DefaultHover(name)))
@@ -197,6 +215,9 @@ function MenuModule:RegisterFrameEvents()
   end
 
   self:RegisterEvent('GUILD_ROSTER_UPDATE', function()
+    self:UpdateGuildText(true)
+  end)
+  self:RegisterEvent('CHAT_MSG_GUILD', function()
     self:UpdateGuildText(true)
   end)
   self:RegisterEvent('BN_FRIEND_ACCOUNT_ONLINE', 'UpdateFriendText')
