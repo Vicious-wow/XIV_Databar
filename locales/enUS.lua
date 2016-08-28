@@ -18,6 +18,15 @@ L['Use Class Colors for Bar'] = true;
 L['Bar Padding'] = true;
 L['Module Spacing'] = true;
 
+-- Positioning Options
+L['Positioning Options'] = true;
+L['Full Screen'] = true;
+L['Horizontal Position'] = true;
+L['Bar Width'] = true;
+L['Left'] = true;
+L['Center'] = true;
+L['Right'] = true;
+
 -- Media
 L['Font'] = true;
 L['Font Size'] = true;

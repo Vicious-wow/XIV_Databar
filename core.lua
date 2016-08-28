@@ -11,7 +11,10 @@ XIVBar.defaults = {
     general = {
       barPosition = "BOTTOM",
       barPadding = 3,
-      moduleSpacing = 30
+      moduleSpacing = 30,
+      barFullscreen = true,
+      barWidth = GetScreenWidth(),
+      barHoriz = 'CENTER'
     },
     color = {
       barColor = {
@@ -118,6 +121,7 @@ function XIVBar:OnInitialize()
           general = self:GetGeneralOptions(),
           text = self:GetTextOptions(),
           textColors = self:GetTextColorOptions(), -- colors
+          positionOptions = self:GetPositionOptions(),
         }
       }, -- general
       modules = {
@@ -236,8 +240,17 @@ function XIVBar:Refresh()
   local barColor = self.db.profile.color.barColor
   self.frames.bar:ClearAllPoints()
   self.frames.bar:SetPoint(self.db.profile.general.barPosition)
-  self.frames.bar:SetPoint("LEFT")
-  self.frames.bar:SetPoint("RIGHT")
+  if self.db.profile.general.barFullscreen then
+    self.frames.bar:SetPoint("LEFT")
+    self.frames.bar:SetPoint("RIGHT")
+  else
+    local relativePoint = self.db.profile.general.barHoriz
+    if relativePoint == 'CENTER' then
+      relativePoint = 'BOTTOM'
+    end
+    self.frames.bar:SetPoint(self.db.profile.general.barHoriz, self.frames.bar:GetParent(), relativePoint)
+    self.frames.bar:SetWidth(self.db.profile.general.barWidth)
+  end
   self.frames.bar:SetHeight(self:GetHeight())
 
   self.frames.bgTexture:SetAllPoints()
@@ -277,8 +290,6 @@ function XIVBar:HexToRGBA(hex)
   end
   return (tonumber(rhex, 16) / 255), (tonumber(ghex, 16) / 255), (tonumber(bhex, 16) / 255), (tonumber(ahex, 16) / 255)
 end
-
-
 
 function XIVBar:GetGeneralOptions()
   return {
@@ -333,6 +344,45 @@ function XIVBar:GetGeneralOptions()
         step = 1,
         get = function() return self.db.profile.general.moduleSpacing; end,
         set = function(info, val) self.db.profile.general.moduleSpacing = val; self:Refresh(); end
+      }
+    }
+  }
+end
+
+function XIVBar:GetPositionOptions()
+  return {
+    name = L['Positioning Options'],
+    type = "group",
+    order = 4,
+    inline = true,
+    args = {
+      fullScreen = {
+        name = L['Full Screen'],
+        type = 'toggle',
+        order = 0,
+        get = function() return self.db.profile.general.barFullscreen; end,
+        set = function(info, value) self.db.profile.general.barFullscreen = value; self:Refresh(); end,
+      },
+      barPosition = {
+        name = L['Horizontal Position'],
+        type = "select",
+        order = 1,
+        values = {LEFT = L['Left'], CENTER = L['Center'], RIGHT = L['Right']},
+        style = "dropdown",
+        get = function() return self.db.profile.general.barHoriz; end,
+        set = function(info, value) self.db.profile.general.barHoriz = value; self:Refresh(); end,
+        disabled = function() return self.db.profile.general.barFullscreen; end
+      },
+      barWidth = {
+        name = L['Bar Width'],
+        type = 'range',
+        order = 2,
+        min = 200,
+        max = GetScreenWidth(),
+        step = 1,
+        get = function() return self.db.profile.general.barWidth; end,
+        set = function(info, val) self.db.profile.general.barWidth = val; self:Refresh(); end,
+        disabled = function() return self.db.profile.general.barFullscreen; end
       }
     }
   }
