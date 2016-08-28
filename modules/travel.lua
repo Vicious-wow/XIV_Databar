@@ -63,14 +63,19 @@ end
 function TravelModule:OnEnable()
   if self.hearthFrame == nil then
     self.hearthFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
-    xb:RegisterFrame('hearthFrame', self.hearthFrame)
+    xb:RegisterFrame('travelFrame', self.hearthFrame)
   end
+  self.hearthFrame:Show()
   self:CreateFrames()
   self:RegisterFrameEvents()
   self:Refresh()
 end
 
 function TravelModule:OnDisable()
+  self.hearthFrame:Hide()
+  self:UnregisterEvent('SPELLS_CHANGED')
+  self:UnregisterEvent('BAG_UPDATE_DELAYED')
+  self:UnregisterEvent('HEARTHSTONE_BOUND')
 end
 
 function TravelModule:CreateFrames()
@@ -355,6 +360,31 @@ end
 
 function TravelModule:GetDefaultOptions()
   return 'travel', {
+    enabled = true,
     portItem = {portId = 110560, text = GARRISON_LOCATION_TOOLTIP}
+  }
+end
+
+function TravelModule:GetConfig()
+  return {
+    name = self:GetName(),
+    type = "group",
+    args = {
+      enable = {
+        name = ENABLE,
+        order = 0,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.travel.enabled; end,
+        set = function(_, val)
+          xb.db.profile.modules.travel.enabled = val
+          if val then
+            self:Enable()
+          else
+            self:Disable()
+          end
+        end,
+        width = "full"
+      }
+    }
   }
 end

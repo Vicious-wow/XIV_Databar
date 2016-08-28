@@ -3,7 +3,7 @@ local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 
-local ClockModule = xb:NewModule("ClockModule")
+local ClockModule = xb:NewModule("ClockModule", 'AceEvent-3.0')
 
 function ClockModule:GetName()
   return L['Clock'];
@@ -49,6 +49,7 @@ function ClockModule:OnEnable()
     self.clockFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
     xb:RegisterFrame('clockFrame', self.clockFrame)
   end
+  self.clockFrame:Show()
   self.elapsed = 0
   self:CreateFrames()
   self:CreateClickFunctions()
@@ -70,7 +71,7 @@ function ClockModule:Refresh()
     return
   end
 
-  self.clockText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.modules.clock.fontSize)
+  self.clockText:SetFont(xb:GetFont(db.modules.clock.fontSize))
   self:SetClockColor()
 
   self.clockFrame:SetSize(self.clockText:GetStringWidth(), self.clockText:GetStringHeight())
@@ -81,7 +82,7 @@ function ClockModule:Refresh()
 
   self.clockText:SetPoint('CENTER')
 
-  self.eventText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.text.smallFontSize)
+  self.eventText:SetFont(xb:GetFont(db.text.smallFontSize))
   self.eventText:SetPoint('CENTER', self.clockText, xb.miniTextPosition)
 end
 
@@ -191,7 +192,14 @@ function ClockModule:GetConfig()
         order = 0,
         type = "toggle",
         get = function() return xb.db.profile.modules.clock.enabled; end,
-        set = function(_, val) xb.db.profile.modules.clock.enabled = val; end,
+        set = function(_, val)
+          xb.db.profile.modules.clock.enabled = val
+          if val then
+            self:Enable()
+          else
+            self:Disable()
+          end
+        end,
         width = "full"
       },
       useServerTime = {

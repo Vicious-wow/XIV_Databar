@@ -15,10 +15,11 @@ end
 
 function SystemModule:OnEnable()
   if self.systemFrame == nil then
-    self.systemFrame = CreateFrame("FRAME", nil, xb:GetFrame('goldFrame'))
+    self.systemFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
     xb:RegisterFrame('systemFrame', self.systemFrame)
   end
 
+  self.systemFrame:Show()
   self:CreateFrames()
   self:RegisterFrameEvents()
   self:Refresh()
@@ -90,7 +91,13 @@ function SystemModule:Refresh()
   self.systemFrame:SetSize(self.fpsFrame:GetWidth() + self.pingFrame:GetWidth(), xb:GetHeight())
 
   --self.systemFrame:SetSize()
-  self.systemFrame:SetPoint('RIGHT', self.systemFrame:GetParent(), 'LEFT', -(db.general.moduleSpacing), 0)
+  local relativeAnchorPoint = 'LEFT'
+  local xOffset = db.general.moduleSpacing
+  if not xb:GetFrame('goldFrame'):IsVisible() then
+    relativeAnchorPoint = 'RIGHT'
+    xOffset = 0
+  end
+  self.systemFrame:SetPoint('RIGHT', xb:GetFrame('goldFrame'), relativeAnchorPoint, -(xOffset), 0)
 end
 
 function SystemModule:UpdateTexts()
@@ -211,6 +218,18 @@ function SystemModule:RegisterFrameEvents()
       SystemModule.elapsed = 0
     end
   end)
+
+  self:RegisterMessage('XIVBar_FrameHide', function(_, name)
+    if name == 'goldFrame' then
+      self:Refresh()
+    end
+  end)
+
+  self:RegisterMessage('XIVBar_FrameShow', function(_, name)
+    if name == 'goldFrame' then
+      self:Refresh()
+    end
+  end)
 end
 
 function SystemModule:ShowTooltip()
@@ -276,7 +295,14 @@ function SystemModule:GetConfig()
         order = 0,
         type = "toggle",
         get = function() return xb.db.profile.modules.system.enabled; end,
-        set = function(_, val) xb.db.profile.modules.system.enabled = val; self:Refresh(); end,
+        set = function(_, val)
+          xb.db.profile.modules.system.enabled = val
+          if val then
+            self:Enable()
+          else
+            self:Disable()
+          end
+        end,
         width = "full"
       },
       showTooltip = {

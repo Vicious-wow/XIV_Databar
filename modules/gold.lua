@@ -15,9 +15,10 @@ end
 
 function GoldModule:OnEnable()
   if self.goldFrame == nil then
-    self.goldFrame = CreateFrame("FRAME", nil, xb:GetFrame('hearthFrame'))
+    self.goldFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
     xb:RegisterFrame('goldFrame', self.goldFrame)
   end
+  self.goldFrame:Show()
   if xb.db.factionrealm[xb.constants.playerName] == nil then
     xb.db.factionrealm[xb.constants.playerName] = {currentMoney = GetMoney()}
   else
@@ -83,7 +84,14 @@ function GoldModule:Refresh()
   self.goldButton:SetPoint('LEFT')
 
   self.goldFrame:SetSize(self.goldButton:GetSize())
-  self.goldFrame:SetPoint('RIGHT', self.goldFrame:GetParent(), 'LEFT', -(db.general.moduleSpacing), 0)
+
+  local relativeAnchorPoint = 'LEFT'
+  local xOffset = db.general.moduleSpacing
+  if not xb:GetFrame('travelFrame'):IsVisible() then
+    relativeAnchorPoint = 'RIGHT'
+    xOffset = 0
+  end
+  self.goldFrame:SetPoint('RIGHT', xb:GetFrame('travelFrame'), relativeAnchorPoint, -(xOffset), 0)
 end
 
 function GoldModule:CreateFrames()
@@ -132,6 +140,18 @@ function GoldModule:RegisterFrameEvents()
   self.goldButton:SetScript('OnClick', function(_, button)
     if InCombatLockdown() then return; end
     ToggleAllBags()
+  end)
+
+  self:RegisterMessage('XIVBar_FrameHide', function(_, name)
+    if name == 'travelFrame' then
+      self:Refresh()
+    end
+  end)
+
+  self:RegisterMessage('XIVBar_FrameShow', function(_, name)
+    if name == 'travelFrame' then
+      self:Refresh()
+    end
   end)
 end
 
@@ -191,7 +211,14 @@ function GoldModule:GetConfig()
         order = 0,
         type = "toggle",
         get = function() return xb.db.profile.modules.gold.enabled; end,
-        set = function(_, val) xb.db.profile.modules.gold.enabled = val; self:Refresh(); end,
+        set = function(_, val)
+          xb.db.profile.modules.gold.enabled = val
+          if val then
+            self:Enable()
+          else
+            self:Disable()
+          end
+        end,
         width = "full"
       },
       showSmallCoins = {

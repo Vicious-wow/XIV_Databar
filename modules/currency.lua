@@ -32,10 +32,11 @@ end
 
 function CurrencyModule:OnEnable()
   if self.currencyFrame == nil then
-    self.currencyFrame = CreateFrame("FRAME", 'XIV_currencyFrame', xb:GetFrame('clockFrame'))
+    self.currencyFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
     xb:RegisterFrame('currencyFrame', self.currencyFrame)
   end
 
+  self.currencyFrame:Show()
   self:CreateFrames()
   self:RegisterFrameEvents()
   self:Refresh()
@@ -115,7 +116,13 @@ function CurrencyModule:Refresh()
   end -- show currencies
 
   --self.currencyFrame:SetSize(self.goldButton:GetSize())
-  self.currencyFrame:SetPoint('LEFT', self.currencyFrame:GetParent(), 'RIGHT', db.general.moduleSpacing, 0)
+  local relativeAnchorPoint = 'RIGHT'
+  local xOffset = db.general.moduleSpacing
+  if not xb:GetFrame('tradeskillFrame'):IsVisible() then
+    relativeAnchorPoint = 'LEFT'
+    xOffset = 0
+  end
+  self.currencyFrame:SetPoint('LEFT', xb:GetFrame('tradeskillFrame'), relativeAnchorPoint, xOffset, 0)
 end
 
 function CurrencyModule:StyleCurrencyFrame(curId, i)
@@ -129,7 +136,7 @@ function CurrencyModule:StyleCurrencyFrame(curId, i)
 
   local iconPoint = 'RIGHT'
   local textPoint = 'LEFT'
-  local padding = -5
+  local padding = -3
 
   if xb.db.profile.modules.currency.textOnRight then
     iconPoint = 'LEFT'
@@ -224,6 +231,19 @@ function CurrencyModule:RegisterFrameEvents()
     local db = xb.db.profile
     self.xpText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
   end)
+
+  self:RegisterMessage('XIVBar_FrameHide', function(_, name)
+    if name == 'tradeskillFrame' then
+      self:Refresh()
+    end
+  end)
+
+  self:RegisterMessage('XIVBar_FrameShow', function(_, name)
+    if name == 'tradeskillFrame' then
+      self:Refresh()
+    end
+  end)
+
   --[[
   self.goldButton:EnableMouse(true)
   self.goldButton:RegisterForClicks("AnyUp")
@@ -322,7 +342,14 @@ function CurrencyModule:GetConfig()
         order = 0,
         type = "toggle",
         get = function() return xb.db.profile.modules.currency.enabled; end,
-        set = function(_, val) xb.db.profile.modules.currency.enabled = val; self:Refresh(); end,
+        set = function(_, val)
+          xb.db.profile.modules.currency.enabled = val
+          if val then
+            self:Enable()
+          else
+            self:Disable()
+          end
+        end,
         width = "full"
       },
       showXPbar = {

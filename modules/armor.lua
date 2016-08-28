@@ -30,8 +30,8 @@ function ArmorModule:OnEnable()
   if self.armorFrame == nil then
     self.armorFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
     xb:RegisterFrame('armorFrame', self.armorFrame)
-    self.armorFrame:Show()
   end
+  self.armorFrame:Show()
   self:CreateFrames()
   self:RegisterFrameEvents()
   self:Refresh()
@@ -188,7 +188,14 @@ function ArmorModule:GetConfig()
         order = 0,
         type = "toggle",
         get = function() return xb.db.profile.modules.armor.enabled; end,
-        set = function(_, val) xb.db.profile.modules.armor.enabled = val; self:Refresh(); end
+        set = function(_, val)
+          xb.db.profile.modules.armor.enabled = val
+          if val then
+            self:Enable()
+          else
+            self:Disable()
+          end
+        end
       },
       ilvlAlways = {
         name = L['Always Show Item Level'],
