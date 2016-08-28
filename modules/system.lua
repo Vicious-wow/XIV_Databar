@@ -60,14 +60,16 @@ function SystemModule:Refresh()
   self.pingText:SetFont(xb:GetFont(db.text.fontSize))
   self.worldPingText:SetFont(xb:GetFont(db.text.fontSize))
 
-  if self.fpsFrame:IsMouseOver() or self.pingFrame:IsMouseOver() then
+  self.fpsText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  self.pingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  self.worldPingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+
+  if self.fpsFrame:IsMouseOver() then
     self.fpsText:SetTextColor(unpack(xb:HoverColors()))
+  end
+  if self.pingFrame:IsMouseOver() then
     self.pingText:SetTextColor(unpack(xb:HoverColors()))
     self.worldPingText:SetTextColor(unpack(xb:HoverColors()))
-  else
-    self.fpsText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    self.pingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    self.worldPingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
   end
 
   self.worldPingText:SetText('000'..MILLISECONDS_ABBR)
@@ -120,9 +122,13 @@ end
 
 function SystemModule:HoverFunction()
   if InCombatLockdown() then return; end
-  self.fpsText:SetTextColor(unpack(xb:HoverColors()))
-  self.pingText:SetTextColor(unpack(xb:HoverColors()))
-  self.worldPingText:SetTextColor(unpack(xb:HoverColors()))
+  if self.fpsFrame:IsMouseOver() then
+    self.fpsText:SetTextColor(unpack(xb:HoverColors()))
+  end
+  if self.pingFrame:IsMouseOver() then
+    self.pingText:SetTextColor(unpack(xb:HoverColors()))
+    self.worldPingText:SetTextColor(unpack(xb:HoverColors()))
+  end
   if xb.db.profile.modules.system.showTooltip then
     self:ShowTooltip()
   end

@@ -104,3 +104,7 @@ L['Garbage Collect'] = true;
 
 L['Use Class Colors'] = true;
 L['Cooldowns'] = true;
+
+L['Set Specialization'] = true;
+L['Set Loot Specialization'] = true;
+L['Current Specialization'] = true;
