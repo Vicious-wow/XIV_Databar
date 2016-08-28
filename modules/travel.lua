@@ -220,7 +220,7 @@ function TravelModule:CreatePortPopup()
 
   local db = xb.db.profile
   self.portOptionString = self.portOptionString or self.portPopup:CreateFontString(nil, 'OVERLAY')
-  self.portOptionString:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.text.fontSize + self.optionTextExtra)
+  self.portOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
   self.portOptionString:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
   self.portOptionString:SetText(L['Port Options'])
   self.portOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
@@ -304,7 +304,7 @@ function TravelModule:Refresh()
 
   if InCombatLockdown() then
     self.hearthText:SetText(GetBindLocation())
-    self.portText:SetText(xb.db.modules.travel.portItem.text)
+    self.portText:SetText(xb.db.profile.modules.travel.portItem.text)
     self:SetHearthColor()
     self:SetPortColor()
   end
@@ -345,8 +345,7 @@ function TravelModule:Refresh()
 
   self:CreatePortPopup()
   self.portPopup:SetPoint('BOTTOM', self.portButton, 'TOP', 0, xb.constants.popupPadding)
-  local mainTexture = string.sub(xb.frames.bgTexture:GetTexture(), 7)
-  self.popupTexture:SetColorTexture(xb:HexToRGBA(mainTexture))
+  self.popupTexture:SetColorTexture(db.color.barColor.r, db.color.barColor.g, db.color.barColor.b, db.color.barColor.a)
   self.popupTexture:SetAllPoints()
   self.portPopup:Hide()
 

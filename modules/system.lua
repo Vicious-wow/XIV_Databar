@@ -248,7 +248,7 @@ function SystemModule:ShowTooltip()
   for i = 1, totalAddons do
     local _, aoName, _ = GetAddOnInfo(i)
     local mem = GetAddOnMemoryUsage(i)
-    tinsert(memTable, {memory = mem, name = aoName})
+    table.insert(memTable, {memory = mem, name = aoName})
   end
 
   table.sort(memTable, function(a, b)
@@ -266,13 +266,15 @@ function SystemModule:ShowTooltip()
 
   for i = 1, toLoop do
     local memString = ''
-    if memTable[i].memory > 0 then
-      if memTable[i].memory > 1024 then
-        memString = string.format("%.2f MB", (memTable[i].memory / 1024))
-      else
-        memString = string.format("%.0f KB", floor(memTable[i].memory))
+    if memTable[i] then
+      if memTable[i].memory > 0 then
+        if memTable[i].memory > 1024 then
+          memString = string.format("%.2f MB", (memTable[i].memory / 1024))
+        else
+          memString = string.format("%.0f KB", floor(memTable[i].memory))
+        end
+        GameTooltip:AddDoubleLine(memTable[i].name, memString, 1, 1, 0, 1, 1, 1)
       end
-      GameTooltip:AddDoubleLine(memTable[i].name, memString, 1, 1, 0, 1, 1, 1)
     end
   end
 
