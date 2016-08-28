@@ -108,3 +108,4 @@ L['Cooldowns'] = true;
 L['Set Specialization'] = true;
 L['Set Loot Specialization'] = true;
 L['Current Specialization'] = true;
+L['Current Loot Specialization'] = true;

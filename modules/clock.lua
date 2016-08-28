@@ -200,7 +200,8 @@ function ClockModule:GetConfig()
             self:Disable()
           end
         end,
-        width = "full"
+        width = "full",
+        hidden = true
       },
       useServerTime = {
         name = L['Use Server Time'],

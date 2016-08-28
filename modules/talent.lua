@@ -112,11 +112,18 @@ function TalentModule:Refresh()
 
   local relativeAnchorPoint = 'LEFT'
   local xOffset = db.general.moduleSpacing
-  if not xb:GetFrame('clockFrame'):IsVisible() then
-    relativeAnchorPoint = 'RIGHT'
-    xOffset = 0
+  local anchorFrame = xb:GetFrame('clockFrame')
+  if not anchorFrame:IsVisible() then
+    if xb:GetFrame('tradeskillFrame'):IsVisible() then
+      anchorFrame = xb:GetFrame('tradeskillFrame')
+    elseif xb:GetFrame('currencyFrame'):IsVisible() then
+      anchorFrame = xb:GetFrame('currencyFrame')
+    else
+      relativeAnchorPoint = 'RIGHT'
+      xOffset = 0
+    end
   end
-  self.talentFrame:SetPoint('RIGHT', xb:GetFrame('clockFrame'), relativeAnchorPoint, -(xOffset), 0)
+  self.talentFrame:SetPoint('RIGHT', anchorFrame, relativeAnchorPoint, -(xOffset), 0)
 end
 
 function TalentModule:CreateFrames()
@@ -138,6 +145,7 @@ function TalentModule:RegisterFrameEvents()
 
   self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', 'Refresh')
   self:RegisterEvent('ACTIVE_TALENT_GROUP_CHANGED', 'Refresh')
+  self:RegisterEvent('PLAYER_LOOT_SPEC_UPDATED', 'Refresh')
 
   self.specFrame:EnableMouse(true)
   self.specFrame:RegisterForClicks('AnyUp')
@@ -145,7 +153,7 @@ function TalentModule:RegisterFrameEvents()
   self.specFrame:SetScript('OnEnter', function()
     if InCombatLockdown() then return; end
     self.specText:SetTextColor(unpack(xb:HoverColors()))
-    if xb.db.profile.modules.tradeskill.showTooltip then
+    if xb.db.profile.modules.tradeskill.showTooltip and ((not self.specPopup:IsVisible()) or (not self.lootSpecPopup:IsVisible())) then
       self:ShowTooltip()
     end
   end)
@@ -158,10 +166,14 @@ function TalentModule:RegisterFrameEvents()
     end
   end)
   self.specFrame:SetScript('OnClick', function(_, button)
+    GameTooltip:Hide()
     if button == 'LeftButton' then
       if not InCombatLockdown() then
         if self.specPopup:IsVisible() then
           self.specPopup:Hide()
+          if xb.db.profile.modules.tradeskill.showTooltip then
+            self:ShowTooltip()
+          end
         else
           self.lootSpecPopup:Hide()
           self.specPopup:Show()
@@ -173,6 +185,9 @@ function TalentModule:RegisterFrameEvents()
       if not InCombatLockdown() then
         if self.lootSpecPopup:IsVisible() then
           self.lootSpecPopup:Hide()
+          if xb.db.profile.modules.tradeskill.showTooltip then
+            self:ShowTooltip()
+          end
         else
           self.specPopup:Hide()
           self.lootSpecPopup:Show()
@@ -180,51 +195,6 @@ function TalentModule:RegisterFrameEvents()
       end
     end
   end)
-
-  --[[
-  self.talentFrame:RegisterUnitEvent('UNIT_SPELLCAST_STOP', 'player')
-  self.talentFrame:SetScript('OnEvent', function(_, event)
-    if event == 'UNIT_SPELLCAST_STOP' then
-      self:Refresh()
-    end
-  end)
-
-
-  self.firstProfFrame:SetAttribute('*type1', 'spell')
-  self.firstProfFrame:SetAttribute('unit', 'player')
-
-  self.secondProfFrame:EnableMouse(true)
-  self.secondProfFrame:RegisterForClicks('AnyUp')
-
-  self.secondProfFrame:SetScript('OnEnter', function()
-    if InCombatLockdown() then return; end
-    self.secondProfText:SetTextColor(unpack(xb:HoverColors()))
-    if xb.db.profile.modules.tradeskill.showTooltip then
-      self:ShowTooltip()
-    end
-  end)
-  self.secondProfFrame:SetScript('OnLeave', function()
-    if InCombatLockdown() then return; end
-    local db = xb.db.profile
-    self.secondProfText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    if xb.db.profile.modules.tradeskill.showTooltip then
-      GameTooltip:Hide()
-    end
-  end)
-  self.secondProfFrame:SetAttribute('*type1', 'spell')
-  self.secondProfFrame:SetAttribute('unit', 'player')
-
-  self.talentFrame:EnableMouse(true)
-  self.talentFrame:SetScript('OnEnter', function()
-    if xb.db.profile.modules.tradeskill.showTooltip then
-      self:ShowTooltip()
-    end
-  end)
-  self.talentFrame:SetScript('OnLeave', function()
-    if xb.db.profile.modules.tradeskill.showTooltip then
-      GameTooltip:Hide()
-    end
-  end)]]--
 
   self:RegisterMessage('XIVBar_FrameHide', function(_, name)
     if name == 'clockFrame' then
@@ -432,17 +402,22 @@ function TalentModule:CreateLootSpecPopup()
 end
 
 function TalentModule:ShowTooltip()
-  return
-  --[[
   GameTooltip:SetOwner(self.talentFrame, 'ANCHOR_'..xb.miniTextPosition)
-  GameTooltip:AddLine("[|cff6699FF"..L['Cooldowns'].."|r]")
+  GameTooltip:AddLine("[|cff6699FF"..SPECIALIZATION.."|r]")
   GameTooltip:AddLine(" ")
 
-  local recipeIds = C_TradeSkillUI.GetAllRecipeIDs()
+  local name = ''
+  if self.currentLootSpecID == 0 then
+    _, name, _ = GetSpecializationInfo(self.currentSpecID)
+  else
+    _, name, _ = GetSpecializationInfoByID(self.currentLootSpecID)
+  end
+  GameTooltip:AddLine("|cffffffff"..L['Current Loot Specialization']..": |cffffff00"..name.."|r")
 
   GameTooltip:AddLine(" ")
-  GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Currency Frame'], 1, 1, 0, 1, 1, 1)
-  GameTooltip:Show()]]--
+  GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Set Specialization'], 1, 1, 0, 1, 1, 1)
+  GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Set Loot Specialization'], 1, 1, 0, 1, 1, 1)
+  GameTooltip:Show()
 end
 
 function TalentModule:GetDefaultOptions()

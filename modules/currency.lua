@@ -118,11 +118,18 @@ function CurrencyModule:Refresh()
   --self.currencyFrame:SetSize(self.goldButton:GetSize())
   local relativeAnchorPoint = 'RIGHT'
   local xOffset = db.general.moduleSpacing
-  if not xb:GetFrame('tradeskillFrame'):IsVisible() then
-    relativeAnchorPoint = 'LEFT'
-    xOffset = 0
+  local anchorFrame = xb:GetFrame('tradeskillFrame')
+  if not anchorFrame:IsVisible() then
+    if xb:GetFrame('clockFrame'):IsVisible() then
+      anchorFrame = xb:GetFrame('clockFrame')
+    elseif xb:GetFrame('talentFrame'):IsVisible() then
+      anchorFrame = xb:GetFrame('talentFrame')
+    else
+      relativeAnchorPoint = 'LEFT'
+      xOffset = 0
+    end
   end
-  self.currencyFrame:SetPoint('LEFT', xb:GetFrame('tradeskillFrame'), relativeAnchorPoint, xOffset, 0)
+  self.currencyFrame:SetPoint('LEFT', anchorFrame, relativeAnchorPoint, xOffset, 0)
 end
 
 function CurrencyModule:StyleCurrencyFrame(curId, i)
