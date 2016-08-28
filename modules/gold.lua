@@ -10,7 +10,10 @@ function GoldModule:GetName()
 end
 
 function GoldModule:OnInitialize()
-
+  if xb.db.factionrealm[xb.constants.playerName] == nil then
+    xb.db.factionrealm[xb.constants.playerName] = { currentMoney = 0 }
+  end
+  xb.db.factionrealm[xb.constants.playerName].sessionMoney = 0
 end
 
 function GoldModule:OnEnable()
@@ -19,9 +22,7 @@ function GoldModule:OnEnable()
     xb:RegisterFrame('goldFrame', self.goldFrame)
   end
   self.goldFrame:Show()
-  if xb.db.factionrealm[xb.constants.playerName] == nil then
-    xb.db.factionrealm[xb.constants.playerName] = {currentMoney = GetMoney()}
-  else
+  if xb.db.factionrealm[xb.constants.playerName].currentMoney == 0 then
     xb.db.factionrealm[xb.constants.playerName].currentMoney = GetMoney()
   end
 
@@ -118,6 +119,9 @@ function GoldModule:RegisterFrameEvents()
     GameTooltip:AddLine("[|cff6699FF"..L['Gold'].."|r - |cff82c5ff"..xb.constants.playerFactionLocal.." "..xb.constants.playerRealm.."|r]")
     GameTooltip:AddLine(" ")
 
+    GameTooltip:AddDoubleLine(L['Session Total'], GoldModule:FormatCoinText(xb.db.factionrealm[xb.constants.playerName].sessionMoney), 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddLine(" ")
+
     local totalGold = 0
     for charName, goldData in pairs(xb.db.factionrealm) do
       GameTooltip:AddDoubleLine(charName, GoldModule:FormatCoinText(goldData.currentMoney), 1, 1, 0, 1, 1, 1)
@@ -156,7 +160,20 @@ function GoldModule:RegisterFrameEvents()
 end
 
 function GoldModule:PLAYER_MONEY()
-  xb.db.factionrealm[xb.constants.playerName].currentMoney = GetMoney()
+  local gdb = xb.db.factionrealm[xb.constants.playerName]
+  local curMoney = gdb.currentMoney
+  local tmpMoney = GetMoney()
+  local moneyDiff = tmpMoney - curMoney
+  gdb.sessionMoney = gdb.sessionMoney + moneyDiff
+
+  --[[local weekday, month, day, year = CalendarGetDate()
+
+  if gdb.curDay == nil or (gdb.curMonth == month and gdb.curDay < day) or (gdb.curMonth < month) or gdb.curYear < year then
+    if gdb.curDay then
+      gdb.
+    end
+  end]]--
+  gdb.currentMoney = tmpMoney
   self:Refresh()
 end
 
@@ -185,7 +202,11 @@ function GoldModule:FormatCoinText(money)
     formattedString = formattedString..'%d'..COPPER_AMOUNT_SYMBOL
   end
 
-  return string.format(formattedString, BreakUpLargeNumbers(g), s, c)
+  local ret = string.format(formattedString, BreakUpLargeNumbers(g), s, c)
+  if money < 0 then
+    ret = '-'..ret
+  end
+  return ret
 end
 function GoldModule:SeparateCoins(money)
   local gold, silver, copper = floor(abs(money / 10000)), floor(abs(mod(money / 100, 100))), floor(abs(mod(money, 100)))

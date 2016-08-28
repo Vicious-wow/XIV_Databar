@@ -82,6 +82,7 @@ L['Show Free Bag Space'] = true;
 L['Shorten Gold'] = true;
 L['Toggle Bags'] = true;
 L['Total'] = true;
+L['Session Total'] = true;
 
 L['Currency'] = true;
 L['Show XP Bar Below Max Level'] = true;
