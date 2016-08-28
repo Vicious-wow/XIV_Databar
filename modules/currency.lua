@@ -53,9 +53,11 @@ function CurrencyModule:Refresh()
 
   xb.constants.playerLevel = UnitLevel("player")
   if InCombatLockdown() then
-    self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
-    self.xpBar:SetValue(UnitXP('player'))
-    self.xpText:SetText(string.upper(LEVEL..' '..UnitLevel("player")..' '..UnitClass('player')))
+    if xb.constants.playerLevel < MAX_PLAYER_LEVEL and db.modules.currency.showXPbar then
+      self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
+      self.xpBar:SetValue(UnitXP('player'))
+      self.xpText:SetText(string.upper(LEVEL..' '..UnitLevel("player")..' '..UnitClass('player')))
+    end
     self:RegisterEvent('PLAYER_REGEN_ENABLED', function()
       self:Refresh()
       self:UnregisterEvent('PLAYER_REGEN_ENABLED')
