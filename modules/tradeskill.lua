@@ -139,7 +139,8 @@ function TradeskillModule:StyleTradeskillFrame(framePrefix, profIndex)
   end
   self[framePrefix..'Frame']:SetSize(iconSize + self[framePrefix..'Text']:GetStringWidth() + 5, xb:GetHeight())
 
-  self[framePrefix..'Frame']:SetAttribute('spell', name) --- While this is usually the type of thing I'd put into RegisterFrameEvents(), I need it to update
+  local spellName, subSpellName = GetSpellBookItemName(spellOffset + 1, BOOKTYPE_PROFESSION)
+  self[framePrefix..'Frame']:SetAttribute('spell', spellName) --- While this is usually the type of thing I'd put into RegisterFrameEvents(), I need it to update
 end
 
 function TradeskillModule:CreateFrames()
