@@ -55,7 +55,8 @@ function TalentModule:Refresh()
   if self.talentFrame == nil then return; end
   if not db.modules.talent.enabled then return; end
 
-  local artifactId = self.LAD:GetActiveArtifactID() or 0
+  local artifactId = 0
+  --local artifactId = self.LAD:GetActiveArtifactID() or 0
 
   self.currentSpecID = GetSpecialization()
   self.currentLootSpecID = GetLootSpecialization()
