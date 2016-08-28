@@ -10,6 +10,7 @@
   <Include file="Libs\AceConsole-3.0\AceConsole-3.0.xml"/>
   <Include file="Libs\AceConfig-3.0\AceConfig-3.0.xml"/>
 	<Include file="Libs\LibSharedMedia-3.0\lib.xml"/>
+  <Include file="Libs\LibArtifactData-1.0\LibArtifactData-1.0.lua"/>
 </Ui>
 
 <!--

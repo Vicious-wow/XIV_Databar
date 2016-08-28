@@ -23,6 +23,7 @@ function TalentModule:OnInitialize()
   self.specButtons = {}
   self.lootSpecButtons = {}
   self.classIcon = xb.constants.mediaPath..'spec\\'..xb.constants.playerClass
+  self.LAD = LibStub('LibArtifactData-1.0')
 end
 
 function TalentModule:OnEnable()
@@ -54,15 +55,18 @@ function TalentModule:Refresh()
   if self.talentFrame == nil then return; end
   if not db.modules.talent.enabled then return; end
 
+  local artifactId = self.LAD:GetActiveArtifactID() or 0
+
   self.currentSpecID = GetSpecialization()
   self.currentLootSpecID = GetLootSpecialization()
 
   local iconSize = db.text.fontSize + db.general.barPadding
   local _, name, _ = GetSpecializationInfo(self.currentSpecID)
 
-
-  --local textHeight = floor((xb:GetHeight() - 4) / 2) -- This will be useful once we add artifact info
   local textHeight = db.text.fontSize
+  if artifactId > 0 then
+    textHeight = floor((xb:GetHeight() - 4) / 2)
+  end
   self.specIcon:SetTexture(self.classIcon)
   self.specIcon:SetTexCoord(unpack(self.specCoords[self.currentSpecID]))
 
@@ -74,15 +78,16 @@ function TalentModule:Refresh()
   self.specText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
   self.specText:SetText(string.upper(name))
 
-  self.specText:SetPoint('LEFT', self.specIcon, 'RIGHT', 5, 0)
+  if artifactId > 0 then
+    self.specText:SetPoint('TOPLEFT', self.specIcon, 'TOPRIGHT', 5, 0)
+  else
+    self.specText:SetPoint('LEFT', self.specIcon, 'RIGHT', 5, 0)
+  end
 
   self.lootSpecButtons[0].icon:SetTexture(self.classIcon)
   self.lootSpecButtons[0].icon:SetTexCoord(unpack(self.specCoords[self.currentSpecID]))
-  --[[
-  if skill == cap then
-    self.specText:SetPoint('LEFT', self.specIcon, 'RIGHT', 5, 0)
-  else
-    self.specText:SetPoint('TOPLEFT', self.specIcon, 'TOPRIGHT', 5, 0)
+
+  if artifactId > 0 then
     self.specBar:SetStatusBarTexture(1, 1, 1)
     if db.modules.tradeskill.barCC then
       self.specBar:SetStatusBarColor(xb:GetClassColors())
@@ -94,7 +99,8 @@ function TalentModule:Refresh()
 
     self.specBarBg:SetAllPoints()
     self.specBarBg:SetColorTexture(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-  end]]--
+    self:UpdateArtifactBar(artifactId)
+  end
   self.specFrame:SetSize(iconSize + self.specText:GetStringWidth() + 5, xb:GetHeight())
   self.specFrame:SetPoint('LEFT')
 
@@ -126,6 +132,12 @@ function TalentModule:Refresh()
   self.talentFrame:SetPoint('RIGHT', anchorFrame, relativeAnchorPoint, -(xOffset), 0)
 end
 
+function TalentModule:UpdateArtifactBar(artifactId)
+  local _, artifactData = self.LAD:GetArtifactInfo(artifactId)
+  self.specBar:SetMinMaxValues(0, artifactData.maxPower)
+  self.specBar:SetValue(artifactData.power)
+end
+
 function TalentModule:CreateFrames()
   self.specFrame = self.specFrame or CreateFrame("BUTTON", nil, self.talentFrame, 'SecureActionButtonTemplate')
   self.specIcon = self.specIcon or self.specFrame:CreateTexture(nil, 'OVERLAY')
@@ -146,6 +158,8 @@ function TalentModule:RegisterFrameEvents()
   self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', 'Refresh')
   self:RegisterEvent('ACTIVE_TALENT_GROUP_CHANGED', 'Refresh')
   self:RegisterEvent('PLAYER_LOOT_SPEC_UPDATED', 'Refresh')
+
+  -- ARTIFACT_ACTIVE_CHANGED
 
   self.specFrame:EnableMouse(true)
   self.specFrame:RegisterForClicks('AnyUp')
