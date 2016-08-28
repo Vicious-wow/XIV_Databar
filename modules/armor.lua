@@ -103,12 +103,17 @@ function ArmorModule:Refresh()
   if self.armorFrame == nil then return; end
   if not xb.db.profile.modules.armor.enabled then return; end
 
+  if InCombatLockdown() then
+    self:UpdateDurabilityText()
+    return
+  end
+
   local iconSize = xb:GetHeight()
   self.armorIcon:SetTexture(self.iconPath)
   --self.armorIcon:SetSize(iconSize, iconSize)
   self.armorIcon:SetPoint('LEFT')
 
-  self.armorText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, xb.db.profile.text.font), xb.db.profile.text.fontSize)
+  self.armorText:SetFont(xb:GetFont(xb.db.profile.text.fontSize))
   self:UpdateDurabilityText()
   self.armorText:SetPoint('LEFT', self.armorIcon, 'RIGHT', 5, 0)
 
@@ -150,14 +155,16 @@ function ArmorModule:UpdateDurabilityText()
   end
   self.durabilityAverage = floor((total / maxTotal) * 100)
 
-  if self.durabilityAverage < db.durabilityMax then
-    text = self.durabilityAverage..'%'
-  end
-
   if (self.durabilityAverage >= db.durabilityMax) or db.alwaysShowIlvl then
     local _, equippedIlvl = GetAverageItemLevel()
-    text = text..floor(equippedIlvl)..' ilvl'
+    text = floor(equippedIlvl)..' ilvl'
   end
+
+  if self.durabilityAverage <= db.durabilityMax then
+    text = text..' '..self.durabilityAverage..'%'
+  end
+
+
 
   self.armorText:SetText(text)
 end

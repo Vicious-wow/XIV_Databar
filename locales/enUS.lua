@@ -22,6 +22,7 @@ L['Module Spacing'] = true;
 L['Font'] = true;
 L['Font Size'] = true;
 L['Small Font Size'] = true;
+L['Text Style'] = true;
 
 -- Text Colors
 L['Text Colors'] = true;

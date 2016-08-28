@@ -40,13 +40,25 @@ function GoldModule:Refresh()
   if self.goldFrame == nil then return; end
   if not db.modules.gold.enabled then return; end
 
+  if InCombatLockdown() then
+    self.goldText:SetText(self:FormatCoinText(GetMoney()))
+    if db.modules.gold.showFreeBagSpace then
+      local freeSpace = 0
+      for i = 0, 4 do
+        freeSpace = freeSpace + GetContainerNumFreeSlots(i)
+      end
+      self.bagText:SetText('('..tostring(freeSpace)..')')
+    end
+    return
+  end
+
   local iconSize = db.text.fontSize + db.general.barPadding
   self.goldIcon:SetTexture(xb.constants.mediaPath..'datatexts\\gold')
   self.goldIcon:SetSize(iconSize, iconSize)
   self.goldIcon:SetPoint('LEFT')
   self.goldIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
 
-  self.goldText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.text.fontSize)
+  self.goldText:SetFont(xb:GetFont(db.text.fontSize))
   self.goldText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
   self.goldText:SetText(self:FormatCoinText(GetMoney()))
   self.goldText:SetPoint('LEFT', self.goldIcon, 'RIGHT', 5, 0)
@@ -57,7 +69,7 @@ function GoldModule:Refresh()
     for i = 0, 4 do
       freeSpace = freeSpace + GetContainerNumFreeSlots(i)
     end
-    self.bagText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.text.fontSize)
+    self.bagText:SetFont(xb:GetFont(db.text.fontSize))
     self.bagText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
     self.bagText:SetText('('..tostring(freeSpace)..')')
     self.bagText:SetPoint('LEFT', self.goldText, 'RIGHT', 5, 0)

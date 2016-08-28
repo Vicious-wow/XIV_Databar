@@ -230,7 +230,7 @@ function TravelModule:CreatePortPopup()
         local button = CreateFrame('BUTTON', nil, self.portPopup)
         local buttonText = button:CreateFontString(nil, 'OVERLAY')
 
-        buttonText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.text.fontSize)
+        buttonText:SetFont(xb:GetFont(db.text.fontSize))
         buttonText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
         buttonText:SetText(v.text)
         buttonText:SetPoint('LEFT')
@@ -308,7 +308,7 @@ function TravelModule:Refresh()
   --local iconSize = (xb:GetHeight() / 2)
   local iconSize = db.text.fontSize + db.general.barPadding
 
-  self.hearthText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.text.fontSize)
+  self.hearthText:SetFont(xb:GetFont(db.text.fontSize))
   self.hearthText:SetText(GetBindLocation())
 
   self.hearthButton:SetSize(self.hearthText:GetWidth() + iconSize + db.general.barPadding, xb:GetHeight())
@@ -323,7 +323,7 @@ function TravelModule:Refresh()
 
   self:SetHearthColor()
 
-  self.portText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.text.fontSize)
+  self.portText:SetFont(xb:GetFont(db.text.fontSize))
   self.portText:SetText(db.modules.travel.portItem.text)
 
   self.portButton:SetSize(self.portText:GetWidth() + iconSize + db.general.barPadding, xb:GetHeight())

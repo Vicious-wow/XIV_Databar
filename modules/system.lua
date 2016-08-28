@@ -45,7 +45,7 @@ function SystemModule:Refresh()
   self.fpsIcon:SetPoint('LEFT')
   self.fpsIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
 
-  self.fpsText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.text.fontSize)
+  self.fpsText:SetFont(xb:GetFont(db.text.fontSize))
 
   self.fpsText:SetPoint('RIGHT', -5, 0)
   self.fpsText:SetText('000'..FPS_ABBR) -- get the widest we can be
@@ -56,8 +56,8 @@ function SystemModule:Refresh()
   self.pingIcon:SetPoint('LEFT')
   self.pingIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
 
-  self.pingText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.text.fontSize)
-  self.worldPingText:SetFont(xb.LSM:Fetch(xb.LSM.MediaType.FONT, db.text.font), db.text.fontSize)
+  self.pingText:SetFont(xb:GetFont(db.text.fontSize))
+  self.worldPingText:SetFont(xb:GetFont(db.text.fontSize))
 
   if self.fpsFrame:IsMouseOver() or self.pingFrame:IsMouseOver() then
     self.fpsText:SetTextColor(unpack(xb:HoverColors()))
@@ -84,7 +84,7 @@ function SystemModule:Refresh()
   self.fpsFrame:SetSize(fpsWidest + iconSize + 5, xb:GetHeight())
   self.fpsFrame:SetPoint('LEFT')
 
-  self.pingFrame:SetSize(pingWidest + iconSize + 5, xb:GetHeight())
+  self.pingFrame:SetSize(pingWidest + iconSize, xb:GetHeight())
   self.pingFrame:SetPoint('LEFT', self.fpsFrame, 'RIGHT', 5, 0)
 
   self.systemFrame:SetSize(self.fpsFrame:GetWidth() + self.pingFrame:GetWidth(), xb:GetHeight())

@@ -46,11 +46,6 @@ XIVBar.defaults = {
       smallFontSize = 11,
       font =  'Homizio Bold'
     },
-
-
-
-
-
     modules = {
 
     }
@@ -73,6 +68,8 @@ function XIVBar:OnInitialize()
   self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults)
   self.LSM:Register(self.LSM.MediaType.FONT, 'Homizio Bold', self.constants.mediaPath.."homizio_bold.ttf")
   self.frames = {}
+
+  self.fontFlags = {'', 'OUTLINE', 'THICKOUTLINE', 'MONOCHROME'}
 
   --[[local options = {
     name = "XIV Bar",
@@ -256,6 +253,10 @@ function XIVBar:Refresh()
   end
 end
 
+function XIVBar:GetFont(size)
+  return self.LSM:Fetch(self.LSM.MediaType.FONT, self.db.profile.text.font), size, self.fontFlags[self.db.profile.text.flags]
+end
+
 function XIVBar:GetClassColors()
   return RAID_CLASS_COLORS[self.constants.playerClass].r, RAID_CLASS_COLORS[self.constants.playerClass].g, RAID_CLASS_COLORS[self.constants.playerClass].b, self.db.profile.color.barColor.a
 end
@@ -377,6 +378,15 @@ function XIVBar:GetTextOptions()
         step = 1,
         get = function() return self.db.profile.text.smallFontSize; end,
         set = function(info, val) self.db.profile.text.smallFontSize = val; self:Refresh(); end
+      },
+      textFlags = {
+        name = L['Text Style'],
+        type = 'select',
+        style = 'dropdown',
+        order = 3,
+        values = self.fontFlags,
+        get = function() return self.db.profile.text.flags; end,
+        set = function(info, val) self.db.profile.text.flags = val; self:Refresh(); end
       },
     }
   }
