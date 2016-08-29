@@ -178,11 +178,7 @@ friendFrame:SetScript("OnEnter", function()
 			elseif client == "WTCG" then
 				gameIcon = "Interface\\FriendsFrame\\Battlenet-WTCGicon.blp"
 				client = "Heartstone"
-			elseif client == "Pro" then
-				gameIcon = "Interface\\FriendsFrame\\Battlenet-OVERWATCHicon.blp"
-				client = "Overwatch"
 			end
-
 			if client == "WoW" then 
 				toonname = ("(|cffecd672"..toonname.."|r)")
 			else

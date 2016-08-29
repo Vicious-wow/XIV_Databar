@@ -1,288 +1,296 @@
-local addon, ns = ...
-local cfg = ns.cfg
-local unpack = unpack
---------------------------------------------------------------
-if not cfg.tradeSkill.show then return end
+local AddOnName, XIVBar = ...;
+local _G = _G;
+local xb = XIVBar;
+local L = XIVBar.L;
 
-local proffessions = {
-	['ALCHEMY'] = {"Alchemical Catalyst", "Secrets of Draenor Alchemy", "Northrend Alchemy Research"},
-	['BLACKSMITHING'] = {"Truesteel Ignot", "Secrets of Draenor Blacksmithing"},
-	['ENCHANTING'] = {"Temporal Crystal", "Secrets of Draenor Enchanting"},
-	['ENGINEERING'] = {"Gearsoring Parts", "Secrets of Draenor Engineering"},
-	['INSCRIPTION'] = {"War Paints", "Secrets of Draenor Inscription","Draenor Merchant Order"},
-	['JEWELCRAFTING'] = {"Taladite Crystal", "Secrets of Draenor Jewelcrafting"},
-	['LEATHERWORKING'] = {"Burnished Leather", "Secrets of Draenor Leatherworking"},
-	['TAILORING'] = {"Hexweave Cloth", "Secrets of Draenor Tailoring"},
-}
+local TradeskillModule = xb:NewModule("TradeskillModule", 'AceEvent-3.0')
 
-local profIcons = {
-	[164] = 'blacksmithing',
-	[165] = 'leatherworking',
-	[171] = 'alchemy',
-	[182] = 'herbalism',
-	[186] = 'mining',
-	[202] = 'engineering',
-	[333] = 'enchanting',
-	[755] = 'jewelcrafting',
-	[773] = 'inscription',
-	[197] = 'tailoring',
-	[393] = 'skinning'
-}
+function TradeskillModule:GetName()
+  return TRADESKILLS;
+end
 
-local prof1OnCooldown = false
-local prof2OnCooldown = false
+function TradeskillModule:OnInitialize()
+  self.profIcons = {
+  	[164] = 'blacksmithing',
+  	[165] = 'leatherworking',
+  	[171] = 'alchemy',
+  	[182] = 'herbalism',
+  	[186] = 'mining',
+  	[202] = 'engineering',
+  	[333] = 'enchanting',
+  	[755] = 'jewelcrafting',
+  	[773] = 'inscription',
+  	[197] = 'tailoring',
+  	[393] = 'skinning'
+  }
+end
 
-local tradeSkillFrame = CreateFrame("Frame",nil, cfg.SXframe)
-tradeSkillFrame:SetPoint("LEFT", cfg.SXframe, "CENTER", 110,0)
-tradeSkillFrame:SetSize(16, 16)
----------------------------------------------------------------------
-local primaryTradeSkillFrame = CreateFrame("BUTTON",nil, tradeSkillFrame)
-primaryTradeSkillFrame:SetSize(16, 16)
-primaryTradeSkillFrame:SetPoint("LEFT")
-primaryTradeSkillFrame:EnableMouse(true)
-primaryTradeSkillFrame:RegisterForClicks("AnyUp")
+function TradeskillModule:OnEnable()
+  if self.tradeskillFrame == nil then
+    self.tradeskillFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
+    xb:RegisterFrame('tradeskillFrame', self.tradeskillFrame)
+  end
 
-local primaryTradeSkillIcon = primaryTradeSkillFrame:CreateTexture(nil,"OVERLAY",nil,7)
-primaryTradeSkillIcon:SetSize(16, 16)
-primaryTradeSkillIcon:SetPoint("LEFT")
-primaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.normal))
+  self.tradeskillFrame:Show()
 
-local primaryTradeSkillText = primaryTradeSkillFrame:CreateFontString(nil, "OVERLAY")
-primaryTradeSkillText:SetFont(cfg.text.font, cfg.text.normalFontSize)
-primaryTradeSkillText:SetPoint("RIGHT",primaryTradeSkillFrame,2,0 )
-primaryTradeSkillText:SetTextColor(unpack(cfg.color.normal))
+  local prof1, prof2, _ = GetProfessions()
+  self.prof1 = prof1
+  self.prof2 = prof2
 
-local primaryTradeSkillStatusbar = CreateFrame("StatusBar", nil, primaryTradeSkillFrame)
-primaryTradeSkillStatusbar:SetStatusBarTexture(1,1,1)
-primaryTradeSkillStatusbar:SetStatusBarColor(unpack(cfg.color.normal))
-primaryTradeSkillStatusbar:SetPoint("TOPLEFT", primaryTradeSkillText, "BOTTOMLEFT",0,-2)
+  self:CreateFrames()
+  self:RegisterFrameEvents()
+  self:Refresh()
+end
 
-local primaryTradeSkillStatusbarBG = primaryTradeSkillStatusbar:CreateTexture(nil,"BACKGROUND",nil,7)
-primaryTradeSkillStatusbarBG:SetPoint("TOPLEFT", primaryTradeSkillText, "BOTTOMLEFT",0,-2)
-primaryTradeSkillStatusbarBG:SetColorTexture(unpack(cfg.color.inactive))
+function TradeskillModule:OnDisable()
+  self.tradeskillFrame:Hide()
+  self:UnregisterEvent('TRADE_SKILL_UPDATE')
+  self:UnregisterEvent('SPELLS_CHANGED')
+  self:UnregisterEvent('UNIT_SPELLCAST_STOP')
+end
 
-primaryTradeSkillFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	primaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.hover))
-	primaryTradeSkillStatusbar:SetStatusBarColor(unpack(cfg.color.hover))
-	if not cfg.tradeSkill.showTooltip then return end
-	GameTooltip:SetOwner(tradeSkillFrame, cfg.tooltipPos)
-	addCooldownsToTooltip()
-	GameTooltip:Show()
-end)
+function TradeskillModule:UpdateProfValues()
+  if self.prof1 then
+    local _, _, skill, cap, _ = GetProfessionInfo(self.prof1)
+    self.firstProfBar:SetMinMaxValues(1, cap)
+    self.firstProfBar:SetValue(skill)
+  end
 
-primaryTradeSkillFrame:SetScript("OnLeave", function()
-	if prof1OnCooldown then
-		primaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.inactive))
-		primaryTradeSkillText:SetTextColor(unpack(cfg.color.inactive))
-	else
-		primaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.normal))
-		primaryTradeSkillText:SetTextColor(unpack(cfg.color.normal))
-	end
-	primaryTradeSkillStatusbar:SetStatusBarColor(unpack(cfg.color.normal))
-	if ( GameTooltip:IsShown() ) then GameTooltip:Hide() end
-end)
+  if self.prof2 then
+    local _, _, skill, cap, _ = GetProfessionInfo(self.prof2)
+    self.secondProfBar:SetMinMaxValues(1, cap)
+    self.secondProfBar:SetValue(skill)
+  end
+end
 
-primaryTradeSkillFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then
-		local prof1, prof2 = GetProfessions()
-		if prof1 then
-			if (GetProfessionInfo(prof1) == ('Herbalism')) then
-				ToggleSpellBook(BOOKTYPE_PROFESSION)
-			elseif(GetProfessionInfo(prof1) == ('Skinning')) then
-				ToggleSpellBook(BOOKTYPE_PROFESSION)
-			elseif(GetProfessionInfo(prof1) == ('Mining')) then
-				CastSpellByName("Smelting")
-			else
-				CastSpellByName((GetProfessionInfo(prof1)))
-			end
-		end
-	elseif button == "RightButton" then
-		ToggleSpellBook(BOOKTYPE_PROFESSION)
-	end
-end)
----------------------------------------------------------------------
-local secondaryTradeSkillFrame = CreateFrame("BUTTON",nil, tradeSkillFrame)
-secondaryTradeSkillFrame:SetPoint("RIGHT")
-secondaryTradeSkillFrame:SetSize(16, 16)
-secondaryTradeSkillFrame:EnableMouse(true)
-secondaryTradeSkillFrame:RegisterForClicks("AnyUp")
+function TradeskillModule:Refresh()
+  if InCombatLockdown() then
+    self:UpdateProfValues()
+    return
+  end
+  local db = xb.db.profile
+  if self.tradeskillFrame == nil then return; end
+  if not db.modules.tradeskill.enabled then return; end
+  local iconSize = db.text.fontSize + db.general.barPadding
 
-local secondaryTradeSkillIcon = secondaryTradeSkillFrame:CreateTexture(nil,"OVERLAY",nil,7)
-secondaryTradeSkillIcon:SetSize(16, 16)
-secondaryTradeSkillIcon:SetPoint("LEFT")
-secondaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.normal))
+  local totalWidth = 0
 
-local secondaryTradeSkillText = secondaryTradeSkillFrame:CreateFontString(nil, "OVERLAY")
-secondaryTradeSkillText:SetFont(cfg.text.font, cfg.text.normalFontSize)
-secondaryTradeSkillText:SetPoint("LEFT", secondaryTradeSkillIcon,"RIGHT",2,0)
-secondaryTradeSkillText:SetTextColor(unpack(cfg.color.normal))
+  if self.prof1 then
+    self:StyleTradeskillFrame('firstProf', self.prof1)
+    totalWidth = totalWidth + self.firstProfFrame:GetWidth()
+    self.firstProfFrame:SetPoint('LEFT')
+  end
 
-local secondaryTradeSkillStatusbar = CreateFrame("StatusBar", nil, secondaryTradeSkillFrame)
-secondaryTradeSkillStatusbar:SetStatusBarTexture(1,1,1)
-secondaryTradeSkillStatusbar:SetStatusBarColor(unpack(cfg.color.normal))
-secondaryTradeSkillStatusbar:SetPoint("TOPLEFT", secondaryTradeSkillText, "BOTTOMLEFT",0,-2)
+  if self.prof2 then
+    self:StyleTradeskillFrame('secondProf', self.prof2)
+    totalWidth = totalWidth + self.secondProfFrame:GetWidth()
+    self.secondProfFrame:SetPoint('LEFT', self.firstProfFrame, 'RIGHT', 5, 0)
+  end
 
-local secondaryTradeSkillStatusbarBG = secondaryTradeSkillStatusbar:CreateTexture(nil,"BACKGROUND",nil,7)
-secondaryTradeSkillStatusbarBG:SetPoint("TOPLEFT", secondaryTradeSkillText, "BOTTOMLEFT",0,-2)
-secondaryTradeSkillStatusbarBG:SetColorTexture(unpack(cfg.color.inactive))
+  self:UpdateProfValues()
 
-secondaryTradeSkillFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	secondaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.hover))
-	secondaryTradeSkillStatusbar:SetStatusBarColor(unpack(cfg.color.hover))
-	if not cfg.tradeSkill.showTooltip then return end
-	GameTooltip:SetOwner(tradeSkillFrame, cfg.tooltipPos)
-	addCooldownsToTooltip()
-	GameTooltip:Show()
-end)
+  self.tradeskillFrame:SetSize(totalWidth, xb:GetHeight())
 
-secondaryTradeSkillFrame:SetScript("OnLeave", function()
-	if prof2OnCooldown then
-		secondaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.inactive))
-		secondaryTradeSkillText:SetTextColor(unpack(cfg.color.inactive))
-	else
-		secondaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.normal))
-		secondaryTradeSkillText:SetTextColor(unpack(cfg.color.normal))
-	end
-	secondaryTradeSkillStatusbar:SetStatusBarColor(unpack(cfg.color.normal))
-	if ( GameTooltip:IsShown() ) then GameTooltip:Hide() end
-end)
+  --self.tradeskillFrame:SetSize(self.goldButton:GetSize())
 
-secondaryTradeSkillFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then
-		local prof1, prof2 = GetProfessions()
-		if prof2 then
-			if (GetProfessionInfo(prof2) == ('Herbalism')) then
-				ToggleSpellBook(BOOKTYPE_PROFESSION)
-			elseif(GetProfessionInfo(prof2) == ('Skinning')) then
-				ToggleSpellBook(BOOKTYPE_PROFESSION)
-			elseif(GetProfessionInfo(prof2) == ('Mining')) then
-				CastSpellByName("Smelting")
-			else
-				CastSpellByName((GetProfessionInfo(prof2)))
-			end
-		end
-	elseif button == "RightButton" then
-		ToggleSpellBook(BOOKTYPE_PROFESSION)
-	end
-end)
----------------------------------------------------------------------
+  local relativeAnchorPoint = 'RIGHT'
+  local xOffset = db.general.moduleSpacing
+  if not xb:GetFrame('clockFrame'):IsVisible() then
+    relativeAnchorPoint = 'LEFT'
+    xOffset = 0
+  end
+  self.tradeskillFrame:SetPoint('LEFT', xb:GetFrame('clockFrame'), relativeAnchorPoint, xOffset, 0)
+end
 
-local eventframe = CreateFrame("Frame")
-eventframe:RegisterEvent("PLAYER_ENTERING_WORLD")
-eventframe:RegisterEvent("TRADE_SKILL_UPDATE")
-eventframe:RegisterEvent("TRAINER_CLOSED")
-eventframe:RegisterEvent("SPELLS_CHANGED")
-eventframe:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
+function TradeskillModule:StyleTradeskillFrame(framePrefix, profIndex)
+  local db = xb.db.profile
+  local iconSize = db.text.fontSize + db.general.barPadding
+  local name, _, skill, cap, _, spellOffset, skillLine, _ = GetProfessionInfo(profIndex)
+  local icon = xb.constants.mediaPath..'profession\\'..self.profIcons[skillLine]
 
-eventframe:SetScript("OnEvent", function(self,event, ...)
-	local prof1, prof2 = GetProfessions()
-	if prof1 then
-		local prof1Name, _, prof1Rank, prof1MaxRank, _, _, prof1SkillLine = GetProfessionInfo(prof1)
-		prof1Name = string.upper(prof1Name)
-		primaryTradeSkillText:SetText(prof1Name)
-		primaryTradeSkillIcon:SetTexture(cfg.mediaFolder.."profession\\"..profIcons[prof1SkillLine])
-		if prof1Rank == prof1MaxRank then
-			primaryTradeSkillStatusbar:Hide()
-		else
-			primaryTradeSkillStatusbar:Show()
-		end
-		primaryTradeSkillStatusbar:SetMinMaxValues(0, prof1MaxRank)
-		primaryTradeSkillStatusbar:SetValue(prof1Rank)
-		primaryTradeSkillFrame:SetSize(primaryTradeSkillText:GetStringWidth()+18, 16)
-		primaryTradeSkillStatusbar:SetSize(primaryTradeSkillText:GetStringWidth(),3)
-		primaryTradeSkillStatusbarBG:SetSize(primaryTradeSkillText:GetStringWidth(),3)
-		primaryTradeSkillFrame:Show()
-		primaryTradeSkillFrame:EnableMouse(true)
+  local textHeight = floor((xb:GetHeight() - 4) / 2)
+  if skill == cap then
+    textHeight = db.text.fontSize
+  end
+  self[framePrefix..'Icon']:SetTexture(icon)
+  self[framePrefix..'Icon']:SetSize(iconSize, iconSize)
+  self[framePrefix..'Icon']:SetPoint('LEFT')
+  self[framePrefix..'Icon']:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
 
-		primaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.normal))
-		primaryTradeSkillText:SetTextColor(unpack(cfg.color.normal))
+  self[framePrefix..'Text']:SetFont(xb:GetFont(textHeight))
+  self[framePrefix..'Text']:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  self[framePrefix..'Text']:SetText(string.upper(name))
 
-		--[[for i=1,GetNumTradeSkills() do
-			local cooldown = GetTradeSkillCooldown(i)
-			if cooldown then
-				local name = GetTradeSkillInfo(i)
-				for k, v in pairs(proffessions) do
-					for u = 1, #v do
-						if k == prof1Name then
-							if v[u] == name then
-								if not prof1OnCooldown then prof1OnCooldown = true end
-								primaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.inactive))
-								primaryTradeSkillText:SetTextColor(unpack(cfg.color.inactive))
-								if not prof1OnCooldown then
-									primaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.normal))
-									primaryTradeSkillText:SetTextColor(unpack(cfg.color.normal))
-								end
-							end
-						end
-					end
-				end
-			end
-		end]]--
-	else
-		primaryTradeSkillFrame:Hide()
-		primaryTradeSkillFrame:EnableMouse(false)
-	end
+  if skill == cap then
+    self[framePrefix..'Text']:SetPoint('LEFT', self[framePrefix..'Icon'], 'RIGHT', 5, 0)
+  else
+    self[framePrefix..'Text']:SetPoint('TOPLEFT', self[framePrefix..'Icon'], 'TOPRIGHT', 5, 0)
+    self[framePrefix..'Bar']:SetStatusBarTexture(1, 1, 1)
+    if db.modules.tradeskill.barCC then
+      self[framePrefix..'Bar']:SetStatusBarColor(xb:GetClassColors())
+    else
+      self[framePrefix..'Bar']:SetStatusBarColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    end
+    self[framePrefix..'Bar']:SetSize(self[framePrefix..'Text']:GetStringWidth(), (iconSize - textHeight - 2))
+    self[framePrefix..'Bar']:SetPoint('BOTTOMLEFT', self[framePrefix..'Icon'], 'BOTTOMRIGHT', 5, 0)
 
-	if prof2 then
-		local prof2Name, _, prof2rank, prof2maxRank, _, _, prof2SkillLine = GetProfessionInfo(prof2)
-		prof2Name = string.upper(prof2Name)
-		secondaryTradeSkillText:SetText(prof2Name)
-		secondaryTradeSkillIcon:SetTexture(cfg.mediaFolder.."profession\\"..profIcons[prof2SkillLine])
-		if prof2rank == prof2maxRank then
-			secondaryTradeSkillStatusbar:Hide()
-		else
-			secondaryTradeSkillStatusbar:Show()
-		end
-		secondaryTradeSkillStatusbar:SetMinMaxValues(0, prof2maxRank)
-		secondaryTradeSkillStatusbar:SetValue(prof2rank)
-		secondaryTradeSkillFrame:SetSize(secondaryTradeSkillText:GetStringWidth()+18, 16)
-		secondaryTradeSkillStatusbar:SetSize(secondaryTradeSkillText:GetStringWidth(),3)
-		secondaryTradeSkillStatusbarBG:SetSize(secondaryTradeSkillText:GetStringWidth(),3)
-		secondaryTradeSkillFrame:Show()
-		secondaryTradeSkillFrame:EnableMouse(true)
+    self[framePrefix..'BarBg']:SetAllPoints()
+    self[framePrefix..'BarBg']:SetColorTexture(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  end
+  self[framePrefix..'Frame']:SetSize(iconSize + self[framePrefix..'Text']:GetStringWidth() + 5, xb:GetHeight())
 
-		secondaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.normal))
-		secondaryTradeSkillText:SetTextColor(unpack(cfg.color.normal))
+  local spellName, subSpellName = GetSpellBookItemName(spellOffset + 1, BOOKTYPE_PROFESSION)
+  self[framePrefix..'Frame']:SetAttribute('spell', spellName) --- While this is usually the type of thing I'd put into RegisterFrameEvents(), I need it to update
+end
 
-		--[[for i=1,GetNumTradeSkills() do
-			local cooldown = GetTradeSkillCooldown(i)
-			if cooldown then
-				local name = GetTradeSkillInfo(i)
-				for k, v in pairs(proffessions) do
-					for u = 1, #v do
-						if k == prof2Name then
-							if v[u] == name then
-								if not prof2OnCooldown then prof2OnCooldown = true end
-								secondaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.inactive))
-								secondaryTradeSkillText:SetTextColor(unpack(cfg.color.inactive))
-								if not prof2OnCooldown then
-									secondaryTradeSkillIcon:SetVertexColor(unpack(cfg.color.normal))
-									secondaryTradeSkillText:SetTextColor(unpack(cfg.color.normal))
-								end
-							end
-						end
-					end
-				end
-			end
-		end]]--
-	else
-		secondaryTradeSkillFrame:Hide()
-		secondaryTradeSkillFrame:EnableMouse(false)
-	end
-	tradeSkillFrame:SetSize((primaryTradeSkillFrame:GetWidth())+(secondaryTradeSkillFrame:GetWidth()+4), 16)
-end)
+function TradeskillModule:CreateFrames()
+  self.firstProfFrame = self.firstProfFrame or CreateFrame("BUTTON", nil, self.tradeskillFrame, 'SecureActionButtonTemplate')
+  self.firstProfIcon = self.firstProfIcon or self.firstProfFrame:CreateTexture(nil, 'OVERLAY')
+  self.firstProfText = self.firstProfText or self.firstProfFrame:CreateFontString(nil, 'OVERLAY')
+  self.firstProfBar = self.firstProfBar or CreateFrame('STATUSBAR', nil, self.firstProfFrame)
+  self.firstProfBarBg = self.firstProfBarBg or self.firstProfBar:CreateTexture(nil, 'BACKGROUND')
 
+  self.secondProfFrame = self.secondProfFrame or CreateFrame("BUTTON", nil, self.tradeskillFrame, 'SecureActionButtonTemplate')
+  self.secondProfIcon = self.secondProfIcon or self.secondProfFrame:CreateTexture(nil, 'OVERLAY')
+  self.secondProfText = self.secondProfText or self.secondProfFrame:CreateFontString(nil, 'OVERLAY')
+  self.secondProfBar = self.secondProfBar or CreateFrame('STATUSBAR', nil, self.secondProfFrame)
+  self.secondProfBarBg = self.secondProfBarBg or self.secondProfBar:CreateTexture(nil, 'BACKGROUND')
+end
 
-function addCooldownsToTooltip()
-	for i,v in pairs(C_TradeSkillUI.GetFilteredRecipeIDs()) do
-	  local _, cooldown, secondsToCooldown, dunno = C_TradeSkillUI.GetRecipeCooldown(v)
-	  if cooldown then
-	    local name = C_TradeSkillUI.GetRecipeInfo(v).name
-	    GameTooltip:AddDoubleLine(name, SecondsToTime(secondsToCooldown), 1, 1, 0, 1, 1, 1)
-	  end
-	end
+function TradeskillModule:RegisterFrameEvents()
+
+  self:RegisterEvent('TRADE_SKILL_UPDATE', 'Refresh')
+  self:RegisterEvent('SPELLS_CHANGED', 'Refresh')
+  self.tradeskillFrame:RegisterUnitEvent('UNIT_SPELLCAST_STOP', 'player')
+  self.tradeskillFrame:SetScript('OnEvent', function(_, event)
+    if event == 'UNIT_SPELLCAST_STOP' then
+      self:Refresh()
+    end
+  end)
+
+  self.firstProfFrame:EnableMouse(true)
+  self.firstProfFrame:RegisterForClicks('AnyUp')
+
+  self.firstProfFrame:SetScript('OnEnter', function()
+    if InCombatLockdown() then return; end
+    self.firstProfText:SetTextColor(unpack(xb:HoverColors()))
+    if xb.db.profile.modules.tradeskill.showTooltip then
+      self:ShowTooltip()
+    end
+  end)
+  self.firstProfFrame:SetScript('OnLeave', function()
+    if InCombatLockdown() then return; end
+    local db = xb.db.profile
+    self.firstProfText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    if xb.db.profile.modules.tradeskill.showTooltip then
+      GameTooltip:Hide()
+    end
+  end)
+  self.firstProfFrame:SetAttribute('*type1', 'spell')
+  self.firstProfFrame:SetAttribute('unit', 'player')
+
+  self.secondProfFrame:EnableMouse(true)
+  self.secondProfFrame:RegisterForClicks('AnyUp')
+
+  self.secondProfFrame:SetScript('OnEnter', function()
+    if InCombatLockdown() then return; end
+    self.secondProfText:SetTextColor(unpack(xb:HoverColors()))
+    if xb.db.profile.modules.tradeskill.showTooltip then
+      self:ShowTooltip()
+    end
+  end)
+  self.secondProfFrame:SetScript('OnLeave', function()
+    if InCombatLockdown() then return; end
+    local db = xb.db.profile
+    self.secondProfText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    if xb.db.profile.modules.tradeskill.showTooltip then
+      GameTooltip:Hide()
+    end
+  end)
+  self.secondProfFrame:SetAttribute('*type1', 'spell')
+  self.secondProfFrame:SetAttribute('unit', 'player')
+
+  self.tradeskillFrame:EnableMouse(true)
+  self.tradeskillFrame:SetScript('OnEnter', function()
+    if xb.db.profile.modules.tradeskill.showTooltip then
+      self:ShowTooltip()
+    end
+  end)
+  self.tradeskillFrame:SetScript('OnLeave', function()
+    if xb.db.profile.modules.tradeskill.showTooltip then
+      GameTooltip:Hide()
+    end
+  end)
+
+  self:RegisterMessage('XIVBar_FrameHide', function(_, name)
+    if name == 'clockFrame' then
+      self:Refresh()
+    end
+  end)
+
+  self:RegisterMessage('XIVBar_FrameShow', function(_, name)
+    if name == 'clockFrame' then
+      self:Refresh()
+    end
+  end)
+end
+
+function TradeskillModule:ShowTooltip()
+  return
+  --[[
+  GameTooltip:SetOwner(self.tradeskillFrame, 'ANCHOR_'..xb.miniTextPosition)
+  GameTooltip:AddLine("[|cff6699FF"..L['Cooldowns'].."|r]")
+  GameTooltip:AddLine(" ")
+
+  local recipeIds = C_TradeSkillUI.GetAllRecipeIDs()
+
+  GameTooltip:AddLine(" ")
+  GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Currency Frame'], 1, 1, 0, 1, 1, 1)
+  GameTooltip:Show()]]--
+end
+
+function TradeskillModule:GetDefaultOptions()
+  return 'tradeskill', {
+      enabled = true,
+      barCC = false,
+      showTooltip = true
+    }
+end
+
+function TradeskillModule:GetConfig()
+  return {
+    name = self:GetName(),
+    type = "group",
+    args = {
+      enable = {
+        name = ENABLE,
+        order = 0,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.tradeskill.enabled; end,
+        set = function(_, val)
+          xb.db.profile.modules.tradeskill.enabled = val
+          if val then
+            self:Enable()
+          else
+            self:Disable()
+          end
+        end,
+        width = "full"
+      },
+      barCC = {
+        name = L['Use Class Colors'],
+        order = 2,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.tradeskill.barCC; end,
+        set = function(_, val) xb.db.profile.modules.tradeskill.barCC = val; self:Refresh(); end
+      },
+      showTooltip = {
+        name = L['Show Tooltips'],
+        order = 3,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.tradeskill.showTooltip; end,
+        set = function(_, val) xb.db.profile.modules.tradeskill.showTooltip = val; self:Refresh(); end
+      }
+    }
+  }
 end
