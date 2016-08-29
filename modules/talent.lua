@@ -120,7 +120,7 @@ function TalentModule:Refresh()
   local relativeAnchorPoint = 'LEFT'
   local xOffset = db.general.moduleSpacing
   local anchorFrame = xb:GetFrame('clockFrame')
-  if not anchorFrame:IsVisible() then
+  if not anchorFrame:IsVisible() and not db.modules.clock.enabled then
     if xb:GetFrame('tradeskillFrame'):IsVisible() then
       anchorFrame = xb:GetFrame('tradeskillFrame')
     elseif xb:GetFrame('currencyFrame'):IsVisible() then
