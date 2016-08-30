@@ -43,12 +43,14 @@ function GoldModule:Refresh()
   if not db.modules.gold.enabled then return; end
 
   if InCombatLockdown() then
+    self.goldText:SetFont(xb:GetFont(db.text.fontSize))
     self.goldText:SetText(self:FormatCoinText(GetMoney()))
     if db.modules.gold.showFreeBagSpace then
       local freeSpace = 0
       for i = 0, 4 do
         freeSpace = freeSpace + GetContainerNumFreeSlots(i)
       end
+      self.bagText:SetFont(xb:GetFont(db.text.fontSize))
       self.bagText:SetText('('..tostring(freeSpace)..')')
     end
     return

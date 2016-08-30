@@ -132,11 +132,51 @@ function TravelModule:RegisterFrameEvents()
 
   self.portButton:SetScript('OnEnter', function()
     TravelModule:SetPortColor()
+    if InCombatLockdown() then return; end
+
+    GameTooltip:SetOwner(self.portButton, 'ANCHOR_'..xb.miniTextPosition)
+    GameTooltip:ClearLines()
+    GameTooltip:AddLine("[|cff6699FF"..L['Travel Cooldowns'].."|r]")
+    for i, v in ipairs(self.portOptions) do
+      if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
+        if IsUsableItem(v.portId) then
+          local _, cd, _ = GetItemCooldown(v.portId)
+          local cdString = self:FormatCooldown(cd)
+          GameTooltip:AddDoubleLine(v.text, cdString, 1, 1, 0, 1, 1, 1)
+        end
+        if IsPlayerSpell(v.portId) then
+          local _, cd, _ = GetSpellCooldown(v.portId)
+          local cdString = self:FormatCooldown(cd)
+          GameTooltip:AddDoubleLine(v.text, cdString, 1, 1, 0, 1, 1, 1)
+        end
+      end
+    end
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Change Port Option'], 1, 1, 0, 1, 1, 1)
+    GameTooltip:Show()
   end)
 
   self.portButton:SetScript('OnLeave', function()
     TravelModule:SetPortColor()
+    GameTooltip:Hide()
   end)
+end
+
+function TravelModule:FormatCooldown(cdTime)
+  if cdTime <= 0 then
+    return L['Ready']
+  end
+  local hours = string.format("%02.f", math.floor(cdTime / 3600))
+  local minutes = string.format("%02.f", math.floor(cdTime / 60 - (hours * 60)))
+  local seconds = string.format("%02.f", math.floor(cdTime - (hours * 3600) - (minutes * 60)))
+  local retString = ''
+  if tonumber(hours) ~= 0 then
+    retString = hours..':'
+  end
+  if tonumber(minutes) ~= 0 or tonumber(hours) ~= 0 then
+    retString = retString..minutes..':'
+  end
+  return retString..seconds
 end
 
 function TravelModule:SetHearthColor()

@@ -77,6 +77,9 @@ L['Hide Event Text'] = true;
 
 L['Travel'] = true;
 L['Port Options'] = true;
+L['Ready'] = true;
+L['Travel Cooldowns'] = true;
+L['Change Port Option'] = true;
 
 L['Gold'] = true;
 L['Always Show Silver and Copper'] = true;

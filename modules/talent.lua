@@ -173,8 +173,10 @@ function TalentModule:RegisterFrameEvents()
   self.specFrame:SetScript('OnEnter', function()
     if InCombatLockdown() then return; end
     self.specText:SetTextColor(unpack(xb:HoverColors()))
-    if xb.db.profile.modules.tradeskill.showTooltip and ((not self.specPopup:IsVisible()) or (not self.lootSpecPopup:IsVisible())) then
-      self:ShowTooltip()
+    if xb.db.profile.modules.tradeskill.showTooltip then
+      if ((not self.specPopup:IsVisible()) or (not self.lootSpecPopup:IsVisible())) then
+        self:ShowTooltip()
+      end
     end
   end)
   self.specFrame:SetScript('OnLeave', function()
