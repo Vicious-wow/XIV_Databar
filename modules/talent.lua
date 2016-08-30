@@ -107,12 +107,17 @@ function TalentModule:Refresh()
 
   self.talentFrame:SetSize(self.specFrame:GetWidth(), xb:GetHeight())
 
-  self.specPopup:SetPoint('BOTTOM', self.specFrame, 'TOP', 0, xb.constants.popupPadding)
+  local popupPadding = xb.constants.popupPadding
+  if db.general.barPosition == 'TOP' then
+    popupPadding = -(popupPadding)
+  end
+
+  self.specPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, popupPadding)
   self.specPopupTexture:SetColorTexture(db.color.barColor.r, db.color.barColor.g, db.color.barColor.b, db.color.barColor.a)
   self.specPopupTexture:SetAllPoints()
   self.specPopup:Hide()
 
-  self.lootSpecPopup:SetPoint('BOTTOM', self.specFrame, 'TOP', 0, xb.constants.popupPadding)
+  self.lootSpecPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, popupPadding)
   self.lootSpecPopupTexture:SetColorTexture(db.color.barColor.r, db.color.barColor.g, db.color.barColor.b, db.color.barColor.a)
   self.lootSpecPopupTexture:SetAllPoints()
   self.lootSpecPopup:Hide()

@@ -194,15 +194,19 @@ function TravelModule:SetPortColor()
     if (PlayerHasToy(v) or IsUsableItem(v)) then
       if GetItemCooldown(v) == 0 then
         hearthName, _ = GetItemInfo(v)
-        hearthActive = true
-        self.portButton:SetAttribute("macrotext", "/cast "..hearthName)
+        if hearthName ~= nil then
+          hearthActive = true
+          self.portButton:SetAttribute("macrotext", "/cast "..hearthName)
+        end
       end
     end -- if toy/item
     if IsPlayerSpell(v) then
       if GetSpellCooldown(v) == 0 then
         hearthName, _ = GetSpellInfo(v)
-        hearthActive = true
-        self.portButton:SetAttribute("macrotext", "/cast "..hearthName)
+        if hearthName ~= nil then
+          hearthActive = true
+          self.portButton:SetAttribute("macrotext", "/cast "..hearthName)
+        end
       end
     end -- if is spell
 

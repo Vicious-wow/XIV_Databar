@@ -58,6 +58,7 @@ L['Open Guild Page'] = true;
 L['Social'] = true;
 L['No Tag'] = true;
 L['Level'] = true;
+L['Hide Social Text'] = true;
 
 L['Armor'] = true;
 L['Always Show Item Level'] = true;
@@ -72,6 +73,7 @@ L['Local Time'] = true;
 L['Realm Time'] = true;
 L['Open Calendar'] = true;
 L['Open Clock'] = true;
+L['Hide Event Text'] = true;
 
 L['Travel'] = true;
 L['Port Options'] = true;
@@ -102,6 +104,7 @@ L['Addons to Show in Tooltip'] = true;
 L['Show All Addons in Tooltip with Shift'] = true;
 L['Memory Usage'] = true;
 L['Garbage Collect'] = true;
+L['Cleaned'] = true;
 
 L['Use Class Colors'] = true;
 L['Cooldowns'] = true;

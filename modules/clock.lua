@@ -84,6 +84,9 @@ function ClockModule:Refresh()
 
   self.eventText:SetFont(xb:GetFont(db.text.smallFontSize))
   self.eventText:SetPoint('CENTER', self.clockText, xb.miniTextPosition)
+  if xb.db.profile.modules.clock.hideEventText then
+    self.eventText:Hide()
+  end
 end
 
 function ClockModule:CreateFrames()
@@ -109,9 +112,11 @@ function ClockModule:RegisterFrameEvents()
       local dateString = date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime)
       ClockModule.clockText:SetText(dateString)
 
-      local eventInvites = CalendarGetNumPendingInvites()
-      if eventInvites > 0 then
-        ClockModule.eventText:SetText(string.format("%s  (|cffffff00%i|r)", L['New Event!'], eventInvites))
+      if not xb.db.profile.modules.clock.hideEventText then
+        local eventInvites = CalendarGetNumPendingInvites()
+        if eventInvites > 0 then
+          ClockModule.eventText:SetText(string.format("%s  (|cffffff00%i|r)", L['New Event!'], eventInvites))
+        end
       end
 
       ClockModule:Refresh()
@@ -177,7 +182,8 @@ function ClockModule:GetDefaultOptions()
       enabled = true,
       timeFormat = 'twelveAmPm',
       fontSize = 20,
-      serverTime = false
+      serverTime = false,
+      hideEventText = false
     }
 end
 
@@ -210,9 +216,16 @@ function ClockModule:GetConfig()
         get = function() return xb.db.profile.modules.clock.serverTime; end,
         set = function(_, val) xb.db.profile.modules.clock.serverTime = val; end
       },
+      hideEventText = {
+        name = L['Hide Event Text'],
+        order = 2,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.clock.hideEventText; end,
+        set = function(_, val) xb.db.profile.modules.clock.hideEventText = val; end
+      },
       timeFormat = {
         name = L['Time Format'],
-        order = 2,
+        order = 3,
         type = "select",
         values = { --TODO: WTF is with this not accepting a variable?
           twelveAmPm = '08:00 AM (12 Hour)',
@@ -229,7 +242,7 @@ function ClockModule:GetConfig()
       fontSize = {
         name = L['Font Size'],
         type = 'range',
-        order = 3,
+        order = 4,
         min = 10,
         max = 20,
         step = 1,

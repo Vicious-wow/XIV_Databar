@@ -117,6 +117,9 @@ function MenuModule:Refresh()
     frame:SetPoint('CENTER', self.frames[name], xb.miniTextPosition)
     self.bgTexture[name]:SetColorTexture(xb.db.profile.color.barColor.r, xb.db.profile.color.barColor.g, xb.db.profile.color.barColor.b, xb.db.profile.color.barColor.a)
     self.bgTexture[name]:SetPoint('CENTER', frame, 'CENTER')
+    if xb.db.profile.modules.microMenu.hideSocialText then
+      frame:Hide()
+    end
   end
 end
 
@@ -233,6 +236,7 @@ function MenuModule:UnregisterFrameEvents()
 end
 
 function MenuModule:UpdateGuildText(isEvent)
+  if xb.db.profile.modules.microMenu.hideSocialText then return; end
   if isEvent == nil then
     GuildRoster()
   end
@@ -247,6 +251,7 @@ function MenuModule:UpdateGuildText(isEvent)
 end
 
 function MenuModule:UpdateFriendText()
+  if xb.db.profile.modules.microMenu.hideSocialText then return; end
   local _, bnOnlineMembers = BNGetNumFriends()
   local _, friendsOnline = GetNumFriends()
   local totalFriends = bnOnlineMembers + friendsOnline
@@ -521,7 +526,8 @@ function MenuModule:GetDefaultOptions()
       enabled = true,
       showTooltips = true,
       mainMenuSpacing = 2,
-      iconSpacing = 2
+      iconSpacing = 2,
+      hideSocialText = false
     }
 end
 
@@ -551,9 +557,16 @@ function MenuModule:GetConfig()
         get = function() return xb.db.profile.modules.microMenu.showTooltips; end,
         set = function(_, val) xb.db.profile.modules.microMenu.showTooltips = val; self:Refresh(); end
       },
+      hideSocialText = {
+        name = L['Hide Social Text'],
+        order = 2,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.microMenu.hideSocialText; end,
+        set = function(_, val) xb.db.profile.modules.microMenu.hideSocialText = val; self:Refresh(); end
+      },
       mainMenuSpacing = {
         name = L['Main Menu Icon Right Spacing'],
-        order = 2,
+        order = 3,
         type="range",
         min = 2,
         max = 20,
@@ -563,7 +576,7 @@ function MenuModule:GetConfig()
       },
       iconSpacing = {
         name = L['Icon Spacing'],
-        order = 2,
+        order = 4,
         type="range",
         min = 2,
         max = 20,

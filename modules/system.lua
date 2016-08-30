@@ -202,7 +202,18 @@ function SystemModule:RegisterFrameEvents()
   self.fpsFrame:SetScript('OnClick', function(_, button)
     if InCombatLockdown() then return; end
     if button == 'LeftButton' then
+      UpdateAddOnMemoryUsage()
+      local before = collectgarbage('count')
       collectgarbage()
+      local after = collectgarbage('count')
+      local memDiff = before - after
+      local memString = ''
+      if memDiff > 1024 then
+        memString = string.format("%.2f MB", (memDiff / 1024))
+      else
+        memString = string.format("%.0f KB", floor(memDiff))
+      end
+      print("|cff6699FFXIV_Databar|r: "..L['Cleaned']..": |cffffff00"..memString)
     end
   end)
 

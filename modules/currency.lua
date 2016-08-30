@@ -50,7 +50,7 @@ function CurrencyModule:OnDisable()
 end
 
 function CurrencyModule:Refresh()
-
+  local db = xb.db.profile
   xb.constants.playerLevel = UnitLevel("player")
   if InCombatLockdown() then
     if xb.constants.playerLevel < MAX_PLAYER_LEVEL and db.modules.currency.showXPbar then
@@ -64,7 +64,6 @@ function CurrencyModule:Refresh()
     end)
     return
   end
-  local db = xb.db.profile
   if self.currencyFrame == nil then return; end
   if not db.modules.currency.enabled then return; end
 
@@ -252,43 +251,6 @@ function CurrencyModule:RegisterFrameEvents()
       self:Refresh()
     end
   end)
-
-  --[[
-  self.goldButton:EnableMouse(true)
-  self.goldButton:RegisterForClicks("AnyUp")
-
-  self.goldButton:SetScript('OnEnter', function()
-    if InCombatLockdown() then return; end
-    self.goldText:SetTextColor(unpack(xb:HoverColors()))
-    self.bagText:SetTextColor(unpack(xb:HoverColors()))
-
-    GameTooltip:SetOwner(CurrencyModule.goldFrame, 'ANCHOR_'..xb.miniTextPosition)
-    GameTooltip:AddLine("[|cff6699FF"..L['Gold'].."|r - |cff82c5ff"..xb.constants.playerFactionLocal.." "..xb.constants.playerRealm.."|r]")
-    GameTooltip:AddLine(" ")
-
-    local totalGold = 0
-    for charName, goldData in pairs(xb.db.factionrealm) do
-      GameTooltip:AddDoubleLine(charName, CurrencyModule:FormatCoinText(goldData.currentMoney), 1, 1, 0, 1, 1, 1)
-      totalGold = totalGold + goldData.currentMoney
-    end
-    GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine(L['Total'], CurrencyModule:FormatCoinText(totalGold), 1, 1, 0, 1, 1, 1)
-    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Bags'], 1, 1, 0, 1, 1, 1)
-    GameTooltip:Show()
-  end)
-
-  self.goldButton:SetScript('OnLeave', function()
-    if InCombatLockdown() then return; end
-    local db = xb.db.profile
-    self.goldText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    self.bagText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    GameTooltip:Hide()
-  end)
-
-  self.goldButton:SetScript('OnClick', function(_, button)
-    if InCombatLockdown() then return; end
-    ToggleAllBags()
-  end)]]--
 end
 
 function CurrencyModule:ShowTooltip()
