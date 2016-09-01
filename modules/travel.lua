@@ -351,6 +351,7 @@ function TravelModule:Refresh()
     self.portText:SetText(xb.db.profile.modules.travel.portItem.text)
     self:SetHearthColor()
     self:SetPortColor()
+    return
   end
 
   local db = xb.db.profile
