@@ -166,6 +166,10 @@ end
 function XIVBar:OnEnable()
   self:CreateMainBar()
   self:Refresh()
+
+  self.db.RegisterCallback(self, 'OnProfileCopied', 'Refresh')
+  self.db.RegisterCallback(self, 'OnProfileChanged', 'Refresh')
+  self.db.RegisterCallback(self, 'OnProfileReset', 'Refresh')
 end
 
 function XIVBar:ToggleConfig()
