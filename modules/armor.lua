@@ -50,6 +50,7 @@ end
 
 function ArmorModule:RegisterFrameEvents()
   self.armorButton:EnableMouse(true)
+  self.armorButton:RegisterUnitEvent('UNIT_INVENTORY_CHANGED', 'player')
 
   self.armorButton:SetScript('OnEnter', function()
     ArmorModule:SetArmorColor()
@@ -68,6 +69,12 @@ function ArmorModule:RegisterFrameEvents()
   self.armorButton:SetScript('OnLeave', function()
     self:SetArmorColor()
     GameTooltip:Hide()
+  end)
+
+  self.armorButton:SetScript('OnEvent', function(_, event)
+    if event == 'UNIT_INVENTORY_CHANGED' then
+      self:Refresh()
+    end
   end)
 
   self:RegisterMessage('XIVBar_FrameHide', function(_, name)
@@ -134,7 +141,6 @@ function ArmorModule:Refresh()
 end
 
 function ArmorModule:UPDATE_INVENTORY_DURABILITY()
-  self:UpdateDurabilityText()
   self:Refresh()
 end
 
