@@ -116,3 +116,7 @@ L['Set Specialization'] = true;
 L['Set Loot Specialization'] = true;
 L['Current Specialization'] = true;
 L['Current Loot Specialization'] = true;
+L['Talent Minimum Width'] = true;
+L['Remaining'] = true;
+L['Available Ranks'] = true;
+L['Artifact Knowledge'] = true;

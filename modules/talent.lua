@@ -24,6 +24,7 @@ function TalentModule:OnInitialize()
   self.lootSpecButtons = {}
   self.classIcon = xb.constants.mediaPath..'spec\\'..xb.constants.playerClass
   self.LAD = LibStub('LibArtifactData-1.0')
+  self.curArtifactId = 0
 end
 
 function TalentModule:OnEnable()
@@ -38,6 +39,7 @@ function TalentModule:OnEnable()
 
   self:CreateFrames()
   self:RegisterFrameEvents()
+  self.LAD:ForceUpdate()
   self:Refresh()
 end
 
@@ -55,8 +57,8 @@ function TalentModule:Refresh()
   if self.talentFrame == nil then return; end
   if not db.modules.talent.enabled then return; end
 
-  local artifactId = 0
-  --local artifactId = self.LAD:GetActiveArtifactID() or 0
+  --local artifactId = 0
+  local artifactId = self.LAD:GetActiveArtifactID() or 0
 
   self.currentSpecID = GetSpecialization()
   self.currentLootSpecID = GetLootSpecialization()
@@ -67,6 +69,7 @@ function TalentModule:Refresh()
   local textHeight = db.text.fontSize
   if artifactId > 0 then
     textHeight = floor((xb:GetHeight() - 4) / 2)
+    self.curArtifactId = artifactId
   end
   self.specIcon:SetTexture(self.classIcon)
   self.specIcon:SetTexCoord(unpack(self.specCoords[self.currentSpecID]))
@@ -104,6 +107,14 @@ function TalentModule:Refresh()
   end
   self.specFrame:SetSize(iconSize + self.specText:GetStringWidth() + 5, xb:GetHeight())
   self.specFrame:SetPoint('LEFT')
+
+  if self.specFrame:GetWidth() < db.modules.talent.minWidth then
+    self.specFrame:SetWidth(db.modules.talent.minWidth)
+  end
+
+  if self.specBar:GetWidth() < db.modules.talent.minWidth then
+    self.specBar:SetWidth(db.modules.talent.minWidth)
+  end
 
   self.talentFrame:SetSize(self.specFrame:GetWidth(), xb:GetHeight())
 
@@ -165,7 +176,11 @@ function TalentModule:RegisterFrameEvents()
   self:RegisterEvent('ACTIVE_TALENT_GROUP_CHANGED', 'Refresh')
   self:RegisterEvent('PLAYER_LOOT_SPEC_UPDATED', 'Refresh')
 
-  -- ARTIFACT_ACTIVE_CHANGED
+  self:RegisterEvent('ARTIFACT_XP_UPDATE', function()
+    UpdateArtifactBar(self.curArtifactId)
+  end)
+
+  self:RegisterEvent('UNIT_INVENTORY_CHANGED', 'Refresh')
 
   self.specFrame:EnableMouse(true)
   self.specFrame:RegisterForClicks('AnyUp')
@@ -434,7 +449,22 @@ function TalentModule:ShowTooltip()
   else
     _, name, _ = GetSpecializationInfoByID(self.currentLootSpecID)
   end
-  GameTooltip:AddLine("|cffffffff"..L['Current Loot Specialization']..": |cffffff00"..name.."|r")
+  GameTooltip:AddDoubleLine(L['Current Loot Specialization'], name, 1, 1, 0, 1, 1, 1)
+
+  if self.curArtifactId > 0 then
+    GameTooltip:AddLine(" ")
+    local _, artifactData = self.LAD:GetArtifactInfo(self.curArtifactId)
+    local knowLevel, knowMult = self.LAD:GetArtifactKnowledge()
+    if knowLevel > 0 then
+      GameTooltip:AddDoubleLine(L['Artifact Knowledge']..':', string.format('%d (x%d)', knowLevel, ((knowMult) - 1 * 100)), 1, 1, 0, 1, 1, 1)
+      GameTooltip:AddLine(" ")
+    end
+    GameTooltip:AddDoubleLine(ARTIFACT_POWER..':', string.format('%d / %d (%d%%)', artifactData.power, artifactData.maxPower, floor((artifactData.power / artifactData.maxPower) * 100)), 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine(L['Remaining']..':', string.format('%d (%d%%)', artifactData.powerForNextRank, floor((artifactData.powerForNextRank / artifactData.maxPower) * 100)), 1, 1, 0, 1, 1, 1)
+    if artifactData.numRanksPurchasable > 0 then
+      GameTooltip:AddDoubleLine(L['Available Ranks']..':', string.format('%d', artifactData.numRanksPurchasable), 1, 1, 0, 1, 1, 1)
+    end
+  end
 
   GameTooltip:AddLine(" ")
   GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Set Specialization'], 1, 1, 0, 1, 1, 1)
@@ -446,7 +476,8 @@ function TalentModule:GetDefaultOptions()
   return 'talent', {
       enabled = true,
       barCC = false,
-      showTooltip = true
+      showTooltip = true,
+      minWidth = 50
     }
 end
 
@@ -483,6 +514,16 @@ function TalentModule:GetConfig()
         type = "toggle",
         get = function() return xb.db.profile.modules.talent.showTooltip; end,
         set = function(_, val) xb.db.profile.modules.talent.showTooltip = val; self:Refresh(); end
+      },
+      minWidth = {
+        name = L['Talent Minimum Width'],
+        type = 'range',
+        order = 4,
+        min = 10,
+        max = 200,
+        step = 10,
+        get = function() return xb.db.profile.modules.talent.minWidth; end,
+        set = function(info, val) xb.db.profile.modules.talent.minWidth = val; self:Refresh(); end
       }
     }
   }
