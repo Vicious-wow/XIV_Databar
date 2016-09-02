@@ -87,19 +87,24 @@ function TradeskillModule:Refresh()
     self.secondProfFrame:SetPoint('LEFT', self.firstProfFrame, 'RIGHT', 5, 0)
   end
 
-  self:UpdateProfValues()
+  if self.prof1 or self.prof2 then
 
-  self.tradeskillFrame:SetSize(totalWidth, xb:GetHeight())
+    self:UpdateProfValues()
 
-  --self.tradeskillFrame:SetSize(self.goldButton:GetSize())
+    self.tradeskillFrame:SetSize(totalWidth, xb:GetHeight())
 
-  local relativeAnchorPoint = 'RIGHT'
-  local xOffset = db.general.moduleSpacing
-  if not xb:GetFrame('clockFrame'):IsVisible() then
-    relativeAnchorPoint = 'LEFT'
-    xOffset = 0
+    --self.tradeskillFrame:SetSize(self.goldButton:GetSize())
+
+    local relativeAnchorPoint = 'RIGHT'
+    local xOffset = db.general.moduleSpacing
+    if not xb:GetFrame('clockFrame'):IsVisible() then
+      relativeAnchorPoint = 'LEFT'
+      xOffset = 0
+    end
+    self.tradeskillFrame:SetPoint('LEFT', xb:GetFrame('clockFrame'), relativeAnchorPoint, xOffset, 0)
+  else
+    self.tradeskillFrame:Hide()
   end
-  self.tradeskillFrame:SetPoint('LEFT', xb:GetFrame('clockFrame'), relativeAnchorPoint, xOffset, 0)
 end
 
 function TradeskillModule:StyleTradeskillFrame(framePrefix, profIndex)
