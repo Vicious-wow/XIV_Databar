@@ -1,415 +1,417 @@
-local addon, ns = ...
-local cfg = ns.cfg
-local unpack = unpack
---------------------------------------------------------------
-if not cfg.currency.show then return end
+local AddOnName, XIVBar = ...;
+local _G = _G;
+local xb = XIVBar;
+local L = XIVBar.L;
 
-local iconPos = "RIGHT"
-local textPos = "LEFT"
+local CurrencyModule = xb:NewModule("CurrencyModule", 'AceEvent-3.0', 'AceHook-3.0')
 
-if cfg.currency.textOnRight then
-	iconPos = "LEFT"
-	textPos = "RIGHT"
+function CurrencyModule:GetName()
+  return L['Currency'];
 end
 
-local currencyFrame = CreateFrame("Frame",nil, cfg.SXframe)
-currencyFrame:SetPoint("LEFT", cfg.SXframe, "CENTER", 340,0)
-currencyFrame:SetSize(16, 16)
+function CurrencyModule:OnInitialize()
+  self.rerollItems = {
+    697,  -- Elder Charm of Good Fortune
+    752,  -- Mogu Rune of Fate
+    776,  -- Warforged Seal
+    994,  -- Seal of Tempered Fate
+    1129, -- Seal of Inevitable Fate
+    1273, -- Seal of Broken Fate
+  }
 
----------------------------------------------
--- XP BAR
----------------------------------------------
-local xpFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-xpFrame:SetPoint("LEFT", cfg.SXframe, "CENTER", 350,0)
-xpFrame:SetSize(16, 16)
-xpFrame:EnableMouse(true)
-xpFrame:RegisterForClicks("AnyUp")
+  self.intToOpt = {
+    [1] = 'currencyOne',
+    [2] = 'currencyTwo',
+    [3] = 'currencyThree'
+  }
 
-local xpIcon = xpFrame:CreateTexture(nil,"OVERLAY",nil,7)
-xpIcon:SetSize(16, 16)
-xpIcon:SetPoint("LEFT")
-xpIcon:SetTexture(cfg.mediaFolder.."datatexts\\exp")
-xpIcon:SetVertexColor(unpack(cfg.color.normal))
-
-local xpText = xpFrame:CreateFontString(nil, "OVERLAY")
-xpText:SetFont(cfg.text.font, cfg.text.normalFontSize)
-xpText:SetPoint("RIGHT",xpFrame,2,0 )
-xpText:SetTextColor(unpack(cfg.color.normal))
-
-local xpStatusbar = CreateFrame("StatusBar", nil, xpFrame)
-xpStatusbar:SetStatusBarTexture(1,1,1)
-xpStatusbar:SetStatusBarColor(unpack(cfg.color.normal))
-xpStatusbar:SetPoint("TOPLEFT", xpText, "BOTTOMLEFT",0,-2)
-
-local xpStatusbarBG = xpStatusbar:CreateTexture(nil,"BACKGROUND",nil,7)
-xpStatusbarBG:SetPoint("TOPLEFT", xpText, "BOTTOMLEFT",0,-2)
-xpStatusbarBG:SetColorTexture(unpack(cfg.color.inactive))
-
-xpFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	xpIcon:SetVertexColor(unpack(cfg.color.hover))
-	xpStatusbar:SetStatusBarColor(unpack(cfg.color.hover))
-	if not cfg.currency.showTooltip then return end
-	local mxp = UnitXPMax("player")
-	local xp = UnitXP("player")
-	local nxp = mxp - xp
-	local rxp = GetXPExhaustion()
-	local name, standing, minrep, maxrep, value = GetWatchedFactionInfo()
-
-	if cfg.core.position ~= "BOTTOM" then
-		GameTooltip:SetOwner(xpStatusbar, cfg.tooltipPos)
-	else
-		GameTooltip:SetOwner(xpFrame, cfg.tooltipPos)
-	end
-
-	GameTooltip:AddLine("[|cff6699FFExperience Bar|r]")
-	GameTooltip:AddLine(" ")
-	GameTooltip:AddDoubleLine(COMBAT_XP_GAIN, format(cfg.SVal(xp)).."|cffffd100/|r"..format(cfg.SVal(mxp)).." |cffffd100/|r "..floor((xp/mxp)*1000)/10 .."%",NORMAL_FONT_COLOR.r,NORMAL_FONT_COLOR.g,NORMAL_FONT_COLOR.b,1,1,1)
-	GameTooltip:AddDoubleLine(NEED, format(cfg.SVal(nxp)).." |cffffd100/|r "..floor((nxp/mxp)*1000)/10 .."%",NORMAL_FONT_COLOR.r,NORMAL_FONT_COLOR.g,NORMAL_FONT_COLOR.b,1,1,1)
-	if rxp then
-		GameTooltip:AddDoubleLine(TUTORIAL_TITLE26, format(cfg.SVal(rxp)) .." |cffffd100/|r ".. floor((rxp/mxp)*1000)/10 .."%", NORMAL_FONT_COLOR.r,NORMAL_FONT_COLOR.g,NORMAL_FONT_COLOR.b,1,1,1)
-	end
-	GameTooltip:Show()
-end)
-
-xpFrame:SetScript("OnLeave", function()
-	xpIcon:SetVertexColor(unpack(cfg.color.normal))
-	xpStatusbar:SetStatusBarColor(unpack(cfg.color.normal))
-	if ( GameTooltip:IsShown() ) then GameTooltip:Hide() end
-end)
-
----------------------------------------------
--- Artifact BAR
----------------------------------------------
-local artiFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-artiFrame:SetPoint("LEFT", cfg.SXframe, "CENTER", 200,0)
-artiFrame:SetSize(16, 16)
-artiFrame:EnableMouse(true)
-artiFrame:RegisterForClicks("AnyUp")
-
-local artiIcon = artiFrame:CreateTexture(nil,"OVERLAY",nil,7)
-artiIcon:SetSize(16, 16)
-artiIcon:SetPoint("LEFT")
-artiIcon:SetVertexColor(unpack(cfg.color.normal))
-
-local artiText = artiFrame:CreateFontString(nil, "OVERLAY")
-artiText:SetFont(cfg.text.font, cfg.text.normalFontSize)
-artiText:SetPoint("RIGHT",artiFrame,2,0 )
-artiText:SetTextColor(unpack(cfg.color.normal))
-
-local artiStatusbar = CreateFrame("StatusBar", nil, artiFrame)
-artiStatusbar:SetStatusBarTexture(1,1,1)
-artiStatusbar:SetStatusBarColor(unpack(cfg.color.normal))
-artiStatusbar:SetPoint("TOPLEFT", artiText, "BOTTOMLEFT",0,-2)
-
-local artiStatusbarBG = artiStatusbar:CreateTexture(nil,"BACKGROUND",nil,7)
-artiStatusbarBG:SetPoint("TOPLEFT", artiText, "BOTTOMLEFT",0,-2)
-artiStatusbarBG:SetColorTexture(unpack(cfg.color.inactive))
-
-artiFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	artiIcon:SetVertexColor(unpack(cfg.color.hover))
-	artiStatusbar:SetStatusBarColor(unpack(cfg.color.hover))
-	if not cfg.currency.showTooltip then return end
-	
-	local currentAP = select(5,C_ArtifactUI.GetEquippedArtifactInfo())
-	local traitsSpent = select(6,C_ArtifactUI.GetEquippedArtifactInfo())
-	local numLearnableTraits,currentAP,xpForNextTrait=GetNumArtifactTraitsPurchasableFromXP(traitsSpent,currentAP)
-
-	if cfg.core.position ~= "BOTTOM" then
-		GameTooltip:SetOwner(artiStatusbar, cfg.tooltipPos)
-	else
-		GameTooltip:SetOwner(artiFrame, cfg.tooltipPos)
-	end
-
-	GameTooltip:AddLine("[|cff6699FFArtifact Power Bar|r]")
-	GameTooltip:AddLine(" ")
-	GameTooltip:AddLine(format(ARTIFACTS_NUM_PURCHASED_RANKS,traitsSpent))
-	GameTooltip:AddLine(format(ARTIFACT_POWER_BAR,currentAP,xpForNextTrait).." with "..numLearnableTraits.." learnable traits")
-	GameTooltip:Show()
-end)
-
-artiFrame:SetScript("OnLeave", function()
-	artiIcon:SetVertexColor(unpack(cfg.color.normal))
-	artiStatusbar:SetStatusBarColor(unpack(cfg.color.normal))
-	if ( GameTooltip:IsShown() ) then GameTooltip:Hide() end
-end)
-
-artiFrame:SetScript("OnClick",function()
-	SocketInventoryItem(16)
-end)
-
----------------------------------------------
--- REROLL
----------------------------------------------
-local rerollFrame = CreateFrame("BUTTON",nil, currencyFrame)
-rerollFrame:SetPoint("LEFT")
-rerollFrame:SetSize(16, 16)
-rerollFrame:EnableMouse(true)
-rerollFrame:RegisterForClicks("AnyUp")
-
-local rerollIcon = rerollFrame:CreateTexture(nil,"OVERLAY",nil,7)
-rerollIcon:SetSize(16, 16)
-rerollIcon:SetPoint(iconPos)
-rerollIcon:SetTexture(cfg.mediaFolder.."datatexts\\reroll")
-rerollIcon:SetVertexColor(unpack(cfg.color.inactive))
-
-local rerollText = rerollFrame:CreateFontString(nil, "OVERLAY")
-rerollText:SetFont(cfg.text.font, cfg.text.normalFontSize)
---rerollText:SetPoint(iconPos,rerollIcon,textPos,-2,0)
-rerollText:SetPoint(textPos)
-rerollText:SetTextColor(unpack(cfg.color.inactive))
-
-rerollFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	rerollIcon:SetVertexColor(unpack(cfg.color.hover))
-	if not cfg.currency.showTooltip then return end
-	GameTooltip:SetOwner(currencyFrame, cfg.tooltipPos)
-	GameTooltip:AddLine("[|cff6699FFReroll|r]")
-	GameTooltip:AddLine(" ")
-	local SoIFname, SoIFamount, SoIFicon, SoIFearnedThisWeek, SoIFweeklyMax, SoIFtotalMax, SoIFisDiscovered = GetCurrencyInfo(1129)
-	if SoIFamount > 0 then
-		GameTooltip:AddLine(SoIFname,1,1,0)
-		GameTooltip:AddDoubleLine("|cffffff00Weekly: |cffffffff"..SoIFearnedThisWeek.."|cffffff00/|cffffffff"..SoIFweeklyMax, "|cffffff00Total: |cffffffff"..SoIFamount.."|cffffff00/|cffffffff"..SoIFtotalMax)
-	else
-		local SoTFname, SoTFamount, SoTFicon, SoTFearnedThisWeek, SoTFweeklyMax, SoTFtotalMax, SoTFisDiscovered = GetCurrencyInfo(994)
-		if SoTFamount > 0 then
-			GameTooltip:AddDoubleLine(SoTFname, "|cffffff00Total: |cffffffff"..SoTFamount.."|cffffff00/|cffffffff"..SoTFtotalMax)
-		end
-	end
-	GameTooltip:Show()
-end)
-
-rerollFrame:SetScript("OnLeave", function()
-	if ( GameTooltip:IsShown() ) then GameTooltip:Hide() end
-	rerollIcon:SetVertexColor(unpack(cfg.color.inactive))
-end)
-
-rerollFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then
-		ToggleCharacter("TokenFrame")
-	end
-end)
-
----------------------------------------------
--- HONOR
----------------------------------------------
-
-local honorFrame = CreateFrame("BUTTON",nil, currencyFrame)
-honorFrame:SetPoint("LEFT",rerollFrame,"RIGHT",2,0)
-honorFrame:SetSize(16, 16)
-honorFrame:EnableMouse(true)
-honorFrame:RegisterForClicks("AnyUp")
-
-local honorIcon = honorFrame:CreateTexture(nil,"OVERLAY",nil,7)
-honorIcon:SetSize(16, 16)
-honorIcon:SetPoint(iconPos)
-honorIcon:SetTexture(cfg.mediaFolder.."datatexts\\honor")
-honorIcon:SetVertexColor(unpack(cfg.color.inactive))
-
-local honorText = honorFrame:CreateFontString(nil, "OVERLAY")
-honorText:SetFont(cfg.text.font, cfg.text.normalFontSize)
-honorText:SetPoint(textPos)
-honorText:SetTextColor(unpack(cfg.color.inactive))
-
-honorFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	honorIcon:SetVertexColor(unpack(cfg.color.hover))
-	if not cfg.currency.showTooltip then return end
-	GameTooltip:SetOwner(currencyFrame, cfg.tooltipPos)
-	GameTooltip:AddLine("[|cff6699FFHonor Level:|r"..UnitHonorLevel("player").."]")
-	GameTooltip:AddLine(" ")
-	GameTooltip:AddDoubleLine(concName,"|cffffff00Honor: |cffffffff"..UnitHonor("player").."|cffffff00/|cffffffff"..UnitHonorMax("player"))
-	GameTooltip:Show()
-end)
-
-honorFrame:SetScript("OnLeave", function()
-	if ( GameTooltip:IsShown() ) then GameTooltip:Hide() end
-	honorIcon:SetVertexColor(unpack(cfg.color.inactive))
-end)
-
-honorFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then
-		ToggleCharacter("TokenFrame")
-	end
-end)
-
----------------------------------------------
--- GARRISON RECOURCES
----------------------------------------------
-
-local garrisonFrame = CreateFrame("BUTTON",nil, currencyFrame)
-garrisonFrame:SetPoint("LEFT",honorFrame,"RIGHT",2,0)
-garrisonFrame:SetSize(16, 16)
-garrisonFrame:EnableMouse(true)
-garrisonFrame:RegisterForClicks("AnyUp")
-
-local garrisonIcon = garrisonFrame:CreateTexture(nil,"OVERLAY",nil,7)
-garrisonIcon:SetSize(16, 16)
-garrisonIcon:SetPoint(iconPos)
-garrisonIcon:SetTexture(cfg.mediaFolder.."datatexts\\garres")
-garrisonIcon:SetVertexColor(unpack(cfg.color.inactive))
-
-local garrisonText = garrisonFrame:CreateFontString(nil, "OVERLAY")
-garrisonText:SetFont(cfg.text.font, cfg.text.normalFontSize)
-garrisonText:SetPoint(textPos)
-garrisonText:SetTextColor(unpack(cfg.color.inactive))
-
-garrisonFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	garrisonIcon:SetVertexColor(unpack(cfg.color.hover))
-	if not cfg.currency.showTooltip then return end
-	GameTooltip:SetOwner(currencyFrame, cfg.tooltipPos)
-	GameTooltip:AddLine("[|cff6699FFGarrison Recources|r]")
-	GameTooltip:AddLine(" ")
-	local grName, grAmount, _, _, _, grTotalMax = GetCurrencyInfo(824)
-	local oilName, oilAmount, _, _, _, oilTotalMax, oilIsDiscovered = GetCurrencyInfo(1101)
-	local apexisName, apexisAmount = GetCurrencyInfo(823)
-	local DICName, DICAmount, _, _, _, DICTotalMax = GetCurrencyInfo(980)
-
-	GameTooltip:AddDoubleLine(grName, "|cffffffff"..format(cfg.SVal(grAmount)).."|cffffff00/|cffffffff"..format(cfg.SVal(grTotalMax)))
-	if oilIsDiscovered then
-		GameTooltip:AddDoubleLine(oilName, "|cffffffff"..format(cfg.SVal(oilAmount)).."|cffffff00/|cffffffff"..format(cfg.SVal(oilTotalMax)))
-	end
-	GameTooltip:AddDoubleLine(apexisName, "|cffffffff"..format(cfg.SVal(apexisAmount)))
-	if DICAmount > 0 then
-		GameTooltip:AddDoubleLine(DICName, "|cffffffff"..format(cfg.SVal(DICAmount)).."|cffffff00/|cffffffff"..format(cfg.SVal(DICTotalMax)))
-	end
-	GameTooltip:Show()
-end)
-
-garrisonFrame:SetScript("OnLeave", function()
-	if ( GameTooltip:IsShown() ) then GameTooltip:Hide() end
-	garrisonIcon:SetVertexColor(unpack(cfg.color.inactive))
-end)
-
-garrisonFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then
-		ToggleCharacter("TokenFrame")
-	end
-end)
-
-
----------------------------------------------
--- FUNCTIONS
----------------------------------------------
-local function updateXP(xp, mxp)
-	if UnitLevel("player") == MAX_PLAYER_LEVEL or not cfg.currency.showXPbar then
-		xpFrame:Hide()
-		xpFrame:EnableMouse(false)
-		currencyFrame:Show()
-	else
-		currencyFrame:Hide()
-		xpFrame:Show()
-		xpFrame:EnableMouse(true)
-		xpStatusbar:SetMinMaxValues(0, mxp)
-		xpStatusbar:SetValue(xp)
-		xpText:SetText("LEVEL "..UnitLevel("player").." "..cfg.CLASS)
-		xpFrame:SetSize(xpText:GetStringWidth()+18, 16)
-		xpStatusbar:SetSize(xpText:GetStringWidth(),3)
-		xpStatusbarBG:SetSize(xpText:GetStringWidth(),3)
-	end
+  self.curButtons = {}
+  self.curIcons = {}
+  self.curText = {}
 end
 
-function GetNumArtifactTraitsPurchasableFromXP(rkSpent, currAP)
-	artiIcon:SetTexture(GetItemIcon(select(1,C_ArtifactUI.GetEquippedArtifactInfo())))
-	artiText:SetText("Artifact rank "..rkSpent)
-	artiFrame:SetSize(artiText:GetStringWidth()+18, 16)
-	artiStatusbar:SetSize(artiText:GetStringWidth(),3)
-	artiStatusbarBG:SetSize(artiText:GetStringWidth(),3)
-	local numRk = 0;
-	local xpForNextRk = C_ArtifactUI.GetCostForPointAtRank(rkSpent);
-	while currAP >= xpForNextRk and xpForNextRk > 0 do
-		currAP = currAP - xpForNextRk;
+function CurrencyModule:OnEnable()
+  if self.currencyFrame == nil then
+    self.currencyFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
+    xb:RegisterFrame('currencyFrame', self.currencyFrame)
+  end
 
-		rkSpent = rkSpent + 1;
-		numRk = numRk + 1;
-
-		xpForNextRk = C_ArtifactUI.GetCostForPointAtRank(rkSpent);
-	end
-	artiStatusbar:SetMinMaxValues(0, xpForNextRk)
-	artiStatusbar:SetValue(currAP)
-	return numRk, currAP, xpForNextRk;
+  self.currencyFrame:Show()
+  self:CreateFrames()
+  self:RegisterFrameEvents()
+  self:Refresh()
 end
 
----------------------------------------------
--- EVENT HANDELING
----------------------------------------------
+function CurrencyModule:OnDisable()
+  self.currencyFrame:Hide()
+  self:UnregisterEvent('CURRENCY_DISPLAY_UPDATE')
+  self:UnregisterEvent('PLAYER_XP_UPDATE')
+  self:UnregisterEvent('PLAYER_LEVEL_UP')
+end
 
-local eventframe = CreateFrame("Frame")
-eventframe:RegisterEvent("PLAYER_ENTERING_WORLD")
-eventframe:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-eventframe:RegisterEvent("PLAYER_XP_UPDATE")
-eventframe:RegisterEvent("ARTIFACT_XP_UPDATE");
-eventframe:RegisterEvent("PLAYER_LEVEL_UP")
-eventframe:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
-eventframe:RegisterEvent("CHAT_MSG_CURRENCY")
-eventframe:RegisterEvent("TRADE_CURRENCY_CHANGED")
-eventframe:RegisterEvent("MODIFIER_STATE_CHANGED")
+function CurrencyModule:Refresh()
+  local db = xb.db.profile
+  xb.constants.playerLevel = UnitLevel("player")
+  if InCombatLockdown() then
+    if xb.constants.playerLevel < MAX_PLAYER_LEVEL and db.modules.currency.showXPbar then
+      self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
+      self.xpBar:SetValue(UnitXP('player'))
+      self.xpText:SetText(string.upper(LEVEL..' '..UnitLevel("player")..' '..UnitClass('player')))
+    end
+    self:RegisterEvent('PLAYER_REGEN_ENABLED', function()
+      self:Refresh()
+      self:UnregisterEvent('PLAYER_REGEN_ENABLED')
+    end)
+    return
+  end
+  if self.currencyFrame == nil then return; end
+  if not db.modules.currency.enabled then return; end
 
-eventframe:SetScript("OnEvent", function(this, event, arg1, arg2, arg3, arg4, ...)
-	--if event == "PLAYER_ENTERING_WORLD" or event == "PLAYER_XP_UPDATE" or event == "PLAYER_LEVEL_UP" then
-	if UnitLevel("player") ~= MAX_PLAYER_LEVEL and cfg.currency.showXPbar then
-		mxp = UnitXPMax("player")
-		xp = UnitXP("player")
-		updateXP(xp, mxp)
-		currencyFrame:Hide()
-	else
-		xpFrame:Hide()
-	end
-	
-	if HasArtifactEquipped() and cfg.currency.showAPbar then
-		local currentAP = select(5,C_ArtifactUI.GetEquippedArtifactInfo())
-		local traitsSpent = select(6,C_ArtifactUI.GetEquippedArtifactInfo())
-		GetNumArtifactTraitsPurchasableFromXP(traitsSpent,currentAP)
-		currencyFrame:Hide()
-		artiFrame:Show()
-	else
-		artiFrame:Hide()
-	end
+  local iconSize = db.text.fontSize + db.general.barPadding
+  for i = 1, 3 do
+    self.curButtons[i]:Hide()
+  end
+  self.xpFrame:Hide()
 
-	if event == "MODIFIER_STATE_CHANGED" then
-		if InCombatLockdown() then return end
-		if arg1 == "LSHIFT" or arg1 == "RSHIFT" then
-			if UnitLevel("player") == MAX_PLAYER_LEVEL or not cfg.currency.showXPbar then return end
-			if arg2 == 1 then
-				xpFrame:Hide()
-				xpFrame:EnableMouse(false)
-				currencyFrame:Show()
-			elseif arg2 == 0 then
-				currencyFrame:Hide()
-				xpFrame:EnableMouse(true)
-				xpFrame:Show()
-			end
-		end
-	end
+  if xb.constants.playerLevel < MAX_PLAYER_LEVEL and db.modules.currency.showXPbar then
+    --self.xpFrame = self.xpFrame or CreateFrame("BUTTON", nil, self.currencyFrame)
 
+    local textHeight = floor((xb:GetHeight() - 4) / 2)
+    self.xpIcon:SetTexture(xb.constants.mediaPath..'datatexts\\exp')
+    self.xpIcon:SetSize(iconSize, iconSize)
+    self.xpIcon:SetPoint('LEFT')
+    self.xpIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
 
+    self.xpText:SetFont(xb:GetFont(textHeight))
+    self.xpText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    self.xpText:SetText(string.upper(LEVEL..' '..UnitLevel("player")..' '..UnitClass('player')))
+    self.xpText:SetPoint('TOPLEFT', self.xpIcon, 'TOPRIGHT', 5, 0)
 
+    self.xpBar:SetStatusBarTexture(1, 1, 1)
+    if db.modules.currency.xpBarCC then
+      self.xpBar:SetStatusBarColor(xb:GetClassColors())
+    else
+      self.xpBar:SetStatusBarColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    end
+    self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
+    self.xpBar:SetValue(UnitXP('player'))
+    self.xpBar:SetSize(self.xpText:GetStringWidth(), (iconSize - textHeight - 2))
+    self.xpBar:SetPoint('BOTTOMLEFT', self.xpIcon, 'BOTTOMRIGHT', 5, 0)
 
-	-- reroll currency
-	local SoIFname, SoIFamount, _, _, _, SoIFtotalMax, SoIFisDiscovered = GetCurrencyInfo(1129)
-	if SoIFamount > 0 then
-		rerollText:SetText(SoIFamount)
-	else
-		local SoTFname, SoTFamount, _, _, _, SoTFtotalMax, SoTFisDiscovered = GetCurrencyInfo(994)
-		if SoTFamount > 0 then rerollText:SetText(SoTFamount) end
-	end
-	rerollFrame:SetSize(rerollText:GetStringWidth()+18, 16)
+    self.xpBarBg:SetAllPoints()
+    self.xpBarBg:SetColorTexture(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    self.currencyFrame:SetSize(iconSize + self.xpText:GetStringWidth() + 5, xb:GetHeight())
+    self.xpFrame:SetAllPoints()
+    self.xpFrame:Show()
+  else -- show xp bar/show currencies
+    local iconsWidth = 0
+    for i = 1, 3 do
+      if db.modules.currency[self.intToOpt[i]] ~= '0' then
+        iconsWidth = iconsWidth + self:StyleCurrencyFrame(tonumber(db.modules.currency[self.intToOpt[i]]), i)
+      end
+    end
+    self.curButtons[1]:SetPoint('LEFT')
+    self.curButtons[2]:SetPoint('LEFT', self.curButtons[1], 'RIGHT', 5, 0)
+    self.curButtons[3]:SetPoint('LEFT', self.curButtons[2], 'RIGHT', 5, 0)
+    self.currencyFrame:SetSize(iconsWidth, xb:GetHeight())
+  end -- show currencies
 
-	-- honor currency
-	honorText:SetText(UnitHonor("player"))
-	honorFrame:SetSize(honorText:GetStringWidth()+18, 16)
+  --self.currencyFrame:SetSize(self.goldButton:GetSize())
+  local relativeAnchorPoint = 'RIGHT'
+  local xOffset = db.general.moduleSpacing
+  local anchorFrame = xb:GetFrame('tradeskillFrame')
+  if not anchorFrame:IsVisible() then
+    if xb:GetFrame('clockFrame'):IsVisible() then
+      anchorFrame = xb:GetFrame('clockFrame')
+    elseif xb:GetFrame('talentFrame'):IsVisible() then
+      anchorFrame = xb:GetFrame('talentFrame')
+    else
+      relativeAnchorPoint = 'LEFT'
+      xOffset = 0
+    end
+  end
+  self.currencyFrame:SetPoint('LEFT', anchorFrame, relativeAnchorPoint, xOffset, 0)
+end
 
-	currencyFrame:SetSize(rerollFrame:GetWidth()+honorFrame:GetWidth()+6,16)
+function CurrencyModule:StyleCurrencyFrame(curId, i)
+  local db = xb.db.profile
+  local iconSize = db.text.fontSize + db.general.barPadding
+  local icon = xb.constants.mediaPath..'datatexts\\garres'
+  if tContains(self.rerollItems, curId) then
+    icon = xb.constants.mediaPath..'datatexts\\reroll'
+  end
+  local _, curAmount, _ = GetCurrencyInfo(curId)
 
-	-- garrison currency
-	local grName, grAmount, _, grEarnedThisWeek, grWeeklyMax, grTotalMax, grIsDiscovered = GetCurrencyInfo(824)
-	garrisonText:SetText(grAmount)
-	garrisonFrame:SetSize(garrisonText:GetStringWidth()+18, 16)
+  local iconPoint = 'RIGHT'
+  local textPoint = 'LEFT'
+  local padding = -3
 
-	currencyFrame:SetSize(rerollFrame:GetWidth()+honorFrame:GetWidth()+garrisonFrame:GetWidth()+6,16)
-end)
+  if xb.db.profile.modules.currency.textOnRight then
+    iconPoint = 'LEFT'
+    textPoint = 'RIGHT'
+    padding = -(padding)
+  end
+
+  self.curIcons[i]:ClearAllPoints()
+  self.curText[i]:ClearAllPoints()
+
+  self.curIcons[i]:SetTexture(icon)
+  self.curIcons[i]:SetSize(iconSize, iconSize)
+  self.curIcons[i]:SetPoint(iconPoint)
+  self.curIcons[i]:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+
+  self.curText[i]:SetFont(xb:GetFont(db.text.fontSize))
+  self.curText[i]:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  self.curText[i]:SetText(curAmount)
+  self.curText[i]:SetPoint(iconPoint, self.curIcons[i], textPoint, padding, 0)
+
+  local buttonWidth = iconSize + self.curText[i]:GetStringWidth() + 5
+  self.curButtons[i]:SetSize(buttonWidth, xb:GetHeight())
+  self.curButtons[i]:Show()
+  return buttonWidth
+end
+
+function CurrencyModule:CreateFrames()
+  for i = 1, 3 do
+    self.curButtons[i] = self.curButtons[i] or CreateFrame("BUTTON", nil, self.currencyFrame)
+    self.curIcons[i] = self.curIcons[i] or self.curButtons[i]:CreateTexture(nil, 'OVERLAY')
+    self.curText[i] = self.curText[i] or self.curButtons[i]:CreateFontString(nil, "OVERLAY")
+    self.curButtons[i]:Hide()
+  end
+
+  self.xpFrame = self.xpFrame or CreateFrame("BUTTON", nil, self.currencyFrame)
+  self.xpIcon = self.xpIcon or self.xpFrame:CreateTexture(nil, 'OVERLAY')
+  self.xpText = self.xpText or self.xpFrame:CreateFontString(nil, 'OVERLAY')
+  self.xpBar = self.xpBar or CreateFrame('STATUSBAR', nil, self.xpFrame)
+  self.xpBarBg = self.xpBarBg or self.xpBar:CreateTexture(nil, 'BACKGROUND')
+  self.xpFrame:Hide()
+end
+
+function CurrencyModule:RegisterFrameEvents()
+
+  for i = 1, 3 do
+    self.curButtons[i]:EnableMouse(true)
+    self.curButtons[i]:RegisterForClicks("AnyUp")
+    self.curButtons[i]:SetScript('OnEnter', function()
+      if InCombatLockdown() then return; end
+      self.curText[i]:SetTextColor(unpack(xb:HoverColors()))
+      if xb.db.profile.modules.currency.showTooltip then
+        self:ShowTooltip()
+      end
+    end)
+    self.curButtons[i]:SetScript('OnLeave', function()
+      if InCombatLockdown() then return; end
+      local db = xb.db.profile
+      self.curText[i]:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+      if xb.db.profile.modules.currency.showTooltip then
+        GameTooltip:Hide()
+      end
+    end)
+    self.curButtons[i]:SetScript('OnClick', function()
+      if InCombatLockdown() then return; end
+      ToggleCharacter('TokenFrame')
+    end)
+  end
+  self:RegisterEvent('CURRENCY_DISPLAY_UPDATE', 'Refresh')
+  self:RegisterEvent('PLAYER_XP_UPDATE', 'Refresh')
+  self:RegisterEvent('PLAYER_LEVEL_UP', 'Refresh')
+  --self:SecureHook('BackpackTokenFrame_Update', 'Refresh') -- Ugh, why is there no event for this?
+
+  self.currencyFrame:EnableMouse(true)
+  self.currencyFrame:SetScript('OnEnter', function()
+    if xb.db.profile.modules.currency.showTooltip then
+      self:ShowTooltip()
+    end
+  end)
+  self.currencyFrame:SetScript('OnLeave', function()
+    if xb.db.profile.modules.currency.showTooltip then
+      GameTooltip:Hide()
+    end
+  end)
+
+  self.xpFrame:SetScript('OnEnter', function()
+    if InCombatLockdown() then return; end
+    self.xpText:SetTextColor(unpack(xb:HoverColors()))
+    self:ShowTooltip()
+  end)
+
+  self.xpFrame:SetScript('OnLeave', function()
+    if InCombatLockdown() then return; end
+    local db = xb.db.profile
+    self.xpText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  end)
+
+  self:RegisterMessage('XIVBar_FrameHide', function(_, name)
+    if name == 'tradeskillFrame' then
+      self:Refresh()
+    end
+  end)
+
+  self:RegisterMessage('XIVBar_FrameShow', function(_, name)
+    if name == 'tradeskillFrame' then
+      self:Refresh()
+    end
+  end)
+end
+
+function CurrencyModule:ShowTooltip()
+  if not xb.db.profile.modules.currency.showTooltip then return; end
+
+  GameTooltip:SetOwner(self.currencyFrame, 'ANCHOR_'..xb.miniTextPosition)
+
+  if xb.constants.playerLevel < MAX_PLAYER_LEVEL and xb.db.profile.modules.currency.showXPbar then
+    GameTooltip:AddLine("[|cff6699FF"..POWER_TYPE_EXPERIENCE.."|r]")
+    GameTooltip:AddLine(" ")
+
+    local curXp = UnitXP('player')
+    local maxXp = UnitXPMax('player')
+    local rested = GetXPExhaustion()
+    -- XP
+    GameTooltip:AddDoubleLine(L['XP']..':', string.format('%d / %d (%d%%)', curXp, maxXp, floor((curXp / maxXp) * 100)), 1, 1, 0, 1, 1, 1)
+    -- Remaining
+    GameTooltip:AddDoubleLine(L['Remaining']..':', string.format('%d (%d%%)', (maxXp - curXp), floor(((maxXp - curXp) / maxXp) * 100)), 1, 1, 0, 1, 1, 1)
+    -- Rested
+    if rested then
+      GameTooltip:AddDoubleLine(L['Rested']..':', string.format('+%d (%d%%)', rested, floor((rested / maxXp) * 100)), 1, 1, 0, 1, 1, 1)
+    end
+
+    --GameTooltip:AddLine(" ")
+    --GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Currency Frame'], 1, 1, 0, 1, 1, 1)
+  else
+    GameTooltip:AddLine("[|cff6699FF"..L['Currency'].."|r]")
+    GameTooltip:AddLine(" ")
+
+    for i = 1, 3 do
+      if xb.db.profile.modules.currency[self.intToOpt[i]] ~= '0' then
+        local curId = tonumber(xb.db.profile.modules.currency[self.intToOpt[i]])
+        local name, count, _, _, _, totalMax, _, _ = GetCurrencyInfo(curId)
+        GameTooltip:AddDoubleLine(name, string.format('%d/%d', count, totalMax), 1, 1, 0, 1, 1, 1)
+      end
+    end
+
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Currency Frame'], 1, 1, 0, 1, 1, 1)
+  end
+
+  GameTooltip:Show()
+end
+
+function CurrencyModule:GetCurrencyOptions()
+  local curOpts = {
+    ['0'] = ''
+  }
+  for i = 1, GetCurrencyListSize() do
+    local _, isHeader, _, isUnused = GetCurrencyListInfo(i)
+    if not isHeader and not isUnused then
+      local cL = GetCurrencyListLink(i)
+      local colon, _ = strfind(cL, ':', 1, true)
+      local pipeS, _ = strfind(cL, '|h', colon, true)
+      local itemId = strsub(cL, colon + 1, pipeS - 1)
+      local name, _ = GetCurrencyInfo(itemId)
+      curOpts[tostring(itemId)] = name
+    end
+  end
+  return curOpts
+end
+
+function CurrencyModule:GetDefaultOptions()
+  return 'currency', {
+      enabled = true,
+      showXPbar = true,
+      xpBarCC = false,
+      showTooltip = true,
+      textOnRight = true,
+      currencyOne = '0',
+      currencyTwo = '0',
+      currencyThree = '0'
+    }
+end
+
+function CurrencyModule:GetConfig()
+  return {
+    name = self:GetName(),
+    type = "group",
+    args = {
+      enable = {
+        name = ENABLE,
+        order = 0,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.currency.enabled; end,
+        set = function(_, val)
+          xb.db.profile.modules.currency.enabled = val
+          if val then
+            self:Enable()
+          else
+            self:Disable()
+          end
+        end,
+        width = "full"
+      },
+      showXPbar = {
+        name = L['Show XP Bar Below Max Level'],
+        order = 1,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.currency.showXPbar; end,
+        set = function(_, val) xb.db.profile.modules.currency.showXPbar = val; self:Refresh(); end
+      },
+      xpBarCC = {
+        name = L['Use Class Colors for XP Bar'],
+        order = 2,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.currency.xpBarCC; end,
+        set = function(_, val) xb.db.profile.modules.currency.xpBarCC = val; self:Refresh(); end,
+        disabled = function() return not xb.db.profile.modules.currency.showXPbar end
+      },
+      showTooltip = {
+        name = L['Show Tooltips'],
+        order = 3,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.currency.showTooltip; end,
+        set = function(_, val) xb.db.profile.modules.currency.showTooltip = val; self:Refresh(); end
+      },
+      textOnRight = {
+        name = L['Text on Right'],
+        order = 4,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.currency.textOnRight; end,
+        set = function(_, val) xb.db.profile.modules.currency.textOnRight = val; self:Refresh(); end
+      },
+      currency = {
+        type = 'group',
+        name = L['Currency Select'],
+        order = 5,
+        inline = true,
+        --disabled = function() return (xb.constants.playerLevel < MAX_PLAYER_LEVEL and xb.db.profile.modules.currency.showXPbar); end, -- keep around in case
+        args = {
+          currencyOne = {
+            name = L['First Currency'], -- DROPDOWN, GoldModule:GetCurrencyOptions
+            type = "select",
+            order = 1,
+            values = function() return self:GetCurrencyOptions(); end,
+            style = "dropdown",
+            get = function() return xb.db.profile.modules.currency.currencyOne; end,
+            set = function(info, value) xb.db.profile.modules.currency.currencyOne = value; self:Refresh(); end,
+          },
+          currencyTwo = {
+            name = L['Second Currency'], -- DROPDOWN, GoldModule:GetCurrencyOptions
+            type = "select",
+            order = 2,
+            values = function() return self:GetCurrencyOptions(); end,
+            style = "dropdown",
+            get = function() return xb.db.profile.modules.currency.currencyTwo; end,
+            set = function(info, value) xb.db.profile.modules.currency.currencyTwo = value; self:Refresh(); end,
+          },
+          currencyThree = {
+            name = L['Third Currency'], -- DROPDOWN, GoldModule:GetCurrencyOptions
+            type = "select",
+            order = 3,
+            values = function() return self:GetCurrencyOptions(); end,
+            style = "dropdown",
+            get = function() return xb.db.profile.modules.currency.currencyThree; end,
+            set = function(info, value) xb.db.profile.modules.currency.currencyThree = value; self:Refresh(); end,
+          }
+        }
+      }
+    }
+  }
+end

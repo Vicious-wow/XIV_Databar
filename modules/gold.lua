@@ -1,242 +1,270 @@
-local addon, ns = ...
-local cfg = ns.cfg
-local unpack = unpack
---------------------------------------------------------------
-if not cfg.gold.show then return end
+local AddOnName, XIVBar = ...;
+local _G = _G;
+local xb = XIVBar;
+local L = XIVBar.L;
 
-local onHover = false
+local GoldModule = xb:NewModule("GoldModule", 'AceEvent-3.0')
 
-local function goldConverter(money)
-	local g, s, c = abs(money/10000), abs(mod(money/100, 100)), abs(mod(money, 100))
-	local cash
-	if ( g < 1 ) then g = "" else g = string.format("|cffffffff%d|cffffd700g|r ", g) end
-	if ( s < 1 ) then s = "" else s = string.format("|cffffffff%d|cffc7c7cfs|r ", s) end
-	if ( c == 0 ) then c = "" else c = string.format("|cffffffff%d|cffeda55fc|r", c) end
-	cash = string.format("%s%s%s", g, s, c)
-	if money == 0 then cash = "|cffffffff0" end
-	return cash
+function GoldModule:GetName()
+  return L['Gold'];
 end
 
-local playerName, playerFaction, playerRealm = UnitName("player"), UnitFactionGroup("player"), GetRealmName()
-
-local positiveSign = "|cff00ff00+ "
-local negativeSign = "|cffff0000- "
-
-local goldFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-goldFrame:SetPoint("RIGHT",-270,0)
-goldFrame:SetSize(16, 16)
-goldFrame:EnableMouse(true)
-goldFrame:RegisterForClicks("AnyUp")
-
- local function goldFrameOnEnter()
-	if not cfg.gold.showTooltip then return end
-	if not onHover then return end
-	GameTooltip:SetOwner(goldFrame, cfg.tooltipPos)
-	GameTooltip:AddLine("[|cff6699FFGold|r]")
-	GameTooltip:AddLine(" ")
-	---------------------------------------------------
-
-	local gold = GetMoney()
-	local logDate = ns.playerData.lastLoginDate
-
-	local sessionGold = ns.playerData["money_on_session_start"]
-	local sessionGoldIcon = ""
-	sessionGold = sessionGold - gold
-
-	if sessionGold < 0 then
-		sessionGoldIcon = positiveSign
-	elseif sessionGold > 0 then
-		sessionGoldIcon = negativeSign
-	else
-	end
-
-	local dayGold = ns.playerData["money_on_first_login_today"]
-	local dayGoldIcon = ""
-	dayGold = dayGold - gold
-
-	if dayGold < 0 then
-		dayGoldIcon = positiveSign
-	elseif dayGold > 0 then
-		dayGoldIcon = negativeSign
-	else
-	end
-
-
-	local weekGold = ns.playerData["money_on_first_weekday"]
-	local weekGoldIcon = ""
-	weekGold = weekGold - gold
-
-	if weekGold < 0 then
-		weekGoldIcon = positiveSign
-	elseif weekGold > 0 then
-		weekGoldIcon = negativeSign
-	else
-	end
-
-
-	local totalGold = 0
-	for key, val in pairs(ns.realmData[playerFaction]) do
-		for k, v in pairs(val) do
-			if k == "money_on_log_out" then
-				totalGold = totalGold + v
-			end
-		end
-	end
-
-	local realmDailyGold = 0
-	for key, val in pairs(ns.realmData[playerFaction]) do
-		for k, v in pairs(val) do
-			if k == "money_on_first_login_today" then
-				realmDailyGold = realmDailyGold + v
-			end
-		end
-	end
-
-	local realmDayGoldIcon = ""
-	realmDailyGold = realmDailyGold - totalGold
-
-	if realmDailyGold < 0 then
-		realmDayGoldIcon = positiveSign
-	elseif realmDailyGold > 0 then
-		realmDayGoldIcon = negativeSign
-	else
-	end
-
-
-	local realmWeeklyGold = 0
-	for key, val in pairs(ns.realmData[playerFaction]) do
-		for k, v in pairs(val) do
-			if k == "money_on_first_weekday" then
-				realmWeeklyGold = realmWeeklyGold + v
-			end
-		end
-	end
-
-	local realmWeekGoldIcon = ""
-	realmWeeklyGold = realmWeeklyGold - totalGold
-
-	if realmWeeklyGold < 0 then
-		realmWeekGoldIcon = positiveSign
-	elseif realmWeeklyGold > 0 then
-		realmWeekGoldIcon = negativeSign
-	else
-	end
-
-	GameTooltip:AddDoubleLine(playerName.."|r's Gold",format(goldConverter(gold)))
-	GameTooltip:AddLine(" ")
-
-	if IsShiftKeyDown() then
-		GameTooltip:AddDoubleLine("Realm Daily Balance",realmDayGoldIcon..format(goldConverter(realmDailyGold)))
-		GameTooltip:AddDoubleLine("Realm Weekly Balance",realmWeekGoldIcon..format(goldConverter(realmWeeklyGold)))
-		GameTooltip:AddLine(" ")
-	for key, val in pairs(ns.realmData[playerFaction]) do
-		for k, v in pairs(val) do
-			if k == "money_on_log_out" then
-				GameTooltip:AddDoubleLine(key,format(goldConverter(v)))
-			end
-		end
-	end
-
-	else
-		GameTooltip:AddDoubleLine("Session Balance",sessionGoldIcon..format(goldConverter(sessionGold)))
-		GameTooltip:AddDoubleLine("Daily Balance",dayGoldIcon..format(goldConverter(dayGold)))
-		GameTooltip:AddDoubleLine("Weekly Balance",weekGoldIcon..format(goldConverter(weekGold)))
-
-	end
-	GameTooltip:AddLine(" ")
-	GameTooltip:AddDoubleLine("Realm Gold","|cffffffff"..format(goldConverter(totalGold)))
-	if not IsShiftKeyDown() then
-		GameTooltip:AddLine(" ")
-		GameTooltip:AddDoubleLine("<Shift-hold>", "Show the |cffffff00"..playerRealm.." - "..playerFaction.."|r gold", 1, 1, 0, 1, 1, 1)
-	end
-	GameTooltip:Show()
- end
-
- local function freeSpaceBags()
-	local freeSlots = 0
-	for i=0, 4,1 do
-		freeSlots = freeSlots+select(1,GetContainerNumFreeSlots(i))
-	end
-	return freeSlots
+function GoldModule:OnInitialize()
+  if xb.db.factionrealm[xb.constants.playerName] == nil then
+    xb.db.factionrealm[xb.constants.playerName] = { currentMoney = 0 }
+  end
+  xb.db.factionrealm[xb.constants.playerName].sessionMoney = 0
 end
 
-local goldIcon = goldFrame:CreateTexture(nil,"OVERLAY",nil,7)
-goldIcon:SetPoint("LEFT",goldFrame,17,0)
-goldIcon:SetTexture(cfg.mediaFolder.."datatexts\\gold")
-goldIcon:SetVertexColor(unpack(cfg.color.normal))
+function GoldModule:OnEnable()
+  if self.goldFrame == nil then
+    self.goldFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
+    xb:RegisterFrame('goldFrame', self.goldFrame)
+  end
+  self.goldFrame:Show()
+  if xb.db.factionrealm[xb.constants.playerName].currentMoney == 0 then
+    xb.db.factionrealm[xb.constants.playerName].currentMoney = GetMoney()
+  end
 
-local goldText = goldFrame:CreateFontString(nil, "OVERLAY")
-goldText:SetFont(cfg.text.font, cfg.text.normalFontSize)
-goldText:SetPoint("LEFT", goldIcon,15,0)
-goldText:SetTextColor(unpack(cfg.color.normal))
+  self:CreateFrames()
+  self:RegisterFrameEvents()
+  self:Refresh()
+end
 
-local spaceText = goldFrame:CreateFontString(nil,"OVERLAY")
-spaceText:SetPoint("LEFT", goldIcon,-17,0)
-spaceText:SetFont(cfg.text.font, cfg.text.normalFontSize)
+function GoldModule:OnDisable()
+  self.goldFrame:Hide()
+  self:UnregisterEvent('PLAYER_MONEY')
+  self:UnregisterEvent('BAG_UPDATE')
+end
 
-goldFrame:SetScript("OnEnter", function()
-	if InCombatLockdown() then return end
-	goldIcon:SetVertexColor(unpack(cfg.color.hover))
-	onHover = true
-	goldFrameOnEnter()
-end)
+function GoldModule:Refresh()
+  local db = xb.db.profile
+  if self.goldFrame == nil then return; end
+  if not db.modules.gold.enabled then return; end
 
-goldFrame:SetScript("OnLeave", function() if ( GameTooltip:IsShown() ) then GameTooltip:Hide() onHover = false end goldIcon:SetVertexColor(unpack(cfg.color.normal)) end)
+  if InCombatLockdown() then
+    self.goldText:SetFont(xb:GetFont(db.text.fontSize))
+    self.goldText:SetText(self:FormatCoinText(GetMoney()))
+    if db.modules.gold.showFreeBagSpace then
+      local freeSpace = 0
+      for i = 0, 4 do
+        freeSpace = freeSpace + GetContainerNumFreeSlots(i)
+      end
+      self.bagText:SetFont(xb:GetFont(db.text.fontSize))
+      self.bagText:SetText('('..tostring(freeSpace)..')')
+    end
+    return
+  end
 
-goldFrame:SetScript("OnClick", function(self, button, down)
-	if InCombatLockdown() then return end
-	if button == "LeftButton" then
-		OpenAllBags()
-	elseif button == "RightButton" then
-		CloseAllBags()
-	end
-end)
+  local iconSize = db.text.fontSize + db.general.barPadding
+  self.goldIcon:SetTexture(xb.constants.mediaPath..'datatexts\\gold')
+  self.goldIcon:SetSize(iconSize, iconSize)
+  self.goldIcon:SetPoint('LEFT')
+  self.goldIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
 
-local eventframe = CreateFrame("Frame")
-eventframe:RegisterEvent("PLAYER_ENTERING_WORLD")
-eventframe:RegisterEvent("PLAYER_MONEY")
-eventframe:RegisterEvent("SEND_MAIL_MONEY_CHANGED")
-eventframe:RegisterEvent("SEND_MAIL_COD_CHANGED")
-eventframe:RegisterEvent("PLAYER_TRADE_MONEY")
-eventframe:RegisterEvent("TRADE_MONEY_CHANGED")
-eventframe:RegisterEvent("TRADE_CLOSED")
-eventframe:RegisterEvent("MODIFIER_STATE_CHANGED")
-eventframe:RegisterEvent("BAG_UPDATE")
+  self.goldText:SetFont(xb:GetFont(db.text.fontSize))
+  self.goldText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  self.goldText:SetText(self:FormatCoinText(GetMoney()))
+  self.goldText:SetPoint('LEFT', self.goldIcon, 'RIGHT', 5, 0)
 
-eventframe:SetScript("OnEvent", function(this, event, arg1, arg2, arg3, arg4, ...)
+  local bagWidth = 0
+  if db.modules.gold.showFreeBagSpace then
+    local freeSpace = 0
+    for i = 0, 4 do
+      freeSpace = freeSpace + GetContainerNumFreeSlots(i)
+    end
+    self.bagText:SetFont(xb:GetFont(db.text.fontSize))
+    self.bagText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    self.bagText:SetText('('..tostring(freeSpace)..')')
+    self.bagText:SetPoint('LEFT', self.goldText, 'RIGHT', 5, 0)
+    bagWidth = self.bagText:GetStringWidth()
+  else
+    self.bagText:SetText('')
+    self.bagText:SetSize(0, 0)
+  end
 
-	goldFrameOnEnter()
-	if event == "MODIFIER_STATE_CHANGED" then
-		if InCombatLockdown() then return end
-		if arg1 == "LSHIFT" or arg1 == "RSHIFT" then
-			if arg2 == 1 then
-				goldFrameOnEnter()
-			elseif arg2 == 0 then
-				goldFrameOnEnter()
-			end
-		end
-	end
+  self.goldButton:SetSize(self.goldText:GetStringWidth() + iconSize + 10 + bagWidth, iconSize)
+  self.goldButton:SetPoint('LEFT')
 
-	if event=="BAG_UPDATE" and cfg.gold.showFreeBagSpace then
-		spaceText:SetText("("..freeSpaceBags()..")")
-	end
+  self.goldFrame:SetSize(self.goldButton:GetSize())
 
+  local relativeAnchorPoint = 'LEFT'
+  local xOffset = db.general.moduleSpacing
+  if not xb:GetFrame('travelFrame'):IsVisible() then
+    relativeAnchorPoint = 'RIGHT'
+    xOffset = 0
+  end
+  self.goldFrame:SetPoint('RIGHT', xb:GetFrame('travelFrame'), relativeAnchorPoint, -(xOffset), 0)
+end
 
-	local gold = GetMoney()
+function GoldModule:CreateFrames()
+  self.goldButton = self.goldButton or CreateFrame("BUTTON", nil, self.goldFrame)
+  self.goldIcon = self.goldIcon or self.goldButton:CreateTexture(nil, 'OVERLAY')
+  self.goldText = self.goldText or self.goldButton:CreateFontString(nil, "OVERLAY")
+  self.bagText = self.bagText or self.goldButton:CreateFontString(nil, "OVERLAY")
+end
 
-	ns.playerData["money_on_log_out"] = gold
+function GoldModule:RegisterFrameEvents()
 
-	local g, s, c = abs(gold/10000), abs(mod(gold/100, 100)), abs(mod(gold, 100))
+  self.goldButton:EnableMouse(true)
+  self.goldButton:RegisterForClicks("AnyUp")
 
-	if g > 1 then
-		goldText:SetText(floor(g).."g")
-	elseif s > 1 then
-		goldText:SetText(floor(s).."s")
-	else
-		goldText:SetText(floor(c).."c")
-	end
-	if gold == 0 then goldText:SetText("0") end
+  self:RegisterEvent('PLAYER_MONEY')
+  self:RegisterEvent('BAG_UPDATE', 'Refresh')
 
+  self.goldButton:SetScript('OnEnter', function()
+    if InCombatLockdown() then return; end
+    self.goldText:SetTextColor(unpack(xb:HoverColors()))
+    self.bagText:SetTextColor(unpack(xb:HoverColors()))
 
-	goldFrame:SetSize(goldText:GetStringWidth()+18, 16)
-end)
+    GameTooltip:SetOwner(GoldModule.goldFrame, 'ANCHOR_'..xb.miniTextPosition)
+    GameTooltip:AddLine("[|cff6699FF"..L['Gold'].."|r - |cff82c5ff"..xb.constants.playerFactionLocal.." "..xb.constants.playerRealm.."|r]")
+    GameTooltip:AddLine(" ")
+
+    GameTooltip:AddDoubleLine(L['Session Total'], GoldModule:FormatCoinText(xb.db.factionrealm[xb.constants.playerName].sessionMoney), 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddLine(" ")
+
+    local totalGold = 0
+    for charName, goldData in pairs(xb.db.factionrealm) do
+      GameTooltip:AddDoubleLine(charName, GoldModule:FormatCoinText(goldData.currentMoney), 1, 1, 0, 1, 1, 1)
+      totalGold = totalGold + goldData.currentMoney
+    end
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddDoubleLine(L['Total'], GoldModule:FormatCoinText(totalGold), 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Bags'], 1, 1, 0, 1, 1, 1)
+    GameTooltip:Show()
+  end)
+
+  self.goldButton:SetScript('OnLeave', function()
+    if InCombatLockdown() then return; end
+    local db = xb.db.profile
+    self.goldText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    self.bagText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    GameTooltip:Hide()
+  end)
+
+  self.goldButton:SetScript('OnClick', function(_, button)
+    if InCombatLockdown() then return; end
+    ToggleAllBags()
+  end)
+
+  self:RegisterMessage('XIVBar_FrameHide', function(_, name)
+    if name == 'travelFrame' then
+      self:Refresh()
+    end
+  end)
+
+  self:RegisterMessage('XIVBar_FrameShow', function(_, name)
+    if name == 'travelFrame' then
+      self:Refresh()
+    end
+  end)
+end
+
+function GoldModule:PLAYER_MONEY()
+  local gdb = xb.db.factionrealm[xb.constants.playerName]
+  local curMoney = gdb.currentMoney
+  local tmpMoney = GetMoney()
+  local moneyDiff = tmpMoney - curMoney
+  gdb.sessionMoney = gdb.sessionMoney + moneyDiff
+
+  --[[local weekday, month, day, year = CalendarGetDate()
+
+  if gdb.curDay == nil or (gdb.curMonth == month and gdb.curDay < day) or (gdb.curMonth < month) or gdb.curYear < year then
+    if gdb.curDay then
+      gdb.
+    end
+  end]]--
+  gdb.currentMoney = tmpMoney
+  self:Refresh()
+end
+
+function GoldModule:FormatCoinText(money)
+  local showSC = xb.db.profile.modules.gold.showSmallCoins
+  local shortThousands = xb.db.profile.modules.gold.shortThousands
+  local g, s, c = self:SeparateCoins(money)
+  local formattedString = ''
+  if g > 0 then
+    formattedString = '%s'..GOLD_AMOUNT_SYMBOL
+    if g > 1000 and shortThousands then
+      g = floor(abs(g / 1000))
+      formattedString = '%s'..FIRST_NUMBER_CAP_NO_SPACE..GOLD_AMOUNT_SYMBOL
+    end
+  end
+  if s > 0 and (g < 1 or showSC) then
+    if g > 1 then
+      formattedString = formattedString..' '
+    end
+    formattedString = formattedString..'%d'..SILVER_AMOUNT_SYMBOL
+  end
+  if c > 0 and (s < 1 or showSC) then
+    if g > 1 or s > 1 then
+      formattedString = formattedString..' '
+    end
+    formattedString = formattedString..'%d'..COPPER_AMOUNT_SYMBOL
+  end
+
+  local ret = string.format(formattedString, BreakUpLargeNumbers(g), s, c)
+  if money < 0 then
+    ret = '-'..ret
+  end
+  return ret
+end
+function GoldModule:SeparateCoins(money)
+  local gold, silver, copper = floor(abs(money / 10000)), floor(abs(mod(money / 100, 100))), floor(abs(mod(money, 100)))
+  return gold, silver, copper
+end
+
+function GoldModule:GetDefaultOptions()
+  return 'gold', {
+      enabled = true,
+      showSmallCoins = false,
+      showFreeBagSpace = true,
+      shortThousands = false
+    }
+end
+
+function GoldModule:GetConfig()
+  return {
+    name = self:GetName(),
+    type = "group",
+    args = {
+      enable = {
+        name = ENABLE,
+        order = 0,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.gold.enabled; end,
+        set = function(_, val)
+          xb.db.profile.modules.gold.enabled = val
+          if val then
+            self:Enable()
+          else
+            self:Disable()
+          end
+        end,
+        width = "full"
+      },
+      showSmallCoins = {
+        name = L['Always Show Silver and Copper'],
+        order = 1,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.gold.showSmallCoins; end,
+        set = function(_, val) xb.db.profile.modules.gold.showSmallCoins = val; self:Refresh(); end
+      },
+      showFreeBagSpace = {
+        name = L['Show Free Bag Space'],
+        order = 1,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.gold.showFreeBagSpace; end,
+        set = function(_, val) xb.db.profile.modules.gold.showFreeBagSpace = val; self:Refresh(); end
+      },
+      shortThousands = {
+        name = L['Shorten Gold'],
+        order = 1,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.gold.shortThousands; end,
+        set = function(_, val) xb.db.profile.modules.gold.shortThousands = val; self:Refresh(); end
+      }
+    }
+  }
+end

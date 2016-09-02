@@ -1,0 +1,12 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <!--<Script file="test.lua" />-->
+  <Script file="micromenu.lua" />
+  <Script file="clock.lua" />
+  <Script file="armor.lua" />
+  <Script file="travel.lua" />
+  <Script file="gold.lua" />
+  <Script file="tradeskill.lua" />
+  <Script file="currency.lua" />
+  <Script file="system.lua" />
+  <Script file="talent.lua" />
+</Ui>
