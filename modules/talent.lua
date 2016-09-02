@@ -177,7 +177,7 @@ function TalentModule:RegisterFrameEvents()
   self:RegisterEvent('PLAYER_LOOT_SPEC_UPDATED', 'Refresh')
 
   self:RegisterEvent('ARTIFACT_XP_UPDATE', function()
-    UpdateArtifactBar(self.curArtifactId)
+    self:UpdateArtifactBar(self.curArtifactId)
   end)
 
   self:RegisterEvent('UNIT_INVENTORY_CHANGED', 'Refresh')
