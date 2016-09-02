@@ -155,10 +155,7 @@ function XIVBar:OnInitialize()
   options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
   self.profilesOptionFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AddOnName, 'Profiles', "XIV Bar", "profiles")
 
-  --LibStub("AceConfig-3.0"):RegisterOptionsTable(AddOnName.."-Profiles", )
-
-
-
+  self.timerRefresh = false
 
   self:RegisterChatCommand('xivbar', 'ToggleConfig')
 end
@@ -170,6 +167,13 @@ function XIVBar:OnEnable()
   self.db.RegisterCallback(self, 'OnProfileCopied', 'Refresh')
   self.db.RegisterCallback(self, 'OnProfileChanged', 'Refresh')
   self.db.RegisterCallback(self, 'OnProfileReset', 'Refresh')
+
+  if not self.timerRefresh then
+    C_Timer.After(5, function()
+      self:Refresh()
+      self.timerRefresh = true
+    end)
+  end
 end
 
 function XIVBar:ToggleConfig()
