@@ -238,11 +238,23 @@ function XIVBar:GetHeight()
 end
 
 function XIVBar:Refresh()
+  local b = OrderHallCommandBar
+
   if self.frames.bar == nil then return; end
 
   self.miniTextPosition = "TOP"
+  if b and not b:IsVisible() and self.OHBarHide then
+	b:SetScript("OnShow", b.Show)
+	self.OHBarHide = false
+  end
   if self.db.profile.general.barPosition == 'TOP' then
     self.miniTextPosition = 'BOTTOM'
+	if b and b:IsVisible() then
+		b:UnregisterAllEvents()
+		b:SetScript("OnShow", b.Hide)
+		b:Hide()
+		self.OHBarHide = true
+	end
   end
 
   local barColor = self.db.profile.color.barColor
