@@ -23,37 +23,6 @@ function TravelModule:OnInitialize()
     44314, -- Scroll of Recall 2
     44315, -- Scroll of Recall 3
   }
-  local compassName, _ = GetItemInfo(128353)
-  self.portOptions = {
-    -- dalaran rings, guild capes?
-    {portId = 128353, text = compassName}, -- admiral's compass
-    {portId = 140192, text = GetMapNameByID(1014)}, -- dalaran hearthstone
-    {portId = self.garrisonHearth, text = GARRISON_LOCATION_TOOLTIP}, -- needs to be var for default options
-  }
-
-  if xb.constants.playerClass == 'DRUID' then
-    if IsPlayerSpell(193753) then
-      tinsert(self.portOptions, {portId = 193753, text = ORDER_HALL_DRUID})
-    else
-      tinsert(self.portOptions, {portId = 18960, text = GetMapNameByID(241)})
-    end
-  end
-
-  if xb.constants.playerClass == 'DEATHKNIGHT' then
-    tinsert(self.portOptions, {portId = 50977, text = ORDER_HALL_DEATHKNIGHT})
-  end
-
-  if xb.constants.playerClass == 'MAGE' then
-    tinsert(self.portOptions, {portId = 193759, text = ORDER_HALL_MAGE})
-  end
-
-  if xb.constants.playerClass == 'MONK' then
-    local portText = GetMapNameByID(809)
-    if IsPlayerSpell(200617) then
-      portText = ORDER_HALL_MONK
-    end
-    tinsert(self.portOptions, {portId = 193759, text = portText})
-  end
 
   self.portButtons = {}
   self.extraPadding = (xb.constants.popupPadding * 3)
@@ -137,7 +106,7 @@ function TravelModule:RegisterFrameEvents()
     GameTooltip:SetOwner(self.portButton, 'ANCHOR_'..xb.miniTextPosition)
     GameTooltip:ClearLines()
     GameTooltip:AddLine("[|cff6699FF"..L['Travel Cooldowns'].."|r]")
-    for i, v in ipairs(self.portOptions) do
+    for i, v in pairs(self.portOptions) do
       if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
         if IsUsableItem(v.portId) then
           local _, cd, _ = GetItemCooldown(v.portId)
@@ -160,6 +129,50 @@ function TravelModule:RegisterFrameEvents()
     TravelModule:SetPortColor()
     GameTooltip:Hide()
   end)
+end
+
+function TravelModule:UpdatePortOptions()
+  local compassName, _ = GetItemInfo(128353)
+  if not self.portOptions then
+    self.portOptions = {}
+  end
+  if IsUsableItem(128353) and not self.portOptions[128353] then
+    self.portOptions[128353] = {portId = 128353, text = compassName} -- admiral's compass
+  end
+  if IsUsableItem(140192) and not self.portOptions[140192] then
+    self.portOptions[140192] = {portId = 140192, text = GetMapNameByID(1014)} -- dalaran hearthstone
+  end
+  if IsUsableItem(self.garrisonHearth) and not self.portOptions[self.garrisonHearth] then
+    self.portOptions[self.garrisonHearth] = {portId = self.garrisonHearth, text = GARRISON_LOCATION_TOOLTIP} -- needs to be var for default options
+  end
+
+  if xb.constants.playerClass == 'DRUID' then
+    if IsPlayerSpell(193753) then
+      if not self.portOptions[193753] then
+        self.portOptions[193753] = {portId = 193753, text = ORDER_HALL_DRUID}
+      end
+    else
+      if not self.portOptions[18960] then
+        self.portOptions[18690] = {portId = 18960, text = GetMapNameByID(241)}
+      end
+    end
+  end
+
+  if xb.constants.playerClass == 'DEATHKNIGHT' and not self.portOptions[50977] then
+    self.portOptions[50977] = {portId = 50977, text = ORDER_HALL_DEATHKNIGHT}
+  end
+
+  if xb.constants.playerClass == 'MAGE' and not self.portOptions[193759] then
+    self.portOptions[193759] = {portId = 193759, text = ORDER_HALL_MAGE}
+  end
+
+  if xb.constants.playerClass == 'MONK' and not self.portOptions[193759] then
+    local portText = GetMapNameByID(809)
+    if IsPlayerSpell(200617) then
+      portText = ORDER_HALL_MONK
+    end
+    self.portOptions[193759] = {portId = 193759, text = portText}
+  end
 end
 
 function TravelModule:FormatCooldown(cdTime)
@@ -273,7 +286,7 @@ function TravelModule:CreatePortPopup()
   local popupWidth = self.portPopup:GetWidth()
   local popupHeight = xb.constants.popupPadding + db.text.fontSize + self.optionTextExtra
   local changedWidth = false
-  for i, v in ipairs(self.portOptions) do
+  for i, v in pairs(self.portOptions) do
     if self.portButtons[v.portId] == nil then
       if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
         local button = CreateFrame('BUTTON', nil, self.portPopup)
@@ -354,6 +367,8 @@ function TravelModule:Refresh()
     return
   end
 
+  self:UpdatePortOptions()
+
   local db = xb.db.profile
   --local iconSize = (xb:GetHeight() / 2)
   local iconSize = db.text.fontSize + db.general.barPadding
@@ -403,9 +418,13 @@ function TravelModule:Refresh()
 end
 
 function TravelModule:GetDefaultOptions()
+  local firstItem = select(1, self.portOptions)
+  if not firstItem then
+    firstItem = {portId = 140192, text = GetMapNameByID(1014)}
+  end
   return 'travel', {
     enabled = true,
-    portItem = {portId = 110560, text = GARRISON_LOCATION_TOOLTIP}
+    portItem = firstItem
   }
 end
 
