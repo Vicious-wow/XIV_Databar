@@ -27,6 +27,7 @@ end
 
 function SystemModule:OnDisable()
   self.systemFrame:Hide()
+  self.fpsFrame:SetScript('OnUpdate', nil)
 end
 
 function SystemModule:Refresh()
@@ -103,6 +104,9 @@ function SystemModule:Refresh()
 end
 
 function SystemModule:UpdateTexts()
+  local db = xb.db.profile
+  if not db.modules.system.enabled then return; end
+  
   self.fpsText:SetText(floor(GetFramerate())..FPS_ABBR)
   local _, _, homePing, worldPing = GetNetStats()
   self.pingText:SetText(floor(homePing)..MILLISECONDS_ABBR)
