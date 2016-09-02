@@ -40,11 +40,7 @@ L['Inactive'] = true;
 L['Use Class Colors for Hover'] = true;
 L['Hover'] = true;
 
-
-
-
 -------------------- MODULES ---------------------------
-L['Test Module'] = true;
 
 L['Micromenu'] = true;
 L['Show Social Tooltips'] = true;
@@ -99,6 +95,8 @@ L['Currency Select'] = true;
 L['First Currency'] = true;
 L['Second Currency'] = true;
 L['Third Currency'] = true;
+L['XP'] = true;
+L['Rested'] = true;
 
 L['System'] = true;
 L['Show World Ping'] = true;

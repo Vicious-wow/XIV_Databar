@@ -232,6 +232,7 @@ function CurrencyModule:RegisterFrameEvents()
   self.xpFrame:SetScript('OnEnter', function()
     if InCombatLockdown() then return; end
     self.xpText:SetTextColor(unpack(xb:HoverColors()))
+    self:ShowTooltip()
   end)
 
   self.xpFrame:SetScript('OnLeave', function()
@@ -254,21 +255,44 @@ function CurrencyModule:RegisterFrameEvents()
 end
 
 function CurrencyModule:ShowTooltip()
-  if xb.constants.playerLevel < MAX_PLAYER_LEVEL and xb.db.profile.modules.currency.showXPbar then return; end
-  GameTooltip:SetOwner(self.currencyFrame, 'ANCHOR_'..xb.miniTextPosition)
-  GameTooltip:AddLine("[|cff6699FF"..L['Currency'].."|r]")
-  GameTooltip:AddLine(" ")
+  if not xb.db.profile.modules.currency.showTooltip then return; end
 
-  for i = 1, 3 do
-    if xb.db.profile.modules.currency[self.intToOpt[i]] ~= '0' then
-      local curId = tonumber(xb.db.profile.modules.currency[self.intToOpt[i]])
-      local name, count, _, _, _, totalMax, _, _ = GetCurrencyInfo(curId)
-      GameTooltip:AddDoubleLine(name, string.format('%d/%d', count, totalMax), 1, 1, 0, 1, 1, 1)
+  GameTooltip:SetOwner(self.currencyFrame, 'ANCHOR_'..xb.miniTextPosition)
+
+  if xb.constants.playerLevel < MAX_PLAYER_LEVEL and xb.db.profile.modules.currency.showXPbar then
+    GameTooltip:AddLine("[|cff6699FF"..POWER_TYPE_EXPERIENCE.."|r]")
+    GameTooltip:AddLine(" ")
+
+    local curXp = UnitXP('player')
+    local maxXp = UnitXPMax('player')
+    local rested = GetXPExhaustion()
+    -- XP
+    GameTooltip:AddDoubleLine(L['XP']..':', string.format('%d / %d (%d%%)', curXp, maxXp, floor((curXp / maxXp) * 100)), 1, 1, 0, 1, 1, 1)
+    -- Remaining
+    GameTooltip:AddDoubleLine(L['Remaining']..':', string.format('%d (%d%%)', (maxXp - curXp), floor(((maxXp - curXp) / maxXp) * 100)), 1, 1, 0, 1, 1, 1)
+    -- Rested
+    if rested then
+      GameTooltip:AddDoubleLine(L['Rested']..':', string.format('+%d (%d%%)', rested, floor((rested / maxXp) * 100)), 1, 1, 0, 1, 1, 1)
     end
+
+    --GameTooltip:AddLine(" ")
+    --GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Currency Frame'], 1, 1, 0, 1, 1, 1)
+  else
+    GameTooltip:AddLine("[|cff6699FF"..L['Currency'].."|r]")
+    GameTooltip:AddLine(" ")
+
+    for i = 1, 3 do
+      if xb.db.profile.modules.currency[self.intToOpt[i]] ~= '0' then
+        local curId = tonumber(xb.db.profile.modules.currency[self.intToOpt[i]])
+        local name, count, _, _, _, totalMax, _, _ = GetCurrencyInfo(curId)
+        GameTooltip:AddDoubleLine(name, string.format('%d/%d', count, totalMax), 1, 1, 0, 1, 1, 1)
+      end
+    end
+
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Currency Frame'], 1, 1, 0, 1, 1, 1)
   end
 
-  GameTooltip:AddLine(" ")
-  GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Currency Frame'], 1, 1, 0, 1, 1, 1)
   GameTooltip:Show()
 end
 
