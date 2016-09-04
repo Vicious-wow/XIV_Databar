@@ -117,4 +117,4 @@ L['Current Loot Specialization'] = "Aktuelle Beute-Spezialisierung";
 L['Talent Minimum Width'] = "Minimale Breite für Talente";
 L['Remaining'] = "Ausbleibend";
 L['Available Ranks'] = "Verfügbare Ränge";
-L['Artifact Knowledge'] = "Artefaktwissen"
+L['Artifact Knowledge'] = "Artefaktwissen";
