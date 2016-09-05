@@ -299,6 +299,16 @@ function XIVBar:HexToRGBA(hex)
   return (tonumber(rhex, 16) / 255), (tonumber(ghex, 16) / 255), (tonumber(bhex, 16) / 255), (tonumber(ahex, 16) / 255)
 end
 
+function XIVBar:PrintTable(table, prefix)
+  for k,v in pairs(table) do
+    if type(v) == 'table' then
+      self:PrintTable(v, prefix..'.'..k)
+    else
+      print(prefix..'.'..k..': '..tostring(v))
+    end
+  end
+end
+
 function XIVBar:GetGeneralOptions()
   return {
     name = L['General'],
