@@ -407,7 +407,6 @@ function TalentModule:CreateLootSpecPopup()
             name = GetSpecializationInfo(GetSpecialization())
           end
           SetLootSpecialization(id)
-          print(string.format("|cffffff00"..ERR_LOOT_SPEC_CHANGED_S.."|r", name))
         end
         TalentModule.lootSpecPopup:Hide()
       end)
