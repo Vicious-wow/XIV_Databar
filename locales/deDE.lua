@@ -2,9 +2,6 @@ local AddOnName, Engine = ...;
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0");
 local L = AceLocale:NewLocale(AddOnName, "deDE", true, false);
 
-L['General'] = "Allgemein";
-L['Text'] = "Text";
-
 L['Modules'] = "Module";
 L['Left-Click'] = "Links-Klick";
 L['Right-Click'] = "Rechts-Klick";
@@ -16,11 +13,10 @@ L['Bottom'] = "Unten";
 L['Bar Color'] = "Leistenfarbe";
 L['Use Class Colors for Bar'] = "Benutze Klassenfarbe für Leiste";
 L['Bar Padding'] = "Leistenabstand";
-L['Module Spacing'] = "Modulabstand;
+L['Module Spacing'] = "Modulabstand";
 
 -- Positioning Options
 L['Positioning Options'] = "Positions-Optionen";
-L['Full Screen'] = "Vollbild";
 L['Horizontal Position'] = "Horizontale Position";
 L['Bar Width'] = "Leistenbreite";
 L['Left'] = "Links";
@@ -29,7 +25,6 @@ L['Right'] = "Rechts";
 
 -- Media
 L['Font'] = "Schriftart";
-L['Font Size'] = "Schriftgröße";
 L['Small Font Size'] = "Kleine Schriftgröße";
 L['Text Style'] = "Schriftstil";
 
@@ -46,27 +41,19 @@ L['Micromenu'] = "Mikromenü";
 L['Show Social Tooltips'] = "Social Tooltips anzeigen";
 L['Main Menu Icon Right Spacing'] = "Hauptmenü Icon Abstand Rechts";
 L['Icon Spacing'] = "Icon-Abstand";
-L['Guild'] = "Gilde";
-L['Online'] = "Online";
-L['AFK'] = "AFK";
-L['DND'] = "DND";
-L['Open Guild Page'] = true";
-L['Social'] = true;
+L['Open Guild Page'] = true;
 L['No Tag'] = true;
-L['Level'] = true;
 L['Hide Social Text'] = "Social Text verstecken";
 
-L['Armor'] = "Rüstung";
 L['Always Show Item Level'] = "Rüstungslevel immer anzeigen";
 L['Minimum Durability to Become Active'] = "Minimale Haltbarkeit für Anzeige";
 L['Maximum Durability to Show Item Level'] = "Maximale Haltbarkeit für Rüstungslevel-Anzeige";
 
-L['Clock'] = "Uhr";
 L['Time Format'] = "Uhrzeit-Format";
 L['Use Server Time'] = "Server-Zeit benutzen";
 L['New Event!'] = "Neue Veranstaltung";
 L['Local Time'] = "Lokale Zeit";
-L['Realm Time'] = "Realm-Zeit;
+L['Realm Time'] = "Realm-Zeit";
 L['Open Calendar'] = "Kalendar öffnen";
 L['Open Clock'] = "Stoppuhr öffnen";
 L['Hide Event Text'] = "Event-Text verstecken";
@@ -77,28 +64,21 @@ L['Ready'] = "Bereit";
 L['Travel Cooldowns'] = "Reise-Abklingzeiten";
 L['Change Port Option'] = "Port Optionen ändern";
 
-L['Gold'] = "Gold";
 L['Always Show Silver and Copper'] = "Silber und Kupfer immer anzeigen";
-L['Show Free Bag Space'] = "Freie Taschenplätze anzeigen";
 L['Shorten Gold'] = "Gold verkürzen";
 L['Toggle Bags'] = "Taschen anzeigen";
-L['Total'] = "Total";
 L['Session Total'] = true;
 
-L['Currency'] = Währungen;
 L['Show XP Bar Below Max Level'] = "Erfahrungsleiste unter Levelcap anzeigen";
 L['Use Class Colors for XP Bar'] = "Klassenfarbe für Erfahrungsleiste benutzen";
 L['Show Tooltips'] = "Tooltips anzeigen";
 L['Text on Right'] = "Text auf der rechten Seite";
-L['Toggle Currency Frame'] = "Währungsfenster anzeigen";
 L['Currency Select'] = "Währung auswählen";
 L['First Currency'] = "Währung #1";
 L['Second Currency'] = "Währung #2";
 L['Third Currency'] = "Währung #3";
-L['XP'] = "Erfahrung";
 L['Rested'] = "Ausgeruht";
 
-L['System'] = "System";
 L['Show World Ping'] = "World-Ping anzeigen";
 L['Number of Addons To Show'] = "Maximale Anzahl für Addon-Anzeige";
 L['Addons to Show in Tooltip'] = true;
