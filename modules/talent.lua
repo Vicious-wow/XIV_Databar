@@ -57,8 +57,8 @@ function TalentModule:Refresh()
   if self.talentFrame == nil then return; end
   if not db.modules.talent.enabled then return; end
 
-  local artifactId = 0
-  --local artifactId = self.LAD:GetActiveArtifactID() or 0
+  --local artifactId = 0
+  local artifactId = self.LAD:GetActiveArtifactID() or 0
 
   self.currentSpecID = GetSpecialization()
   self.currentLootSpecID = GetLootSpecialization()
@@ -137,7 +137,7 @@ function TalentModule:Refresh()
 end
 
 function TalentModule:UpdateArtifactBar(artifactId)
-  if true then return; end
+  --if true then return; end
   local _, artifactData = self.LAD:GetArtifactInfo(artifactId)
   self.specBar:SetMinMaxValues(0, artifactData.maxPower)
   self.specBar:SetValue(artifactData.power)
