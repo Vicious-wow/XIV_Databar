@@ -77,6 +77,10 @@ function CurrencyModule:Refresh()
     --self.xpFrame = self.xpFrame or CreateFrame("BUTTON", nil, self.currencyFrame)
 
     local textHeight = floor((xb:GetHeight() - 4) / 2)
+    local barHeight = (iconSize - textHeight - 2)
+    if barHeight < 2 then
+      barHeight = 2
+    end
     self.xpIcon:SetTexture(xb.constants.mediaPath..'datatexts\\exp')
     self.xpIcon:SetSize(iconSize, iconSize)
     self.xpIcon:SetPoint('LEFT')
@@ -95,7 +99,7 @@ function CurrencyModule:Refresh()
     end
     self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
     self.xpBar:SetValue(UnitXP('player'))
-    self.xpBar:SetSize(self.xpText:GetStringWidth(), (iconSize - textHeight - 2))
+    self.xpBar:SetSize(self.xpText:GetStringWidth(), barHeight)
     self.xpBar:SetPoint('BOTTOMLEFT', self.xpIcon, 'BOTTOMRIGHT', 5, 0)
 
     self.xpBarBg:SetAllPoints()
