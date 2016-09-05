@@ -400,10 +400,14 @@ function TalentModule:CreateLootSpecPopup()
         if InCombatLockdown() then return; end
         if button == 'LeftButton' then
           local id = 0
+          local name = ''
           if self:GetID() ~= 0 then
-            id = GetSpecializationInfo(self:GetID())
+            id, name = GetSpecializationInfo(self:GetID())
+          else
+            name = GetSpecializationInfo(GetSpecialization())
           end
           SetLootSpecialization(id)
+          print(string.format("|cffffff00"..ERR_LOOT_SPEC_CHANGED_S.."|r", name))
         end
         TalentModule.lootSpecPopup:Hide()
       end)

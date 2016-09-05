@@ -6,7 +6,7 @@ local L = XIVBar.L;
 local ClockModule = xb:NewModule("ClockModule", 'AceEvent-3.0')
 
 function ClockModule:GetName()
-  return L['Clock'];
+  return TIMEMANAGER_TITLE;
 end
 
 function ClockModule:OnInitialize()
@@ -128,7 +128,7 @@ function ClockModule:RegisterFrameEvents()
     if InCombatLockdown() then return; end
     ClockModule:SetClockColor()
     GameTooltip:SetOwner(ClockModule.clockTextFrame, 'ANCHOR_'..xb.miniTextPosition)
-    GameTooltip:AddLine("[|cff6699FF"..L['Clock'].."|r]")
+    GameTooltip:AddLine("[|cff6699FF"..TIMEMANAGER_TITLE.."|r]")
     GameTooltip:AddLine(" ")
     local clockTime = nil
     local ttTimeText = ''
@@ -240,7 +240,7 @@ function ClockModule:GetConfig()
         set = function(info, val) xb.db.profile.modules.clock.timeFormat = val; self:Refresh(); end
       },
       fontSize = {
-        name = L['Font Size'],
+        name = FONT_SIZE,
         type = 'range',
         order = 4,
         min = 10,

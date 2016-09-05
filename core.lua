@@ -74,48 +74,13 @@ function XIVBar:OnInitialize()
 
   self.fontFlags = {'', 'OUTLINE', 'THICKOUTLINE', 'MONOCHROME'}
 
-  --[[local options = {
-    name = "XIV Bar",
-    handler = XIVBar,
-    type = 'group',
-    args = {
-      general = {
-        name = L['General'],
-        type = "group",
-        order = 3,
-        inline = true,
-        args = {
-          barPosition = {
-            name = L['Bar Position'],
-            type = "select",
-            order = 1,
-            values = {TOP = L['Top'], BOTTOM = L['Bottom']},
-            style = "dropdown",
-            get = function() return self.db.profile.general.barPosition; end,
-            set = function(info, value) self.db.profile.general.barPosition = value; self:Refresh(); end,
-          },
-          barColor = {
-            name = L['Bar Color'],
-            type = "color",
-            order = 2,
-            hasAlpha = true,
-            set = function(info, r, g, b, a)
-              XIVBar:SetColor('barColor', r, g, b, a)
-            end,
-            get = function() return XIVBar:GetColor('barColor') end
-          },
-        }
-      }
-    }
-  }]]--
-
   local options = {
     name = "XIV Bar",
     handler = XIVBar,
     type = 'group',
     args = {
       general = {
-        name = L['General'],
+        name = GENERAL_LABEL,
         type = "group",
         args = {
           general = self:GetGeneralOptions(),
@@ -311,7 +276,7 @@ end
 
 function XIVBar:GetGeneralOptions()
   return {
-    name = L['General'],
+    name = GENERAL_LABEL,
     type = "group",
     order = 3,
     inline = true,
@@ -375,7 +340,7 @@ function XIVBar:GetPositionOptions()
     inline = true,
     args = {
       fullScreen = {
-        name = L['Full Screen'],
+        name = VIDEO_OPTIONS_FULLSCREEN,
         type = 'toggle',
         order = 0,
         get = function() return self.db.profile.general.barFullscreen; end,
@@ -413,7 +378,7 @@ function XIVBar:GetTextOptions()
     fontList[v] = v;
   end
   return {
-    name = L['Text'],
+    name = LOCALE_TEXT_LABEL,
     type = "group",
     order = 3,
     inline = true,
@@ -428,7 +393,7 @@ function XIVBar:GetTextOptions()
         set = function(info, val) self.db.profile.text.font = val; self:Refresh(); end
       },
       fontSize = {
-        name = L['Font Size'],
+        name = FONT_SIZE,
         type = 'range',
         order = 2,
         min = 10,

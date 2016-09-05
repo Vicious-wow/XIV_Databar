@@ -6,7 +6,7 @@ local L = XIVBar.L;
 local ArmorModule = xb:NewModule("ArmorModule", 'AceEvent-3.0')
 
 function ArmorModule:GetName()
-  return L['Armor'];
+  return AUCTION_CATEGORY_ARMOR;
 end
 
 function ArmorModule:OnInitialize()
@@ -55,7 +55,7 @@ function ArmorModule:RegisterFrameEvents()
   self.armorButton:SetScript('OnEnter', function()
     ArmorModule:SetArmorColor()
     GameTooltip:SetOwner(ArmorModule.armorFrame, 'ANCHOR_'..xb.miniTextPosition)
-    GameTooltip:AddLine("[|cff6699FF"..L['Armor'].."|r]")
+    GameTooltip:AddLine("[|cff6699FF"..AUCTION_CATEGORY_ARMOR.."|r]")
     GameTooltip:AddLine(" ")
     for i,v in pairs(ArmorModule.durabilityList) do
       if v.max ~= nil and v.max > 0 then

@@ -256,7 +256,7 @@ function TradeskillModule:ShowTooltip()
   local recipeIds = C_TradeSkillUI.GetAllRecipeIDs()
 
   GameTooltip:AddLine(" ")
-  GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Currency Frame'], 1, 1, 0, 1, 1, 1)
+  GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', BINDING_NAME_TOGGLECURRENCY, 1, 1, 0, 1, 1, 1)
   GameTooltip:Show()]]--
 end
 
