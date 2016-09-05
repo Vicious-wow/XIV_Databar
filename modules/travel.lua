@@ -410,7 +410,20 @@ function TravelModule:Refresh()
   self:SetPortColor()
 
   self:CreatePortPopup()
-  self.portPopup:SetPoint('BOTTOM', self.portButton, 'TOP', 0, xb.constants.popupPadding)
+
+  local popupPadding = xb.constants.popupPadding
+  local popupPoint = 'BOTTOM'
+  local relPoint = 'TOP'
+  if db.general.barPosition == 'TOP' then
+    popupPadding = -(popupPadding)
+    popupPoint = 'TOP'
+    relPoint = 'BOTTOM'
+  end
+
+  self.portPopup:ClearAllPoints()
+  self.popupTexture:ClearAllPoints()
+
+  self.portPopup:SetPoint(popupPoint, self.portButton, relPoint, 0, popupPadding)
   self.popupTexture:SetColorTexture(db.color.barColor.r, db.color.barColor.g, db.color.barColor.b, db.color.barColor.a)
   self.popupTexture:SetAllPoints()
   self.portPopup:Hide()
