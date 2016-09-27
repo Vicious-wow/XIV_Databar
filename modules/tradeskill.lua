@@ -117,6 +117,12 @@ function TradeskillModule:StyleTradeskillFrame(framePrefix, profIndex)
   if skill == cap then
     textHeight = db.text.fontSize
   end
+
+  local barHeight = (iconSize - textHeight - 2)
+  if barHeight < 2 then
+    barHeight = 2
+  end
+
   self[framePrefix..'Icon']:SetTexture(icon)
   self[framePrefix..'Icon']:SetSize(iconSize, iconSize)
   self[framePrefix..'Icon']:SetPoint('LEFT')
@@ -136,7 +142,7 @@ function TradeskillModule:StyleTradeskillFrame(framePrefix, profIndex)
     else
       self[framePrefix..'Bar']:SetStatusBarColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
     end
-    self[framePrefix..'Bar']:SetSize(self[framePrefix..'Text']:GetStringWidth(), (iconSize - textHeight - 2))
+    self[framePrefix..'Bar']:SetSize(self[framePrefix..'Text']:GetStringWidth(), barHeight)
     self[framePrefix..'Bar']:SetPoint('BOTTOMLEFT', self[framePrefix..'Icon'], 'BOTTOMRIGHT', 5, 0)
 
     self[framePrefix..'BarBg']:SetAllPoints()
@@ -250,7 +256,7 @@ function TradeskillModule:ShowTooltip()
   local recipeIds = C_TradeSkillUI.GetAllRecipeIDs()
 
   GameTooltip:AddLine(" ")
-  GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Currency Frame'], 1, 1, 0, 1, 1, 1)
+  GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', BINDING_NAME_TOGGLECURRENCY, 1, 1, 0, 1, 1, 1)
   GameTooltip:Show()]]--
 end
 

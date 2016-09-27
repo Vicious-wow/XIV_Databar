@@ -6,7 +6,7 @@ local L = XIVBar.L;
 local CurrencyModule = xb:NewModule("CurrencyModule", 'AceEvent-3.0', 'AceHook-3.0')
 
 function CurrencyModule:GetName()
-  return L['Currency'];
+  return CURRENCY;
 end
 
 function CurrencyModule:OnInitialize()
@@ -77,6 +77,10 @@ function CurrencyModule:Refresh()
     --self.xpFrame = self.xpFrame or CreateFrame("BUTTON", nil, self.currencyFrame)
 
     local textHeight = floor((xb:GetHeight() - 4) / 2)
+    local barHeight = (iconSize - textHeight - 2)
+    if barHeight < 2 then
+      barHeight = 2
+    end
     self.xpIcon:SetTexture(xb.constants.mediaPath..'datatexts\\exp')
     self.xpIcon:SetSize(iconSize, iconSize)
     self.xpIcon:SetPoint('LEFT')
@@ -95,7 +99,7 @@ function CurrencyModule:Refresh()
     end
     self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
     self.xpBar:SetValue(UnitXP('player'))
-    self.xpBar:SetSize(self.xpText:GetStringWidth(), (iconSize - textHeight - 2))
+    self.xpBar:SetSize(self.xpText:GetStringWidth(), barHeight)
     self.xpBar:SetPoint('BOTTOMLEFT', self.xpIcon, 'BOTTOMRIGHT', 5, 0)
 
     self.xpBarBg:SetAllPoints()
@@ -267,18 +271,15 @@ function CurrencyModule:ShowTooltip()
     local maxXp = UnitXPMax('player')
     local rested = GetXPExhaustion()
     -- XP
-    GameTooltip:AddDoubleLine(L['XP']..':', string.format('%d / %d (%d%%)', curXp, maxXp, floor((curXp / maxXp) * 100)), 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine(XP..':', string.format('%d / %d (%d%%)', curXp, maxXp, floor((curXp / maxXp) * 100)), 1, 1, 0, 1, 1, 1)
     -- Remaining
     GameTooltip:AddDoubleLine(L['Remaining']..':', string.format('%d (%d%%)', (maxXp - curXp), floor(((maxXp - curXp) / maxXp) * 100)), 1, 1, 0, 1, 1, 1)
     -- Rested
     if rested then
       GameTooltip:AddDoubleLine(L['Rested']..':', string.format('+%d (%d%%)', rested, floor((rested / maxXp) * 100)), 1, 1, 0, 1, 1, 1)
     end
-
-    --GameTooltip:AddLine(" ")
-    --GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Currency Frame'], 1, 1, 0, 1, 1, 1)
   else
-    GameTooltip:AddLine("[|cff6699FF"..L['Currency'].."|r]")
+    GameTooltip:AddLine("[|cff6699FF"..CURRENCY.."|r]")
     GameTooltip:AddLine(" ")
 
     for i = 1, 3 do
@@ -290,7 +291,7 @@ function CurrencyModule:ShowTooltip()
     end
 
     GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Currency Frame'], 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', BINDING_NAME_TOGGLECURRENCY, 1, 1, 0, 1, 1, 1)
   end
 
   GameTooltip:Show()

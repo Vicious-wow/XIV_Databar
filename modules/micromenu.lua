@@ -288,7 +288,7 @@ function MenuModule:SocialHover(hoverFunc)
 
     if (totalOnlineFriends + totalBNOnlineFriends) > 0 then
       GameTooltip:SetOwner(MenuModule.frames.social, 'ANCHOR_'..xb.miniTextPosition)
-      GameTooltip:AddLine('[|cff6699FF'..L['Social']..'|r]')
+      GameTooltip:AddLine('[|cff6699FF'..SOCIAL_LABEL..'|r]')
       GameTooltip:AddLine(' ')
     end
 
@@ -302,18 +302,18 @@ function MenuModule:SocialHover(hoverFunc)
           end
 
           local _, _, _, realmName, _ = BNGetGameAccountInfo(gameAccount)
-          local status = L['Online']
+          local status = FRIENDS_LIST_ONLINE
           local statusIcon = FRIENDS_TEXTURE_ONLINE
           local socialIcon = MenuModule.socialIcons[gameClient].icon
           local gameName = MenuModule.socialIcons[gameClient].text
 
           if isAfk then
             statusIcon = FRIENDS_TEXTURE_AFK
-            status = L['AFK']
+            status = DEFAULT_AFK_MESSAGE
           end
           if isDnd then
             statusIcon = FRIENDS_TEXTURE_DND
-            status = L['DND']
+            status = DEFAULT_DND_MESSAGE
           end
 
           if gameClient == BNET_CLIENT_WOW then
@@ -337,18 +337,18 @@ function MenuModule:SocialHover(hoverFunc)
       for i = 1, GetNumFriends() do
         local name, level, class, area, isOnline, status, note = GetFriendInfo(i)
         if online then
-          local status = L['Online']
+          local status = FRIENDS_LIST_ONLINE
           local statusIcon = FRIENDS_TEXTURE_ONLINE
           if isAfk then
             statusIcon = FRIENDS_TEXTURE_AFK
-            status = L['AFK']
+            status = DEFAULT_AFK_MESSAGE
           end
           if isDnd then
             statusIcon = FRIENDS_TEXTURE_DND
-            status = L['DND']
+            status = DEFAULT_DND_MESSAGE
           end
 
-          local lineLeft = string.format("|T%s:16|t %s, "..L['Level']..":%s %s", statusIcon, name, level, class)
+          local lineLeft = string.format("|T%s:16|t %s, "..LEVEL..":%s %s", statusIcon, name, level, class)
           local lineRight = string.format("%s", area)
           GameTooltip:AddDoubleLine(lineLeft, lineRight)
         end -- isOnline
@@ -374,10 +374,10 @@ function MenuModule:GuildHover(hoverFunc)
     end
     GuildRoster()
     GameTooltip:SetOwner(MenuModule.frames.guild, 'ANCHOR_'..xb.miniTextPosition)
-    GameTooltip:AddLine("[|cff6699FF"..L['Guild'].."|r]")
+    GameTooltip:AddLine("[|cff6699FF"..GUILD.."|r]")
     GameTooltip:AddLine(" ")
     local gName, _, _, _ = GetGuildInfo('player')
-    GameTooltip:AddDoubleLine(L['Guild']..':', gName, 1, 1, 0, 0, 1, 0)
+    GameTooltip:AddDoubleLine(GUILD..':', gName, 1, 1, 0, 0, 1, 0)
 
     local totalGuild, _ = GetNumGuildMembers()
     for i = 0, totalGuild do
@@ -385,9 +385,9 @@ function MenuModule:GuildHover(hoverFunc)
       if isOnline then
         local colorHex = RAID_CLASS_COLORS[class].colorStr
         if status == 1 then
-          status = L['AFK'];
+          status = DEFAULT_AFK_MESSAGE;
         elseif status == 2 then
-          status = L['DND'];
+          status = DEFAULT_DND_MESSAGE;
         else
           status = ''
         end

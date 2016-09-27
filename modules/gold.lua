@@ -6,7 +6,7 @@ local L = XIVBar.L;
 local GoldModule = xb:NewModule("GoldModule", 'AceEvent-3.0')
 
 function GoldModule:GetName()
-  return L['Gold'];
+  return BONUS_ROLL_REWARD_MONEY;
 end
 
 function GoldModule:OnInitialize()
@@ -118,7 +118,7 @@ function GoldModule:RegisterFrameEvents()
     self.bagText:SetTextColor(unpack(xb:HoverColors()))
 
     GameTooltip:SetOwner(GoldModule.goldFrame, 'ANCHOR_'..xb.miniTextPosition)
-    GameTooltip:AddLine("[|cff6699FF"..L['Gold'].."|r - |cff82c5ff"..xb.constants.playerFactionLocal.." "..xb.constants.playerRealm.."|r]")
+    GameTooltip:AddLine("[|cff6699FF"..BONUS_ROLL_REWARD_MONEY.."|r - |cff82c5ff"..xb.constants.playerFactionLocal.." "..xb.constants.playerRealm.."|r]")
     GameTooltip:AddLine(" ")
 
     GameTooltip:AddDoubleLine(L['Session Total'], GoldModule:FormatCoinText(xb.db.factionrealm[xb.constants.playerName].sessionMoney), 1, 1, 0, 1, 1, 1)
@@ -130,7 +130,7 @@ function GoldModule:RegisterFrameEvents()
       totalGold = totalGold + goldData.currentMoney
     end
     GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine(L['Total'], GoldModule:FormatCoinText(totalGold), 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine(TOTAL, GoldModule:FormatCoinText(totalGold), 1, 1, 0, 1, 1, 1)
     GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Bags'], 1, 1, 0, 1, 1, 1)
     GameTooltip:Show()
   end)
@@ -252,7 +252,7 @@ function GoldModule:GetConfig()
         set = function(_, val) xb.db.profile.modules.gold.showSmallCoins = val; self:Refresh(); end
       },
       showFreeBagSpace = {
-        name = L['Show Free Bag Space'],
+        name = DISPLAY_FREE_BAG_SLOTS,
         order = 1,
         type = "toggle",
         get = function() return xb.db.profile.modules.gold.showFreeBagSpace; end,

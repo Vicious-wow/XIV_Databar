@@ -232,12 +232,18 @@ function TravelModule:SetPortColor()
   if InCombatLockdown() then return; end
 
   local db = xb.db.profile
-  local v = db.modules.travel.portItem.portId
+  local v = xb.db.char.portItem.portId
 
-  if not (IsUsableItem(v) or IsPlayerSpell(v)) then
-    self.portButton:Hide()
-    return
+  if not (self:IsUsable(v)) then
+    v = self:FindFirstOption()
+    v = v.portId
+    if not (self:IsUsable(v)) then
+      self.portButton:Hide()
+      return
+    end
   end
+
+
 
   if self.portButton:IsMouseOver() then
     self.portText:SetTextColor(unpack(xb:HoverColors()))
@@ -315,7 +321,7 @@ function TravelModule:CreatePortPopup()
         end)
 
         button:SetScript('OnClick', function(self)
-          xb.db.profile.modules.travel.portItem = self.portItem
+          xb.db.char.portItem = self.portItem
           TravelModule:Refresh()
         end)
 
@@ -361,7 +367,7 @@ function TravelModule:Refresh()
 
   if InCombatLockdown() then
     self.hearthText:SetText(GetBindLocation())
-    self.portText:SetText(xb.db.profile.modules.travel.portItem.text)
+    self.portText:SetText(xb.db.char.portItem.text)
     self:SetHearthColor()
     self:SetPortColor()
     return
@@ -389,7 +395,7 @@ function TravelModule:Refresh()
   self:SetHearthColor()
 
   self.portText:SetFont(xb:GetFont(db.text.fontSize))
-  self.portText:SetText(db.modules.travel.portItem.text)
+  self.portText:SetText(xb.db.char.portItem.text)
 
   self.portButton:SetSize(self.portText:GetWidth() + iconSize + db.general.barPadding, xb:GetHeight())
   self.portButton:SetPoint("LEFT", -(db.general.barPadding), 0)
@@ -404,7 +410,20 @@ function TravelModule:Refresh()
   self:SetPortColor()
 
   self:CreatePortPopup()
-  self.portPopup:SetPoint('BOTTOM', self.portButton, 'TOP', 0, xb.constants.popupPadding)
+
+  local popupPadding = xb.constants.popupPadding
+  local popupPoint = 'BOTTOM'
+  local relPoint = 'TOP'
+  if db.general.barPosition == 'TOP' then
+    popupPadding = -(popupPadding)
+    popupPoint = 'TOP'
+    relPoint = 'BOTTOM'
+  end
+
+  self.portPopup:ClearAllPoints()
+  self.popupTexture:ClearAllPoints()
+
+  self.portPopup:SetPoint(popupPoint, self.portButton, relPoint, 0, popupPadding)
   self.popupTexture:SetColorTexture(db.color.barColor.r, db.color.barColor.g, db.color.barColor.b, db.color.barColor.a)
   self.popupTexture:SetAllPoints()
   self.portPopup:Hide()
@@ -417,14 +436,28 @@ function TravelModule:Refresh()
   self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
 end
 
-function TravelModule:GetDefaultOptions()
-  local firstItem = select(1, self.portOptions)
-  if not firstItem then
-    firstItem = {portId = 140192, text = GetMapNameByID(1014)}
+function TravelModule:FindFirstOption()
+  local firstItem = {portId = 140192, text = GetMapNameByID(1014)}
+  if self.portOptions then
+    for k,v in pairs(self.portOptions) do
+      if self:IsUsable(v.portId) then
+        firstItem = v
+        break
+      end
+    end
   end
+  return firstItem
+end
+
+function TravelModule:IsUsable(id)
+  return IsUsableItem(id) or IsPlayerSpell(id)
+end
+
+function TravelModule:GetDefaultOptions()
+  local firstItem = self:FindFirstOption()
+  xb.db.char.portItem = xb.db.char.portItem or firstItem
   return 'travel', {
-    enabled = true,
-    portItem = firstItem
+    enabled = true
   }
 end
 

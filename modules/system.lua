@@ -6,7 +6,7 @@ local L = XIVBar.L;
 local SystemModule = xb:NewModule("SystemModule", 'AceEvent-3.0', 'AceHook-3.0')
 
 function SystemModule:GetName()
-  return L['System'];
+  return SYSTEMOPTIONS_MENU;
 end
 
 function SystemModule:OnInitialize()

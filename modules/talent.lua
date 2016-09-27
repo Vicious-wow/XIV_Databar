@@ -57,8 +57,8 @@ function TalentModule:Refresh()
   if self.talentFrame == nil then return; end
   if not db.modules.talent.enabled then return; end
 
-  local artifactId = 0
-  --local artifactId = self.LAD:GetActiveArtifactID() or 0
+  --local artifactId = 0
+  local artifactId = self.LAD:GetActiveArtifactID() or 0
 
   self.currentSpecID = GetSpecialization()
   self.currentLootSpecID = GetLootSpecialization()
@@ -118,21 +118,6 @@ function TalentModule:Refresh()
 
   self.talentFrame:SetSize(self.specFrame:GetWidth(), xb:GetHeight())
 
-  local popupPadding = xb.constants.popupPadding
-  if db.general.barPosition == 'TOP' then
-    popupPadding = -(popupPadding)
-  end
-
-  self.specPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, popupPadding)
-  self.specPopupTexture:SetColorTexture(db.color.barColor.r, db.color.barColor.g, db.color.barColor.b, db.color.barColor.a)
-  self.specPopupTexture:SetAllPoints()
-  self.specPopup:Hide()
-
-  self.lootSpecPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, popupPadding)
-  self.lootSpecPopupTexture:SetColorTexture(db.color.barColor.r, db.color.barColor.g, db.color.barColor.b, db.color.barColor.a)
-  self.lootSpecPopupTexture:SetAllPoints()
-  self.lootSpecPopup:Hide()
-
   local relativeAnchorPoint = 'LEFT'
   local xOffset = db.general.moduleSpacing
   local anchorFrame = xb:GetFrame('clockFrame')
@@ -147,10 +132,12 @@ function TalentModule:Refresh()
     end
   end
   self.talentFrame:SetPoint('RIGHT', anchorFrame, relativeAnchorPoint, -(xOffset), 0)
+  self:CreateSpecPopup()
+  self:CreateLootSpecPopup()
 end
 
 function TalentModule:UpdateArtifactBar(artifactId)
-  return;
+  --if true then return; end
   local _, artifactData = self.LAD:GetArtifactInfo(artifactId)
   self.specBar:SetMinMaxValues(0, artifactData.maxPower)
   self.specBar:SetValue(artifactData.power)
@@ -214,6 +201,7 @@ function TalentModule:RegisterFrameEvents()
           end
         else
           self.lootSpecPopup:Hide()
+          self:CreateSpecPopup()
           self.specPopup:Show()
         end
       end
@@ -228,6 +216,7 @@ function TalentModule:RegisterFrameEvents()
           end
         else
           self.specPopup:Hide()
+          self:CreateLootSpecPopup()
           self.lootSpecPopup:Show()
         end
       end
@@ -335,6 +324,18 @@ function TalentModule:CreateSpecPopup()
     popupWidth = (self.specOptionString:GetStringWidth()  + self.extraPadding)
   end
   self.specPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
+
+  local popupPadding = xb.constants.popupPadding
+  if db.general.barPosition == 'TOP' then
+    popupPadding = -(popupPadding)
+  end
+
+  self.specPopup:ClearAllPoints()
+  self.specPopupTexture:ClearAllPoints()
+  self.specPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, popupPadding)
+  self.specPopupTexture:SetColorTexture(db.color.barColor.r, db.color.barColor.g, db.color.barColor.b, db.color.barColor.a)
+  self.specPopupTexture:SetAllPoints()
+  self.specPopup:Hide()
 end
 
 function TalentModule:CreateLootSpecPopup()
@@ -399,8 +400,11 @@ function TalentModule:CreateLootSpecPopup()
         if InCombatLockdown() then return; end
         if button == 'LeftButton' then
           local id = 0
+          local name = ''
           if self:GetID() ~= 0 then
-            id = GetSpecializationInfo(self:GetID())
+            id, name = GetSpecializationInfo(self:GetID())
+          else
+            name = GetSpecializationInfo(GetSpecialization())
           end
           SetLootSpecialization(id)
         end
@@ -437,6 +441,18 @@ function TalentModule:CreateLootSpecPopup()
     popupWidth = (self.lootSpecOptionString:GetStringWidth()  + self.extraPadding)
   end
   self.lootSpecPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
+
+  local popupPadding = xb.constants.popupPadding
+  if db.general.barPosition == 'TOP' then
+    popupPadding = -(popupPadding)
+  end
+
+  self.lootSpecPopup:ClearAllPoints()
+  self.lootSpecPopupTexture:ClearAllPoints()
+  self.lootSpecPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, popupPadding)
+  self.lootSpecPopupTexture:SetColorTexture(db.color.barColor.r, db.color.barColor.g, db.color.barColor.b, db.color.barColor.a)
+  self.lootSpecPopupTexture:SetAllPoints()
+  self.lootSpecPopup:Hide()
 end
 
 function TalentModule:ShowTooltip()

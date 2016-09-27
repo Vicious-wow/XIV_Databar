@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibArtifactData-1.0", 6
+local MAJOR, MINOR = "LibArtifactData-1.0", 7
 
 assert(_G.LibStub, MAJOR .. " requires LibStub")
 local lib = _G.LibStub:NewLibrary(MAJOR, MINOR)
@@ -225,6 +225,10 @@ end
 local function GetViewedArtifactData()
 	GetArtifactKnowledge()
 	local itemID, _, name, icon, unspentPower, numRanksPurchased = GetArtifactInfo() -- TODO: appearance stuff needed? altItemID ?
+	if not itemID then
+		Debug("|cffff0000ERROR:|r", "GetArtifactInfo() returned nil.")
+		return
+	end
 	viewedID = itemID
 	Debug("GetViewedArtifactData", name, itemID)
 	local numRanksPurchasable, power, maxPower = GetNumPurchasableTraits(numRanksPurchased, unspentPower)
@@ -305,11 +309,11 @@ local function InitializeScan(event)
 end
 
 function private.PLAYER_ENTERING_WORLD(event)
+	frame:UnregisterEvent(event)
 	_G.C_Timer.After(5, function()
 		InitializeScan(event)
 		frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 		frame:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
-		frame:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	end)
 end
 
@@ -348,6 +352,10 @@ function private.ARTIFACT_XP_UPDATE(event)
 	local numRanksPurchasable, power, maxPower = GetNumPurchasableTraits(numRanksPurchased, unspentPower)
 
 	local artifact = artifacts[itemID]
+	if not artifact then
+		Debug("|cffff0000ERROR:|r", "artifact", itemID, "not found.")
+		return
+	end
 	local diff = unspentPower - artifact.unspentPower
 
 	if numRanksPurchased ~= artifact.numRanksPurchased then
