@@ -55,7 +55,7 @@ function TalentModule:Refresh()
 
   local db = xb.db.profile
   if self.talentFrame == nil then return; end
-  if not db.modules.talent.enabled then return; end
+  if not db.modules.talent.enabled then self:Disable(); return; end
 
   --local artifactId = 0
   local artifactId = self.LAD:GetActiveArtifactID() or 0

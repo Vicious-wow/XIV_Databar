@@ -108,7 +108,7 @@ end
 
 function ArmorModule:Refresh()
   if self.armorFrame == nil then return; end
-  if not xb.db.profile.modules.armor.enabled then return; end
+  if not xb.db.profile.modules.armor.enabled then self:Disable(); return; end
 
   if InCombatLockdown() then
     self:UpdateDurabilityText()

@@ -81,7 +81,7 @@ end
 function MenuModule:Refresh()
   if self.frames.menu == nil then return; end
 
-  if not xb.db.profile.modules.microMenu.enabled then return; end
+  if not xb.db.profile.modules.microMenu.enabled then self:Disable(); return; end
 
   if InCombatLockdown() then
     self:RegisterEvent('PLAYER_REGEN_ENABLED', function()

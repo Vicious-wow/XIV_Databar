@@ -64,7 +64,7 @@ end
 function ClockModule:Refresh()
   local db = xb.db.profile
   if self.clockFrame == nil then return; end
-  if not db.modules.clock.enabled then return; end
+  if not db.modules.clock.enabled then self:Disable(); return; end
 
   if InCombatLockdown() then
     self:SetClockColor()

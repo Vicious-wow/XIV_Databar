@@ -65,7 +65,7 @@ function CurrencyModule:Refresh()
     return
   end
   if self.currencyFrame == nil then return; end
-  if not db.modules.currency.enabled then return; end
+  if not db.modules.currency.enabled then self:Disable(); return; end
 
   local iconSize = db.text.fontSize + db.general.barPadding
   for i = 1, 3 do

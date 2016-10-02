@@ -40,7 +40,7 @@ end
 function GoldModule:Refresh()
   local db = xb.db.profile
   if self.goldFrame == nil then return; end
-  if not db.modules.gold.enabled then return; end
+  if not db.modules.gold.enabled then self:Disable(); return; end
 
   if InCombatLockdown() then
     self.goldText:SetFont(xb:GetFont(db.text.fontSize))

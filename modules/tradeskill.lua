@@ -70,7 +70,7 @@ function TradeskillModule:Refresh()
   end
   local db = xb.db.profile
   if self.tradeskillFrame == nil then return; end
-  if not db.modules.tradeskill.enabled then return; end
+  if not db.modules.tradeskill.enabled then self:Disable(); return; end
   local iconSize = db.text.fontSize + db.general.barPadding
 
   local totalWidth = 0
