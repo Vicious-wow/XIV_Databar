@@ -130,13 +130,16 @@ function ArmorModule:Refresh()
 
   local relativeAnchorPoint = 'RIGHT'
   local xOffset = xb.db.profile.general.moduleSpacing
-  if not xb:GetFrame('microMenuFrame'):IsVisible() then
+
+  local parentFrame = xb:GetFrame('microMenuFrame');
+  if not xb.db.profile.modules.microMenu.enabled then
+	parentFrame = self.armorFrame:GetParent()
     relativeAnchorPoint = 'LEFT'
     xOffset = 0
   end
 
   self.armorFrame:ClearAllPoints()
-  self.armorFrame:SetPoint('LEFT', xb:GetFrame('microMenuFrame'), relativeAnchorPoint, xOffset, 0)
+  self.armorFrame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
   self:SetArmorColor()
 end
 

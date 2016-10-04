@@ -63,7 +63,7 @@ function MenuModule:OnEnable()
     self:CreateFrames()
     self:RegisterFrameEvents()
     self:CreateIcons()
-    self:Refresh()
+    xb:Refresh()
     self:UpdateGuildText()
     self:UpdateFriendText()
   end
@@ -74,14 +74,14 @@ function MenuModule:OnDisable()
     frame:Hide()
   end
   self.microMenuFrame:Hide()
-  self:Refresh()
   self:UnregisterFrameEvents()
+  xb:Refresh()
 end
 
 function MenuModule:Refresh()
-  if self.frames.menu == nil then return; end
-
   if not xb.db.profile.modules.microMenu.enabled then self:Disable(); return; end
+  
+  if self.frames.menu == nil then return; end
 
   if InCombatLockdown() then
     self:RegisterEvent('PLAYER_REGEN_ENABLED', function()

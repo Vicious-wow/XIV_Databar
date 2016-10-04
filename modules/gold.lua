@@ -90,11 +90,13 @@ function GoldModule:Refresh()
 
   local relativeAnchorPoint = 'LEFT'
   local xOffset = db.general.moduleSpacing
-  if not xb:GetFrame('travelFrame'):IsVisible() then
+  local parentFrame = xb:GetFrame('travelFrame')
+  if not xb.db.profile.modules.travel.enabled then
+    parentFrame = self.goldFrame:GetParent()
     relativeAnchorPoint = 'RIGHT'
     xOffset = 0
   end
-  self.goldFrame:SetPoint('RIGHT', xb:GetFrame('travelFrame'), relativeAnchorPoint, -(xOffset), 0)
+  self.goldFrame:SetPoint('RIGHT', parentFrame, relativeAnchorPoint, -(xOffset), 0)
 end
 
 function GoldModule:CreateFrames()

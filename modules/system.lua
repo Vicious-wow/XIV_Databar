@@ -96,11 +96,17 @@ function SystemModule:Refresh()
   --self.systemFrame:SetSize()
   local relativeAnchorPoint = 'LEFT'
   local xOffset = db.general.moduleSpacing
-  if not xb:GetFrame('goldFrame'):IsVisible() then
-    relativeAnchorPoint = 'RIGHT'
-    xOffset = 0
+  local parentFrame = xb:GetFrame('goldFrame');
+  if not xb.db.profile.modules.gold.enabled then
+	if xb.db.profile.modules.travel.enabled then
+	  parentFrame = xb:GetFrame('travelFrame');
+	else
+	  relativeAnchorPoint = 'RIGHT'
+	  xOffset = 0
+	  parentFrame = self.systemFrame:GetParent();
+	end
   end
-  self.systemFrame:SetPoint('RIGHT', xb:GetFrame('goldFrame'), relativeAnchorPoint, -(xOffset), 0)
+  self.systemFrame:SetPoint('RIGHT', parentFrame, relativeAnchorPoint, -(xOffset), 0)
 end
 
 function SystemModule:UpdateTexts()
