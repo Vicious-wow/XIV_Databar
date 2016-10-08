@@ -205,9 +205,6 @@ function XIVBar:GetHeight()
 end
 
 function XIVBar:Refresh()
-    local b = OrderHallCommandBar
-	--local inOrderHall = C_Garrison.IsPlayerInGarrison(LE_GARRISON_TYPE_7_0);
-	
     if self.frames.bar == nil then return; end
 
 	if doitOnce then
