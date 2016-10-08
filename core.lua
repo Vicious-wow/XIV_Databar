@@ -3,6 +3,8 @@ local _G = _G;
 local pairs, unpack, select = pairs, unpack, select
 LibStub("AceAddon-3.0"):NewAddon(XIVBar, AddOnName, "AceConsole-3.0", "AceEvent-3.0");
 local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true);
+local doitOnce = true
+local topOffsetBlizz
 
 XIVBar.L = L
 
@@ -204,12 +206,10 @@ end
 
 function XIVBar:Refresh()
     local b = OrderHallCommandBar
-	local inOrderHall = C_Garrison.IsPlayerInGarrison(LE_GARRISON_TYPE_7_0);
+	--local inOrderHall = C_Garrison.IsPlayerInGarrison(LE_GARRISON_TYPE_7_0);
 	
     if self.frames.bar == nil then return; end
 
-	local doitOnce = true
-	local topOffsetBlizz
 	if doitOnce then
 		topOffsetBlizz = UIParent_UpdateTopFramePositions
 		doitOnce = false
@@ -225,8 +225,11 @@ function XIVBar:Refresh()
 				end
 			end
 			OffsetUI()
-	   end)
+		end)
+		OffsetUI()
         self.miniTextPosition = 'BOTTOM'
+	else
+		self:ResetUI();
     end
 
     local barColor = self.db.profile.color.barColor
@@ -328,6 +331,9 @@ function OffsetUI()
 end
 
 function XIVBar:ResetUI()
+	if topOffsetBlizz then
+		UIParent_UpdateTopFramePositions = topOffsetBlizz
+	end
 	UIParent_UpdateTopFramePositions();
 	if not MinimapCluster:IsUserPlaced() then
 		MinimapCluster:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0);
@@ -348,7 +354,11 @@ function XIVBar:GetGeneralOptions()
                 values = {TOP = L['Top'], BOTTOM = L['Bottom']},
                 style = "dropdown",
                 get = function() return self.db.profile.general.barPosition; end,
-                set = function(info, value) self.db.profile.general.barPosition = value; self:Refresh(); end,
+                set = function(info, value) self.db.profile.general.barPosition = value; 
+				if value == "TOP" and self.db.profile.general.ohHide then 
+					LoadAddOn("Blizzard_OrderHallUI"); local b = OrderHallCommandBar; b:Hide(); 
+				end
+				self:Refresh(); end,
             },
             barCC = {
                 name = L['Use Class Colors for Bar'],
