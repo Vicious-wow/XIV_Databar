@@ -10,6 +10,7 @@ function MenuModule:GetName()
 end
 
 function MenuModule:OnInitialize()
+  self.LTip=LibStub('LibQTip-1.0')
   self.mediaFolder = xb.constants.mediaPath..'microbar\\'
   self.socialIconPath = "Interface\\FriendsFrame\\"
   self.icons = {}
@@ -327,10 +328,7 @@ function MenuModule:RegisterFrameEvents()
     elseif name == 'social' then
       local leaveFunc = self:DefaultLeave(name)
       frame:SetScript("OnEnter", self:SocialHover(self:DefaultHover(name)))
-      frame:SetScript("OnLeave", function()
-        GameTooltip:Hide()
-        leaveFunc()
-      end)
+      frame:SetScript("OnLeave", leaveFunc)
     else
       frame:SetScript("OnEnter", self:DefaultHover(name))
       frame:SetScript("OnLeave", self:DefaultLeave(name))
@@ -384,6 +382,8 @@ function MenuModule:DefaultHover(name)
     if InCombatLockdown() then return; end
     if self.icons[name] ~= nil then
       self.icons[name]:SetVertexColor(unpack(xb:HoverColors()))
+	  self.tipHover=(name=="social")
+	  self.gtipHover=(name=="guild")
     end
   end
 end
@@ -403,19 +403,27 @@ function MenuModule:SocialHover(hoverFunc)
       hoverFunc()
       return
     end
+	if self.LTip:IsAcquired("SocialToolTip") then
+		self.LTip:Release(self.LTip:Acquire("SocialToolTip"))
+	end
+	local tooltip = self.LTip:Acquire("SocialToolTip", 2, "LEFT", "RIGHT")
+	tooltip:EnableMouse(true)
+	tooltip:SetScript("OnEnter",function() self.tipHover=true end)
+	tooltip:SetScript("OnLeave",function() self.tipHover=false end)
+	tooltip:SetScript("OnUpdate",function() if not self.tipHover and not self.lineHover then tooltip:Release() end end)
     local totalBNFriends, totalBNOnlineFriends = BNGetNumFriends()
     local totalFriends, totalOnlineFriends = GetNumFriends()
-
+	local charNameFormat
     if (totalOnlineFriends + totalBNOnlineFriends) > 0 then
-      GameTooltip:SetOwner(MenuModule.frames.social, 'ANCHOR_'..xb.miniTextPosition)
-      GameTooltip:AddLine('[|cff6699FF'..SOCIAL_LABEL..'|r]')
-      GameTooltip:AddLine(' ')
+      tooltip:SmartAnchorTo(MenuModule.frames.social)
+      tooltip:AddHeader('[|cff6699FF'..SOCIAL_LABEL..'|r]')
+      tooltip:AddLine(' ',' ')
     end
 
     if totalBNOnlineFriends then
 
       for i = 1, BNGetNumFriends() do
-        local _, battleName, battleTag, _, charName, gameAccount, gameClient, isOnline, _, isAfk, isDnd, _, note = BNGetFriendInfo(i)
+        local battleID, battleName, battleTag, _, charName, gameAccount, gameClient, isOnline, _, isAfk, isDnd, _, note = BNGetFriendInfo(i)
         if isOnline then
           if not battleTag then
             battleTag = '['..L['No Tag']..']'
@@ -437,9 +445,9 @@ function MenuModule:SocialHover(hoverFunc)
           end
 
           if gameClient == BNET_CLIENT_WOW then
-            charName = "(|cffecd672"..charName.."-"..realmName.."|r)"
+            charNameFormat = "(|cffecd672"..charName.."-"..realmName.."|r)"
           else
-            charName = ''
+            charNameFormat = ''
           end
 
           if note ~= '' then
@@ -447,8 +455,25 @@ function MenuModule:SocialHover(hoverFunc)
           end
 
           local lineLeft = string.format("|T%s:16|t|cff82c5ff %s|r %s", statusIcon, battleName, note)
-          local lineRight = string.format("%s %s |T%s:16|t", charName, gameName, socialIcon)
-          GameTooltip:AddDoubleLine(lineLeft, lineRight)
+          local lineRight = string.format("%s %s |T%s:16|t", charNameFormat, gameName, socialIcon)
+          tooltip:AddLine(lineLeft, lineRight)
+		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true;end)
+		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false; end)
+		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
+		    if button == "LeftButton" then
+				if IsShiftKeyDown() then
+					if CanGroupWithAccount(battleID) then
+						InviteToGroup(charName.."-"..realmName)
+					end
+				else
+					local name = battleName
+					if charName then
+						name = charName.."-"..realmName
+					end
+					ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..name.." ")
+				end
+			end
+		  end)
         end -- isOnline
       end -- for in BNGetNumFriends
     end -- totalBNOnlineFriends
@@ -470,13 +495,27 @@ function MenuModule:SocialHover(hoverFunc)
 
           local lineLeft = string.format("|T%s:16|t %s, "..LEVEL..":%s %s", statusIcon, name, level, class)
           local lineRight = string.format("%s", area)
-          GameTooltip:AddDoubleLine(lineLeft, lineRight)
+          tooltip:AddLine(lineLeft, lineRight)
+		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true;end)
+		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false; end)
+		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
+		    if button == "LeftButton" then
+				if IsShiftKeyDown() then
+					if not name:find('%u%U*-%u%U') then
+						local homeRealm = GetRealmName()
+						homeRealm = homeRealm:gsub("%s+", "")
+						name=name.."-"..homeRealm
+					end
+					InviteUnit(name)
+				end
+				ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..name.." ")
+			end
+		  end)
         end -- isOnline
       end -- for in GetNumFriends
     end -- totalOnlineFriends
-
     if (totalOnlineFriends + totalBNOnlineFriends) > 0 then
-      GameTooltip:Show()
+      tooltip:Show()
     end
     hoverFunc()
   end
@@ -492,12 +531,22 @@ function MenuModule:GuildHover(hoverFunc)
       hoverFunc()
       return
     end
+	
+	if self.LTip:IsAcquired("GuildToolTip") then
+		self.LTip:Release(self.LTip:Acquire("GuildToolTip"))
+	end
+	local tooltip = self.LTip:Acquire("GuildToolTip", 2, "LEFT","RIGHT")
+	tooltip:EnableMouse(true)
+	tooltip:SetScript("OnEnter",function() self.gtipHover=true end)
+	tooltip:SetScript("OnLeave",function() self.gtipHover=false end)
+	tooltip:SetScript("OnUpdate",function() if not self.gtipHover and not self.glineHover then tooltip:Release() end end)
+	
     GuildRoster()
-    GameTooltip:SetOwner(MenuModule.frames.guild, 'ANCHOR_'..xb.miniTextPosition)
-    GameTooltip:AddLine("[|cff6699FF"..GUILD.."|r]")
-    GameTooltip:AddLine(" ")
+    tooltip:SmartAnchorTo(MenuModule.frames.guild)
+    tooltip:AddHeader("[|cff6699FF"..GUILD.."|r]")
+    tooltip:AddLine(" "," ")
     local gName, _, _, _ = GetGuildInfo('player')
-    GameTooltip:AddDoubleLine(GUILD..':', gName, 1, 1, 0, 0, 1, 0)
+    tooltip:AddLine('|cffff00ff'..GUILD..':|r', '|c00ff00ff'..gName..'|r')
 
     local totalGuild, _ = GetNumGuildMembers()
     for i = 0, totalGuild do
@@ -512,13 +561,29 @@ function MenuModule:GuildHover(hoverFunc)
           status = ''
         end
         local lineLeft = string.format('%s |c%s%s|r %s %s', level, colorHex, name, status, note)
-        local lineRight = string.format('%s|cffffffff %s', (isMobile and "|cffffff00[M]|r " or ""), zone or '')
-        GameTooltip:AddDoubleLine(lineLeft, lineRight)
+        local lineRight = string.format('%s|cffffffff %s', (isMobile and "|cffffffa0[M]|r " or ""), zone or '')
+        tooltip:AddLine(lineLeft, lineRight)
+		tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.glineHover = true;end)
+		tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.glineHover = false; end)
+		tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
+		    if button == "LeftButton" then
+				if IsShiftKeyDown() then
+					if not name:find('%u%U*-%u%U') then
+						local homeRealm = GetRealmName()
+						homeRealm = homeRealm:gsub("%s+", "")
+						name=name.."-"..homeRealm
+					end
+					InviteUnit(name)
+				else
+					ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..name.." ")
+				end
+			end
+		  end)
       end
     end
-    GameTooltip:AddLine(' ')
-    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Open Guild Page'], 1, 1, 0, 1, 1, 1)
-    GameTooltip:Show()
+    --tooltip:AddLine(' ',' ')
+    --tooltip:AddLine('|cffff00ff<'..L['Left-Click']..'>|r', '|cffffffff'..L['Open Guild Page']..'|r', 1, 1, 0, 1, 1, 1)
+    tooltip:Show()
     hoverFunc()
   end
 end
