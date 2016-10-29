@@ -125,6 +125,7 @@ function XIVBar:OnInitialize()
     self.timerRefresh = false
 
     self:RegisterChatCommand('xivbar', 'ToggleConfig')
+    self:RegisterChatCommand('xb', 'ToggleConfig')
 end
 
 function XIVBar:OnEnable()
@@ -144,7 +145,9 @@ function XIVBar:OnEnable()
 end
 
 function XIVBar:ToggleConfig()
-    InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
+    InterfaceOptionsFrame.selectedTab = 2;
+	InterfaceOptionsFrame:Show()--weird hack ; options registration is wrong in some way
+	InterfaceOptionsFrame_OpenToCategory("XIV Bar")
 end
 
 function XIVBar:SetColor(name, r, g, b, a)
