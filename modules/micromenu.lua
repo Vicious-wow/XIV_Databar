@@ -14,6 +14,7 @@ function MenuModule:OnInitialize()
   self.mediaFolder = xb.constants.mediaPath..'microbar\\'
   self.socialIconPath = "Interface\\FriendsFrame\\"
   self.icons = {}
+  self.modifiers={"SHIFT","ALT","CONTROL"}
   self.frames = {}
   self.text = {}
   self.bgTexture = {}
@@ -88,6 +89,8 @@ function MenuModule:Refresh()
     end)
     return
   end
+
+  self.modifier=self.modifiers[xb.db.profile.modules.microMenu.modifierTooltip];
 
   self.iconSize = xb:GetHeight();
 
@@ -403,6 +406,14 @@ function MenuModule:SocialHover(hoverFunc)
       hoverFunc()
       return
     end
+
+	local modifierFunc = IsShiftKeyDown
+	if self.modifier == "ALT" then
+		modifierFunc = IsAltKeyDown
+	elseif self.modifier == "CONTROL" then
+		modifierFunc = IsControlKeyDown
+	end
+
 	if self.LTip:IsAcquired("SocialToolTip") then
 		self.LTip:Release(self.LTip:Acquire("SocialToolTip"))
 	end
@@ -461,16 +472,16 @@ function MenuModule:SocialHover(hoverFunc)
 		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false; end)
 		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
 		    if button == "LeftButton" then
-				if IsShiftKeyDown() then
+				if modifierFunc() then
 					if CanGroupWithAccount(battleID) then
 						InviteToGroup(charName.."-"..realmName)
 					end
 				else
-					local name = battleName
-					if charName then
-						name = charName.."-"..realmName
-					end
-					ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..name.." ")
+					ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..battleName.." ")
+				end
+			elseif button == "RightButton" then
+				if charName then
+					ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..charName.."-"..realmName.." ")
 				end
 			end
 		  end)
@@ -481,7 +492,7 @@ function MenuModule:SocialHover(hoverFunc)
     if totalOnlineFriends then
       for i = 1, GetNumFriends() do
         local name, level, class, area, isOnline, status, note = GetFriendInfo(i)
-        if online then
+        if isOnline then
           local status = FRIENDS_LIST_ONLINE
           local statusIcon = FRIENDS_TEXTURE_ONLINE
           if isAfk then
@@ -499,21 +510,27 @@ function MenuModule:SocialHover(hoverFunc)
 		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true;end)
 		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false; end)
 		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
-		    if button == "LeftButton" then
-				if IsShiftKeyDown() then
-					if not name:find('%u%U*-%u%U') then
-						local homeRealm = GetRealmName()
-						homeRealm = homeRealm:gsub("%s+", "")
-						name=name.."-"..homeRealm
-					end
+		    if not name:find('%u%U*-%u%U') then
+				local homeRealm = GetRealmName()
+				homeRealm = homeRealm:gsub("%s+", "")
+				name=name.."-"..homeRealm
+			end
+		    if button == "RightButton" then
+				ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..name.." ")
+			elseif button == "LeftButton" then
+				if modifierFunc() then
 					InviteUnit(name)
 				end
-				ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..name.." ")
 			end
 		  end)
         end -- isOnline
       end -- for in GetNumFriends
     end -- totalOnlineFriends
+
+	tooltip:AddLine(' ',' ')
+    tooltip:AddLine('|cffffff00<'..L['Left-Click']..'>|r', '|cffffffff Whisper BTag |r')
+    tooltip:AddLine('|cffffff00<'..self.modifier..' + '..L['Left-Click']..'>|r', '|cffffffff Invite Contact |r')
+    tooltip:AddLine('|cffffff00<'..L['Right-Click']..'>|r', '|cffffffff Whisper character |r')
     if (totalOnlineFriends + totalBNOnlineFriends) > 0 then
       tooltip:Show()
     end
@@ -531,7 +548,14 @@ function MenuModule:GuildHover(hoverFunc)
       hoverFunc()
       return
     end
-	
+
+	local modifierFunc = IsShiftKeyDown
+	if self.modifier == "ALT" then
+		modifierFunc = IsAltKeyDown
+	elseif self.modifier == "CONTROL" then
+		modifierFunc = IsControlKeyDown
+	end
+
 	if self.LTip:IsAcquired("GuildToolTip") then
 		self.LTip:Release(self.LTip:Acquire("GuildToolTip"))
 	end
@@ -547,6 +571,7 @@ function MenuModule:GuildHover(hoverFunc)
     tooltip:AddLine(" "," ")
     local gName, _, _, _ = GetGuildInfo('player')
     tooltip:AddLine('|cffff00ff'..GUILD..':|r', '|c00ff00ff'..gName..'|r')
+    tooltip:AddLine('|c00ff00ff'..GetGuildRosterMOTD()..':|r', ' ')
 
     local totalGuild, _ = GetNumGuildMembers()
     for i = 0, totalGuild do
@@ -567,12 +592,12 @@ function MenuModule:GuildHover(hoverFunc)
 		tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.glineHover = false; end)
 		tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
 		    if button == "LeftButton" then
-				if IsShiftKeyDown() then
-					if not name:find('%u%U*-%u%U') then
-						local homeRealm = GetRealmName()
-						homeRealm = homeRealm:gsub("%s+", "")
-						name=name.."-"..homeRealm
-					end
+				if not name:find('%u%U*-%u%U') then
+					local homeRealm = GetRealmName()
+					homeRealm = homeRealm:gsub("%s+", "")
+					name=name.."-"..homeRealm
+				end
+				if modifierFunc() then
 					InviteUnit(name)
 				else
 					ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..name.." ")
@@ -581,8 +606,9 @@ function MenuModule:GuildHover(hoverFunc)
 		  end)
       end
     end
-    --tooltip:AddLine(' ',' ')
-    --tooltip:AddLine('|cffff00ff<'..L['Left-Click']..'>|r', '|cffffffff'..L['Open Guild Page']..'|r', 1, 1, 0, 1, 1, 1)
+    tooltip:AddLine(' ',' ')
+    tooltip:AddLine('|cffff00ff<'..L['Left-Click']..'>|r', '|cffffffff Whisper |r')
+    tooltip:AddLine('|cffff00ff<'..self.modifier..' + '..L['Left-Click']..'>|r', '|cffffffff Invite |r')
     tooltip:Show()
     hoverFunc()
   end
@@ -717,6 +743,7 @@ function MenuModule:GetDefaultOptions()
       mainMenuSpacing = 2,
       iconSpacing = 2,
       hideSocialText = false,
+	  modifierTooltip = 1,
 	  menu = true,
       chat = true,
       guild = true,
@@ -768,6 +795,15 @@ function MenuModule:GetConfig()
         get = function() return xb.db.profile.modules.microMenu.hideSocialText; end,
         set = function(_, val) xb.db.profile.modules.microMenu.hideSocialText = val; self:Refresh(); end
       },
+	  modifierTooltip = {
+		name = "Modifier for friend invite",
+		order = 3,
+		type = "select",
+		values = {"SHIFT","ALT","CONTROL"},
+		style = "dropdown",
+		get = function() return xb.db.profile.modules.microMenu.modifierTooltip; end,
+		set = function(info, val) xb.db.profile.modules.microMenu.modifierTooltip = val; self:Refresh(); end
+	  },
       mainMenuSpacing = {
         name = L['Main Menu Icon Right Spacing'],
         order = 3,
