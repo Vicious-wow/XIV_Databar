@@ -571,7 +571,7 @@ function MenuModule:GuildHover(hoverFunc)
     tooltip:AddLine(" "," ")
     local gName, _, _, _ = GetGuildInfo('player')
     tooltip:AddLine('|cffff00ff'..GUILD..':|r', '|c00ff00ff'..gName..'|r')
-    tooltip:AddLine('|c00ff00ff'..GetGuildRosterMOTD()..':|r', ' ')
+    tooltip:AddLine('|cff00ff00'..GetGuildRosterMOTD()..':|r', ' ')
 
     local totalGuild, _ = GetNumGuildMembers()
     for i = 0, totalGuild do
