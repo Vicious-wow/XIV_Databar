@@ -8,11 +8,13 @@ L['Left-Click'] = "Clic gauche";
 L['Right-Click'] = "Clic droit";
 
 -- General
+L["Positioning"] = "Positionnement";
 L['Bar Position'] = "Position de la barre";
 L['Top'] = "Haut";
 L['Bottom'] = "Bas";
 L['Bar Color'] = "Couleur de la barre";
-L['Use Class Colors for Bar'] = "Utiliser la couleur de classe pour la barre";
+L['Use Class Color for Bar'] = "Utiliser la couleur de classe pour la barre";
+L["Miscellaneous"] = "Divers";
 L['Bar Padding'] = "Décalage de la barre";
 L['Module Spacing'] = "Espacement des modules";
 L['Hide order hall bar'] = "Cacher la barre du hall de classe";
@@ -31,7 +33,8 @@ L['Small Font Size'] = "Taille de la petite police";
 L['Text Style'] = "Style du texte";
 
 -- Text Colors
-L['Text Colors'] = "Couleur du texte";
+L["Colors"] = "Couleurs";
+L['Text Colors'] = "Couleurs du texte";
 L['Normal'] = "Normale";
 L['Use Class Color for Text'] = "Utiliser la couleur de classe pour le texte";
 L['Only the alpha can be set with the color picker'] = "Seul l'alpha peut être réglé avec la sélection de couleur";
@@ -48,6 +51,24 @@ L['Icon Spacing'] = "Espacement des icônes";
 L['Open Guild Page'] = "Ouvrir la page de guilde";
 L['No Tag'] = "Aucun Tag";
 L['Hide Social Text'] = "Cacher le texte des contacts";
+L["GMOTD in Tooltip"] = "Afficher le message de guilde dans la bulle";
+L["Modifier for friend invite"] = "Touche modifieuse pour inviter un contact";
+L['Show/Hide Buttons'] = "Montrer/Cacher les boutons";
+L['Show Menu Button'] = "Montrer le bouton Menu";
+L['Show Chat Button'] = "Montrer le bouton Tchat";
+L['Show Guild Button'] = "Montrer le bouton Guilde";
+L['Show Social Button'] = "Montrer le bouton Contacts";
+L['Show Character Button'] = "Montrer le bouton Personnage";
+L['Show Spellbook Button'] = "Montrer le bouton Grimoire";
+L['Show Talents Button'] = "Montrer le bouton Talents";
+L['Show Achievements Button'] = "Montrer le bouton Haut-faits";
+L['Show Quests Button'] = "Montrer le bouton Quêtes";
+L['Show LFG Button'] = "Montrer le bouton RDG";
+L['Show Journal Button'] = "Montrer le bouton Journal";
+L['Show PVP Button'] = "Montrer le bouton PVP";
+L['Show Pets Button'] = "Montrer le bouton Mascottes";
+L['Show Shop Button'] = "Montrer le bouton Boutique";
+L['Show Help Button'] = "Montrer le bouton Aide";
 
 L['Always Show Item Level'] = "Toujours montrer le niveau d'objet";
 L['Minimum Durability to Become Active'] = "Activation au minimum de durabilité";

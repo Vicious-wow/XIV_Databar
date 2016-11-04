@@ -105,7 +105,7 @@ function ClockModule:RegisterFrameEvents()
     if ClockModule.elapsed >= 1 then
       local clockTime = nil
       if xb.db.profile.modules.clock.serverTime then
-        clockTime = GetServerTime()
+        clockTime = GetServerTime() -- GameTime_GetGameTime() ?
       else
         clockTime = time()
       end

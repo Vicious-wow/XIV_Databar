@@ -8,6 +8,16 @@ local topOffsetBlizz
 
 XIVBar.L = L
 
+XIVBar.constants = {
+    mediaPath = "Interface\\AddOns\\"..AddOnName.."\\media\\",
+    playerName = UnitName("player"),
+    playerClass = select(2, UnitClass("player")),
+    playerLevel = UnitLevel("player"),
+    playerFactionLocal = select(2, UnitFactionGroup("player")),
+    playerRealm = GetRealmName(),
+    popupPadding = 3
+}
+
 XIVBar.defaults = {
     profile = {
         general = {
@@ -41,11 +51,11 @@ XIVBar.defaults = {
 			useTextCC = false,
             useHoverCC = true,
             hover = {
-                r = 1,
-                g = 1,
-                b = 1,
-                a = 1
-            }
+				r = RAID_CLASS_COLORS[XIVBar.constants.playerClass].r,
+				g = RAID_CLASS_COLORS[XIVBar.constants.playerClass].g,
+				b = RAID_CLASS_COLORS[XIVBar.constants.playerClass].b,
+				a = RAID_CLASS_COLORS[XIVBar.constants.playerClass].a
+			}
         },
         text = {
             fontSize = 12,
@@ -57,16 +67,6 @@ XIVBar.defaults = {
         }
     }
 };
-
-XIVBar.constants = {
-    mediaPath = "Interface\\AddOns\\"..AddOnName.."\\media\\",
-    playerName = UnitName("player"),
-    playerClass = select(2, UnitClass("player")),
-    playerLevel = UnitLevel("player"),
-    playerFactionLocal = select(2, UnitFactionGroup("player")),
-    playerRealm = GetRealmName(),
-    popupPadding = 3
-}
 
 XIVBar.LSM = LibStub('LibSharedMedia-3.0');
 
@@ -86,10 +86,7 @@ function XIVBar:OnInitialize()
                 name = GENERAL_LABEL,
                 type = "group",
                 args = {
-                    general = self:GetGeneralOptions(),
-                    text = self:GetTextOptions(),
-                    textColors = self:GetTextColorOptions(), -- colors
-                    positionOptions = self:GetPositionOptions(),
+                    general = self:GetGeneralOptions()
                 }
             }, -- general
             modules = {
@@ -249,12 +246,8 @@ function XIVBar:Refresh()
     end
     self.frames.bar:SetHeight(self:GetHeight())
 
+	self.frames.bgTexture:SetColorTexture(self:GetColor('barColor'))
     self.frames.bgTexture:SetAllPoints()
-    if self.db.profile.color.useCC then
-        self.frames.bgTexture:SetColorTexture(self:GetClassColors())
-    else
-        self.frames.bgTexture:SetColorTexture(barColor.r, barColor.g, barColor.b, barColor.a)
-    end
 
     for name, module in self:IterateModules() do
         if module['Refresh'] == nil then return; end
@@ -345,107 +338,129 @@ function XIVBar:GetGeneralOptions()
     return {
         name = GENERAL_LABEL,
         type = "group",
-        order = 3,
         inline = true,
         args = {
-            barPosition = {
-                name = L['Bar Position'],
-                type = "select",
-                order = 1,
-                values = {TOP = L['Top'], BOTTOM = L['Bottom']},
-                style = "dropdown",
-                get = function() return self.db.profile.general.barPosition; end,
-                set = function(info, value) self.db.profile.general.barPosition = value; 
-				if value == "TOP" and self.db.profile.general.ohHide then 
-					LoadAddOn("Blizzard_OrderHallUI"); local b = OrderHallCommandBar; b:Hide(); 
-				end
-				self:Refresh(); end,
-            },
-            barCC = {
-                name = L['Use Class Colors for Bar'],
-                type = "toggle",
-                order = 2,
-                set = function(info, val) self.db.profile.color.useCC = val; self:Refresh(); end,
-                get = function() return self.db.profile.color.useCC end
-            }, -- normal
-            barColor = {
-                name = L['Bar Color'],
-                type = "color",
-                order = 3,
-                hasAlpha = true,
-                set = function(info, r, g, b, a)
-                    XIVBar:SetColor('barColor', r, g, b, a)
-                end,
-                get = function() return XIVBar:GetColor('barColor') end,
-                disabled = function() return self.db.profile.color.useCC end
-            },
-            barPadding = {
-                name = L['Bar Padding'],
-                type = 'range',
-                order = 4,
-                min = 0,
-                max = 10,
-                step = 1,
-                get = function() return self.db.profile.general.barPadding; end,
-                set = function(info, val) self.db.profile.general.barPadding = val; self:Refresh(); end
-            },
-            moduleSpacing = {
-                name = L['Module Spacing'],
-                type = 'range',
-                order = 5,
-                min = 10,
-                max = 50,
-                step = 1,
-                get = function() return self.db.profile.general.moduleSpacing; end,
-                set = function(info, val) self.db.profile.general.moduleSpacing = val; self:Refresh(); end
-            },
-			 ohHide = {
-				name = L['Hide order hall bar'],
-				type = "toggle",
-				order = 2,
-				hidden = function() return self.db.profile.general.barPosition == "BOTTOM" end,
-				get = function() return self.db.profile.general.ohHide end,
-				set = function(_,val) self.db.profile.general.ohHide = val; if val then LoadAddOn("Blizzard_OrderHallUI"); local b = OrderHallCommandBar; b:Hide(); end self:Refresh(); end
-	  }
-        }
-    }
-end
-
-function XIVBar:GetPositionOptions()
-    return {
-        name = L['Positioning Options'],
-        type = "group",
-        order = 4,
-        inline = true,
-        args = {
-            fullScreen = {
-                name = VIDEO_OPTIONS_FULLSCREEN,
-                type = 'toggle',
-                order = 0,
-                get = function() return self.db.profile.general.barFullscreen; end,
-                set = function(info, value) self.db.profile.general.barFullscreen = value; self:Refresh(); end,
-            },
-            barPosition = {
-                name = L['Horizontal Position'],
-                type = "select",
-                order = 1,
-                values = {LEFT = L['Left'], CENTER = L['Center'], RIGHT = L['Right']},
-                style = "dropdown",
-                get = function() return self.db.profile.general.barHoriz; end,
-                set = function(info, value) self.db.profile.general.barHoriz = value; self:Refresh(); end,
-                disabled = function() return self.db.profile.general.barFullscreen; end
-            },
-            barWidth = {
-                name = L['Bar Width'],
-                type = 'range',
-                order = 2,
-                min = 200,
-                max = GetScreenWidth(),
-                step = 1,
-                get = function() return self.db.profile.general.barWidth; end,
-                set = function(info, val) self.db.profile.general.barWidth = val; self:Refresh(); end,
-                disabled = function() return self.db.profile.general.barFullscreen; end
-            }
+			positioning = {
+				name = L["Positioning"],
+				type = "group",
+				order = 1,
+				inline = true,
+				args = {
+					barLocation = {
+						name = L['Bar Position'],
+						type = "select",
+						order = 1,
+						width = "full",
+						values = {TOP = L['Top'], BOTTOM = L['Bottom']},
+						style = "dropdown",
+						get = function() return self.db.profile.general.barPosition; end,
+						set = function(info, value) self.db.profile.general.barPosition = value;
+						if value == "TOP" and self.db.profile.general.ohHide then
+							LoadAddOn("Blizzard_OrderHallUI"); local b = OrderHallCommandBar; b:Hide();
+						end
+						self:Refresh(); end,
+					},
+					ohHide = {
+						name = L['Hide order hall bar'],
+						type = "toggle",
+						order = 2,
+						hidden = function() return self.db.profile.general.barPosition == "BOTTOM" end,
+						get = function() return self.db.profile.general.ohHide end,
+						set = function(_,val) self.db.profile.general.ohHide = val; if val then LoadAddOn("Blizzard_OrderHallUI"); local b = OrderHallCommandBar; b:Hide(); end self:Refresh(); end
+					},
+					fullScreen = {
+						name = VIDEO_OPTIONS_FULLSCREEN,
+						type = "toggle",
+						order = 3,
+						get = function() return self.db.profile.general.barFullscreen; end,
+						set = function(info, value) self.db.profile.general.barFullscreen = value; self:Refresh(); end,
+					},
+					barPosition = {
+						name = L['Horizontal Position'],
+						type = "select",
+						hidden = function() return self.db.profile.general.barFullscreen; end,
+						order = 4,
+						values = {LEFT = L['Left'], CENTER = L['Center'], RIGHT = L['Right']},
+						style = "dropdown",
+						get = function() return self.db.profile.general.barHoriz; end,
+						set = function(info, value) self.db.profile.general.barHoriz = value; self:Refresh(); end,
+						disabled = function() return self.db.profile.general.barFullscreen; end
+					},
+					barWidth = {
+						name = L['Bar Width'],
+						type = 'range',
+						order = 5,
+						hidden = function() return self.db.profile.general.barFullscreen; end,
+						min = 200,
+						max = GetScreenWidth(),
+						step = 1,
+						get = function() return self.db.profile.general.barWidth; end,
+						set = function(info, val) self.db.profile.general.barWidth = val; self:Refresh(); end,
+						disabled = function() return self.db.profile.general.barFullscreen; end
+					}
+				}
+			},
+			text = self:GetTextOptions(),
+			colors = {
+				name = L["Colors"],
+				type = "group",
+				inline = true,
+				order = 3,
+				args = {
+					barColor = {
+						name = L['Bar Color'],
+						type = "color",
+						order = 1,
+						hasAlpha = true,
+						set = function(info, r, g, b, a)
+							if not self.db.profile.color.useCC then
+								self:SetColor('barColor', r, g, b, a)
+							else
+								local cr,cg,cb,_ = self:GetClassColors()
+								self:SetColor('barColor',cr,cg,cb,a)
+							end
+						end,
+						get = function() return XIVBar:GetColor('barColor') end,
+					},
+					barCC = {
+						name = L['Use Class Color for Bar'],
+						desc = L["Only the alpha can be set with the color picker"],
+						type = "toggle",
+						order = 2,
+						set = function(info, val) XIVBar:SetColor('barColor',self:GetClassColors()); self.db.profile.color.useCC = val; self:Refresh(); end,
+						get = function() return self.db.profile.color.useCC end
+					},
+					textColors = self:GetTextColorOptions()
+				}
+			},
+			miscellanelous = {
+				name = L["Miscellaneous"],
+				type = "group",
+				inline = true,
+				order = 3,
+				args = {
+					barPadding = {
+						name = L['Bar Padding'],
+						type = 'range',
+						order = 9,
+						min = 0,
+						max = 10,
+						step = 1,
+						get = function() return self.db.profile.general.barPadding; end,
+						set = function(info, val) self.db.profile.general.barPadding = val; self:Refresh(); end
+					},
+					moduleSpacing = {
+						name = L['Module Spacing'],
+						type = 'range',
+						order = 10,
+						min = 10,
+						max = 50,
+						step = 1,
+						get = function() return self.db.profile.general.moduleSpacing; end,
+						set = function(info, val) self.db.profile.general.moduleSpacing = val; self:Refresh(); end
+					}
+				}
+			}
         }
     }
 end
@@ -459,7 +474,7 @@ function XIVBar:GetTextOptions()
     return {
         name = LOCALE_TEXT_LABEL,
         type = "group",
-        order = 3,
+        order = 2,
         inline = true,
         args = {
             font = {
@@ -519,7 +534,7 @@ function XIVBar:GetTextColorOptions()
                 hasAlpha = true,
                 set = function(info, r, g, b, a)
 					if self.db.profile.color.useTextCC then
-						r,g,b,_=XIVBar:GetColor('normal')
+						r,g,b,_=self:GetClassColors()
 					end
                     XIVBar:SetColor('normal', r, g, b, a)
                 end,
@@ -532,40 +547,47 @@ function XIVBar:GetTextColorOptions()
 				order = 2,
 				set = function(_,val) 
 					if val then
-						XIVBar:SetColor("normal",RAID_CLASS_COLORS[self.constants.playerClass].r,RAID_CLASS_COLORS[self.constants.playerClass].g,RAID_CLASS_COLORS[self.constants.playerClass].b,select(4,XIVBar:GetColor('normal'))) 
+						XIVBar:SetColor("normal",self:GetClassColors())
 					end 
 					self.db.profile.color.useTextCC = val 
 				end,
 				get = function() return self.db.profile.color.useTextCC end
 			},
+			hover = {
+                name = L['Hover'],
+                type = "color",
+                order = 3,
+				width = "double",
+                hasAlpha = true,
+                set = function(info, r, g, b, a)
+					if self.db.profile.color.useHoverCC then
+						r,g,b,_=self:GetClassColors()
+					end
+                    XIVBar:SetColor('hover', r, g, b, a)
+                end,
+                get = function() return XIVBar:GetColor('hover') end,
+            }, -- normal
             hoverCC = {
                 name = L['Use Class Colors for Hover'],
                 type = "toggle",
-                order = 3,
-                set = function(info, val) self.db.profile.color.useHoverCC = val; self:Refresh(); end,
+                order = 4,
+                set = function(_, val)
+					if val then
+						XIVBar:SetColor("hover",self:GetClassColors())
+					end
+				self.db.profile.color.useHoverCC = val; self:Refresh(); end,
                 get = function() return self.db.profile.color.useHoverCC end
             }, -- normal
             inactive = {
                 name = L['Inactive'],
                 type = "color",
-                order = 4,
+                order = 5,
                 hasAlpha = true,
                 width = "double",
                 set = function(info, r, g, b, a)
                     XIVBar:SetColor('inactive', r, g, b, a)
                 end,
                 get = function() return XIVBar:GetColor('inactive') end
-            }, -- normal
-            hover = {
-                name = L['Hover'],
-                type = "color",
-                order = 5,
-                hasAlpha = true,
-                set = function(info, r, g, b, a)
-                    XIVBar:SetColor('hover', r, g, b, a)
-                end,
-                get = function() return XIVBar:GetColor('hover') end,
-                disabled = function() return self.db.profile.color.useHoverCC end
             }, -- normal
         }
     }

@@ -14,7 +14,7 @@ function MenuModule:OnInitialize()
   self.mediaFolder = xb.constants.mediaPath..'microbar\\'
   self.socialIconPath = "Interface\\FriendsFrame\\"
   self.icons = {}
-  self.modifiers={"SHIFT","ALT","CONTROL"}
+  self.modifiers={SHIFT_KEY_TEXT,ALT_KEY_TEXT,CTRL_KEY_TEXT}
   self.frames = {}
   self.text = {}
   self.bgTexture = {}
@@ -119,6 +119,8 @@ function MenuModule:Refresh()
     self.bgTexture[name]:SetPoint('CENTER', frame, 'CENTER')
     if xb.db.profile.modules.microMenu.hideSocialText then
       frame:Hide()
+	else
+	  frame:Show()
     end
   end
 
@@ -567,11 +569,12 @@ function MenuModule:GuildHover(hoverFunc)
 	
     GuildRoster()
     tooltip:SmartAnchorTo(MenuModule.frames.guild)
-    tooltip:AddHeader("[|cff6699FF"..GUILD.."|r]")
+	local gName, _, _, _ = GetGuildInfo('player')
+    tooltip:AddHeader("[|cff6699FF"..GUILD.."|r]",'|cff00ff00'..gName..'|r')
     tooltip:AddLine(" "," ")
-    local gName, _, _, _ = GetGuildInfo('player')
-    tooltip:AddLine('|cffffff00'..GUILD..':|r', '|cff00ff00'..gName..'|r')
-    tooltip:AddLine('|cff00ff00'..GetGuildRosterMOTD()..':|r', ' ')
+	if xb.db.profile.modules.microMenu.showGMOTD then
+		tooltip:AddLine('|cff00ff00'..GetGuildRosterMOTD()..':|r', ' ')
+	end
 
     local totalGuild, _ = GetNumGuildMembers()
     for i = 0, totalGuild do
@@ -646,7 +649,7 @@ function MenuModule:CreateClickFunctions()
     if button == "LeftButton" then
       ToggleGuildFrame()
       if IsInGuild() then
-        GuildFrameTab2:Click()-- GuildFrame_Toggle(); to test
+        GuildFrameTab2:Click()
       end
     end
   end; --guild
@@ -744,6 +747,7 @@ function MenuModule:GetDefaultOptions()
       iconSpacing = 2,
       hideSocialText = false,
 	  modifierTooltip = 1,
+	  showGMOTD = false,
 	  menu = true,
       chat = true,
       guild = true,
@@ -791,19 +795,11 @@ function MenuModule:GetConfig()
       hideSocialText = {
         name = L['Hide Social Text'],
         order = 2,
+		width = "double",
         type = "toggle",
         get = function() return xb.db.profile.modules.microMenu.hideSocialText; end,
         set = function(_, val) xb.db.profile.modules.microMenu.hideSocialText = val; self:Refresh(); end
       },
-	  modifierTooltip = {
-		name = "Modifier for friend invite",
-		order = 3,
-		type = "select",
-		values = {"SHIFT","ALT","CONTROL"},
-		style = "dropdown",
-		get = function() return xb.db.profile.modules.microMenu.modifierTooltip; end,
-		set = function(info, val) xb.db.profile.modules.microMenu.modifierTooltip = val; self:Refresh(); end
-	  },
       mainMenuSpacing = {
         name = L['Main Menu Icon Right Spacing'],
         order = 3,
@@ -824,14 +820,31 @@ function MenuModule:GetConfig()
         get = function() return xb.db.profile.modules.microMenu.iconSpacing; end,
         set = function(_, val) xb.db.profile.modules.microMenu.iconSpacing = val; self:Refresh(); end
       },
+	  showGMOTD = {
+		name = L["GMOTD in Tooltip"],
+		type = "toggle",
+		order = 5,
+		get = function() return xb.db.profile.modules.microMenu.showGMOTD end,
+		set = function(_,val) xb.db.profile.modules.microMenu.showGMOTD = val; self:Refresh(); end
+	  },
+	  modifierTooltip = {
+		name = L["Modifier for friend invite"],
+		order = 6,
+		type = "select",
+		values = {SHIFT_KEY_TEXT,ALT_KEY_TEXT,CTRL_KEY_TEXT},
+		style = "dropdown",
+		get = function() return xb.db.profile.modules.microMenu.modifierTooltip; end,
+		set = function(info, val) xb.db.profile.modules.microMenu.modifierTooltip = val; self:Refresh(); end,
+		disabled = function() return not xb.db.profile.modules.microMenu.guild and not xb.db.profile.modules.microMenu.social end
+	  },
       buttons = {
         type = 'group',
-        name = 'Show/Hide Buttons',
-        order = 5,
+        name = L['Show/Hide Buttons'],
+        order = 7,
         inline = true,
         args = {
           menu = {
-            name = 'Show Menu Button',
+            name = L['Show Menu Button'],
             disabled = true,
             order = 1,
             type = "toggle",
@@ -839,98 +852,98 @@ function MenuModule:GetConfig()
             set = function(_, val) xb.db.profile.modules.microMenu.menu = val; self:Refresh(); end
           },
           chat = {
-            name = 'Show Chat Button',
+            name = L['Show Chat Button'],
             order = 2,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.chat; end,
             set = function(_, val) xb.db.profile.modules.microMenu.chat = val; self:UpdateMenu(); self:Refresh(); end
           },
           guild = {
-            name = 'Show Guild Button',
+            name = L['Show Guild Button'],
             order = 3,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.guild; end,
             set = function(_, val) xb.db.profile.modules.microMenu.guild = val; self:UpdateMenu(); self:Refresh(); end
           },
           social = {
-            name = 'Show Social Button',
+            name = L['Show Social Button'],
             order = 4,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.social; end,
             set = function(_, val) xb.db.profile.modules.microMenu.social = val; self:UpdateMenu(); self:Refresh(); end
           },
           char = {
-            name = 'Show Character Button',
+            name = L['Show Character Button'],
             order = 5,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.char; end,
             set = function(_, val) xb.db.profile.modules.microMenu.char = val; self:UpdateMenu(); self:Refresh(); end
           },
           spell = {
-            name = 'Show Spellbook Button',
+            name = L['Show Spellbook Button'],
             order = 6,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.spell; end,
             set = function(_, val) xb.db.profile.modules.microMenu.spell = val; self:UpdateMenu(); self:Refresh(); end
           },
           talent = {
-            name = 'Show Talents Button',
+            name = L['Show Talents Button'],
             order = 7,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.talent; end,
             set = function(_, val) xb.db.profile.modules.microMenu.talent = val; self:UpdateMenu(); self:Refresh(); end
           },
           ach = {
-            name = 'Show Achievements Button',
+            name = L['Show Achievements Button'],
             order = 8,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.ach; end,
             set = function(_, val) xb.db.profile.modules.microMenu.ach = val; self:UpdateMenu(); self:Refresh(); end
           },
           quest = {
-            name = 'Show Quests Button',
+            name = L['Show Quests Button'],
             order = 9,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.quest; end,
             set = function(_, val) xb.db.profile.modules.microMenu.quest = val; self:UpdateMenu(); self:Refresh(); end
           },
           lfg = {
-            name = 'Show LFG Button',
+            name = L['Show LFG Button'],
             order = 10,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.lfg; end,
             set = function(_, val) xb.db.profile.modules.microMenu.lfg = val; self:UpdateMenu(); self:Refresh(); end
           },
           journal = {
-            name = 'Show Journal Button',
+            name = L['Show Journal Button'],
             order = 11,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.journal; end,
             set = function(_, val) xb.db.profile.modules.microMenu.journal = val; self:UpdateMenu(); self:Refresh(); end
           },
           pvp = {
-            name = 'Show PVP Button',
+            name = L['Show PVP Button'],
             order = 12,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.pvp; end,
             set = function(_, val) xb.db.profile.modules.microMenu.pvp = val; self:UpdateMenu(); self:Refresh(); end
           },
           pet = {
-            name = 'Show Pets Button',
+            name = L['Show Pets Button'],
             order = 13,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.pet; end,
             set = function(_, val) xb.db.profile.modules.microMenu.pet = val; self:UpdateMenu(); self:Refresh(); end
           },
           shop = {
-            name = 'Show Shop Button',
+            name = L['Show Shop Button'],
             order = 14,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.shop; end,
             set = function(_, val) xb.db.profile.modules.microMenu.shop = val; self:UpdateMenu(); self:Refresh(); end
           },
           help = {
-            name = 'Show Help Button',
+            name = L['Show Help Button'],
             order = 15,
             type = "toggle",
             get = function() return xb.db.profile.modules.microMenu.help; end,

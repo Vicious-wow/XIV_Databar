@@ -8,11 +8,13 @@ L['Left-Click'] = "Левая кнопка мыши";
 L['Right-Click'] = "Правая кнопка мыши";
 
 -- General
+L["Positioning"] = true;
 L['Bar Position'] = "Положение полосы";
 L['Top'] = "Вверху";
 L['Bottom'] = "Внизу";
 L['Bar Color'] = "Цвет полосы";
-L['Use Class Colors for Bar'] = "Использовать цвет класса для полосы";
+L['Use Class Colors= for Bar'] = "Использовать цвет класса для полосы";
+L["Miscellaneous"] = true;
 L['Bar Padding'] = "Заполнение";
 L['Module Spacing'] = "Расстояние между модулями";
 L['Hide order hall bar'] = true;
@@ -31,6 +33,7 @@ L['Small Font Size'] = "Размер маленького шрифта";
 L['Text Style'] = "Стиль текста";
 
 -- Text Colors
+L["Colors"] = true;
 L['Text Colors'] = "Цвета текста";
 L['Normal'] = "Обычный";
 L['Inactive'] = "Неактивно";
@@ -48,6 +51,24 @@ L['Icon Spacing'] = "Расстояние между кнопками";
 L['Open Guild Page'] = true;
 L['No Tag'] = true;
 L['Hide Social Text'] = "Скрыть количество онлайна гильдии и друзей";
+L["GMOTD in Tooltip"] = true;
+L["Modifier for friend invite"] = true;
+L['Show/Hide Buttons'] = true;
+L['Show Menu Button'] = true;
+L['Show Chat Button'] = true;
+L['Show Guild Button'] = true;
+L['Show Social Button'] = true;
+L['Show Character Button'] = true;
+L['Show Spellbook Button'] = true;
+L['Show Talents Button'] = true;
+L['Show Achievements Button'] = true;
+L['Show Quests Button'] = true;
+L['Show LFG Button'] = true;
+L['Show Journal Button'] = true;
+L['Show PVP Button'] = true;
+L['Show Pets Button'] = true;
+L['Show Shop Button'] = true;
+L['Show Help Button'] = true;
 
 L['Always Show Item Level'] = "Всегда показывать уровень предметов";
 L['Minimum Durability to Become Active'] = "Прочность, до которой загораются цифры";
