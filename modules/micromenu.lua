@@ -570,7 +570,7 @@ function MenuModule:GuildHover(hoverFunc)
     tooltip:AddHeader("[|cff6699FF"..GUILD.."|r]")
     tooltip:AddLine(" "," ")
     local gName, _, _, _ = GetGuildInfo('player')
-    tooltip:AddLine('|cffff00ff'..GUILD..':|r', '|c00ff00ff'..gName..'|r')
+    tooltip:AddLine('|cffffff00'..GUILD..':|r', '|cff00ff00'..gName..'|r')
     tooltip:AddLine('|cff00ff00'..GetGuildRosterMOTD()..':|r', ' ')
 
     local totalGuild, _ = GetNumGuildMembers()
@@ -607,8 +607,8 @@ function MenuModule:GuildHover(hoverFunc)
       end
     end
     tooltip:AddLine(' ',' ')
-    tooltip:AddLine('|cffff00ff<'..L['Left-Click']..'>|r', '|cffffffff Whisper |r')
-    tooltip:AddLine('|cffff00ff<'..self.modifier..' + '..L['Left-Click']..'>|r', '|cffffffff Invite |r')
+    tooltip:AddLine('|cffffff00<'..L['Left-Click']..'>|r', '|cffffffff Whisper |r')
+    tooltip:AddLine('|cffffff00<'..self.modifier..' + '..L['Left-Click']..'>|r', '|cffffffff Invite |r')
     tooltip:Show()
     hoverFunc()
   end

@@ -1,6 +1,7 @@
 local AddOnName, Engine = ...;
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0");
-local L = AceLocale:NewLocale(AddOnName, "deDE", true, false);
+local L = AceLocale:NewLocale(AddOnName, "deDE", false, false);
+if not L then return end
 
 L['Modules'] = "Module";
 L['Left-Click'] = "Links-Klick";
@@ -14,6 +15,7 @@ L['Bar Color'] = "Leistenfarbe";
 L['Use Class Colors for Bar'] = "Benutze Klassenfarbe für Leiste";
 L['Bar Padding'] = "Leistenabstand";
 L['Module Spacing'] = "Modulabstand";
+L['Hide order hall bar'] = true;
 
 -- Positioning Options
 L['Positioning Options'] = "Positions-Optionen";
@@ -32,6 +34,8 @@ L['Text Style'] = "Schriftstil";
 L['Text Colors'] = "Textfarbe";
 L['Normal'] = "Normal";
 L['Inactive'] = "Inaktiv";
+L["Use Class Color for Text"] = true;
+L["Only the alpha can be set with the color picker"] = true;
 L['Use Class Colors for Hover'] = "Benutze Klassenfarbe für Mouseover";
 L['Hover'] = "Mouseover";
 

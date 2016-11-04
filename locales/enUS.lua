@@ -14,6 +14,7 @@ L['Bar Color'] = true;
 L['Use Class Colors for Bar'] = true;
 L['Bar Padding'] = true;
 L['Module Spacing'] = true;
+L['Hide order hall bar'] = true;
 
 -- Positioning Options
 L['Positioning Options'] = true;
@@ -32,6 +33,8 @@ L['Text Style'] = true;
 L['Text Colors'] = true;
 L['Normal'] = true;
 L['Inactive'] = true;
+L["Use Class Color for Text"] = true;
+L["Only the alpha can be set with the color picker"] = true;
 L['Use Class Colors for Hover'] = true;
 L['Hover'] = true;
 
