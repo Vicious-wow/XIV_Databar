@@ -28,13 +28,13 @@ end
 
 function ArmorModule:OnEnable()
   if self.armorFrame == nil then
-    self.armorFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
+    self.armorFrame = CreateFrame("FRAME", AUCTION_CATEGORY_ARMOR, xb:GetFrame('bar'))
     xb:RegisterFrame('armorFrame', self.armorFrame)
   end
   self.armorFrame:Show()
   self:CreateFrames()
   self:RegisterFrameEvents()
-  self:Refresh()
+  xb:Refresh()
 end
 
 function ArmorModule:OnDisable()
@@ -203,6 +203,7 @@ function ArmorModule:GetConfig()
             self:Enable()
           else
             self:Disable()
+			xb:Refresh()
           end
         end
       },

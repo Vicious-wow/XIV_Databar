@@ -9,4 +9,5 @@
   <Script file="currency.lua" />
   <Script file="system.lua" />
   <Script file="talent.lua" />
+  <Script file="mastervolume.lua" />
 </Ui>
