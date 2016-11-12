@@ -3,8 +3,6 @@ local _G = _G;
 local pairs, unpack, select = pairs, unpack, select
 LibStub("AceAddon-3.0"):NewAddon(XIVBar, AddOnName, "AceConsole-3.0", "AceEvent-3.0");
 local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true);
-local doitOnce = true
-local topOffsetBlizz
 
 XIVBar.L = L
 
@@ -207,22 +205,18 @@ end
 
 function XIVBar:Refresh()
     if self.frames.bar == nil then return; end
-
-	if doitOnce then
-		topOffsetBlizz = UIParent_UpdateTopFramePositions
-		doitOnce = false
-	end
 	
     self.miniTextPosition = "TOP"
     if self.db.profile.general.barPosition == 'TOP' then
-		UIParent_UpdateTopFramePositions = topOffsetBlizz
 		hooksecurefunc("UIParent_UpdateTopFramePositions",function(self)
-			if OrderHallCommandBar and OrderHallCommandBar:IsVisible() then
-				if XIVBar.db.profile.general.ohHide then
-					OrderHallCommandBar:Hide()
+			if(XIVBar.db.profile.general.barPosition == 'TOP') then
+				if OrderHallCommandBar and OrderHallCommandBar:IsVisible() then
+					if XIVBar.db.profile.general.ohHide then
+						OrderHallCommandBar:Hide()
+					end
 				end
+				OffsetUI()
 			end
-			OffsetUI()
 		end)
 		OffsetUI()
         self.miniTextPosition = 'BOTTOM'

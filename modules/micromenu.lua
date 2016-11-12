@@ -67,8 +67,8 @@ function MenuModule:OnEnable()
 	self:CreateFrames()
 	self:RegisterFrameEvents()
 	self:CreateIcons()
-	self:Refresh()
   end
+  xb:Refresh()
 end
 
 function MenuModule:OnDisable()
