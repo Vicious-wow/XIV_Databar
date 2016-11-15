@@ -530,9 +530,9 @@ function MenuModule:SocialHover(hoverFunc)
     end -- totalOnlineFriends
 
 	tooltip:AddLine(' ',' ')
-    tooltip:AddLine('|cffffff00<'..L['Left-Click']..'>|r', '|cffffffff'..SLASH_SMART_WHISPER1..' '..BATTLENET_OPTIONS_LABEL..'|r')
+    tooltip:AddLine('|cffffff00<'..L['Left-Click']..'>|r', '|cffffffff'..L['Whisper BNet']..'|r')
     tooltip:AddLine('|cffffff00<'..self.modifier..' + '..L['Left-Click']..'>|r', '|cffffffff'..CALENDAR_INVITELIST_INVITETORAID..'|r')
-    tooltip:AddLine('|cffffff00<'..L['Right-Click']..'>|r', '|cffffffff'..SLASH_SMART_WHISPER1..' '..CHARACTER..'|r')
+    tooltip:AddLine('|cffffff00<'..L['Right-Click']..'>|r', '|cffffffff'..L['Whisper Character']..'|r')
     if (totalOnlineFriends + totalBNOnlineFriends) > 0 then
       tooltip:Show()
     end
@@ -610,7 +610,7 @@ function MenuModule:GuildHover(hoverFunc)
       end
     end
     tooltip:AddLine(' ',' ')
-    tooltip:AddLine('|cffffff00<'..L['Left-Click']..'>|r', '|cffffffff'..SLASH_SMART_WHISPER1..' '..CHARACTER..'|r')
+    tooltip:AddLine('|cffffff00<'..L['Left-Click']..'>|r', '|cffffffff'..L['Whisper Character']..'|r')
     tooltip:AddLine('|cffffff00<'..self.modifier..' + '..L['Left-Click']..'>|r', '|cffffffff'..CALENDAR_INVITELIST_INVITETORAID..'|r')
     tooltip:Show()
     hoverFunc()
