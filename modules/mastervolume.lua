@@ -162,7 +162,7 @@ end
 
 function VolumeModule:GetConfig()
   return {
-    name = self:GetName(),
+    name = L['Master Volume'],
     type = "group",
     args = {
       enable = {

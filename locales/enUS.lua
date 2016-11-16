@@ -14,6 +14,7 @@ L['Bottom'] = true;
 L['Bar Color'] = true;
 L['Use Class Color for Bar'] = true;
 L["Miscellaneous"] = true;
+L['Hide Bar in combat'] = true;
 L['Bar Padding'] = true;
 L['Module Spacing'] = true;
 L['Hide order hall bar'] = true;
@@ -75,6 +76,7 @@ L['Always Show Item Level'] = true;
 L['Minimum Durability to Become Active'] = true;
 L['Maximum Durability to Show Item Level'] = true;
 
+L['Master Volume'] = true;
 L["Volume step"] = true;
 
 L['Time Format'] = true;

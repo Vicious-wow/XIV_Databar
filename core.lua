@@ -24,7 +24,8 @@ XIVBar.defaults = {
             moduleSpacing = 30,
             barFullscreen = true,
             barWidth = GetScreenWidth(),
-            barHoriz = 'CENTER'
+            barHoriz = 'CENTER',
+			barCombatHide = false
         },
         color = {
             barColor = {
@@ -199,6 +200,27 @@ function XIVBar:CreateMainBar()
     end
 end
 
+function XIVBar:HideBarEvent()
+	local bar = self:GetFrame("bar")
+	if self.db.profile.general.barCombatHide then
+		bar:RegisterEvent("PLAYER_REGEN_ENABLED")
+		bar:RegisterEvent("PLAYER_REGEN_DISABLED")
+
+		bar:SetScript("OnEvent", function(_, event, ...)
+			if event=="PLAYER_REGEN_DISABLED" and XIV_Databar:IsVisible() then
+				XIV_Databar:Hide()
+			end
+			if event=="PLAYER_REGEN_ENABLED" and not XIV_Databar:IsVisible() then
+				XIV_Databar:Show()
+			end
+		end)
+	else
+		bar:UnregisterEvent("PLAYER_REGEN_ENABLED")
+		bar:UnregisterEvent("PLAYER_REGEN_DISABLED")
+		bar.OnEvent = nil
+	end
+end
+
 function XIVBar:GetHeight()
     return (self.db.profile.text.fontSize * 2) + self.db.profile.general.barPadding
 end
@@ -206,6 +228,7 @@ end
 function XIVBar:Refresh()
     if self.frames.bar == nil then return; end
 	
+	self:HideBarEvent()
     self.miniTextPosition = "TOP"
     if self.db.profile.general.barPosition == 'TOP' then
 		hooksecurefunc("UIParent_UpdateTopFramePositions",function(self)
@@ -433,10 +456,17 @@ function XIVBar:GetGeneralOptions()
 				inline = true,
 				order = 3,
 				args = {
+					barCombatHide = {
+						name = L['Hide Bar in combat'],
+						type = "toggle",
+						order = 9,
+						get = function() return self.db.profile.general.barCombatHide; end,
+						set = function(_,val) self.db.profile.general.barCombatHide = val; self:Refresh(); end
+					},
 					barPadding = {
 						name = L['Bar Padding'],
 						type = 'range',
-						order = 9,
+						order = 10,
 						min = 0,
 						max = 10,
 						step = 1,
@@ -446,7 +476,7 @@ function XIVBar:GetGeneralOptions()
 					moduleSpacing = {
 						name = L['Module Spacing'],
 						type = 'range',
-						order = 10,
+						order = 11,
 						min = 10,
 						max = 50,
 						step = 1,

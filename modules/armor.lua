@@ -53,22 +53,26 @@ function ArmorModule:RegisterFrameEvents()
   self.armorButton:RegisterUnitEvent('UNIT_INVENTORY_CHANGED', 'player')
 
   self.armorButton:SetScript('OnEnter', function()
-    ArmorModule:SetArmorColor()
-    GameTooltip:SetOwner(ArmorModule.armorFrame, 'ANCHOR_'..xb.miniTextPosition)
-    GameTooltip:AddLine("[|cff6699FF"..AUCTION_CATEGORY_ARMOR.."|r]")
-    GameTooltip:AddLine(" ")
-    for i,v in pairs(ArmorModule.durabilityList) do
-      if v.max ~= nil and v.max > 0 then
-        local perc = floor((v.cur / v.max)  * 100)
-        GameTooltip:AddDoubleLine(v.text, string.format('%d/%d (%d%%)', v.cur, v.max, perc), 1, 1, 0, 1, 1, 1)
-      end
-    end
-    GameTooltip:Show()
+	if not InCombatLockdown() then
+		ArmorModule:SetArmorColor()
+		GameTooltip:SetOwner(ArmorModule.armorFrame, 'ANCHOR_'..xb.miniTextPosition)
+		GameTooltip:AddLine("[|cff6699FF"..AUCTION_CATEGORY_ARMOR.."|r]")
+		GameTooltip:AddLine(" ")
+		for i,v in pairs(ArmorModule.durabilityList) do
+		  if v.max ~= nil and v.max > 0 then
+			local perc = floor((v.cur / v.max)  * 100)
+			GameTooltip:AddDoubleLine(v.text, string.format('%d/%d (%d%%)', v.cur, v.max, perc), 1, 1, 0, 1, 1, 1)
+		  end
+		end
+		GameTooltip:Show()
+	end
   end)
 
   self.armorButton:SetScript('OnLeave', function()
-    self:SetArmorColor()
-    GameTooltip:Hide()
+	if not InCombatLockdown() then
+		self:SetArmorColor()
+		GameTooltip:Hide()
+	end
   end)
 
   self.armorButton:SetScript('OnEvent', function(_, event)

@@ -15,6 +15,7 @@ L['Bottom'] = "Bas";
 L['Bar Color'] = "Couleur de la barre";
 L['Use Class Color for Bar'] = "Utiliser la couleur de classe pour la barre";
 L["Miscellaneous"] = "Divers";
+L['Hide Bar in combat'] = "Cacher la barre en combat";
 L['Bar Padding'] = "Décalage de la barre";
 L['Module Spacing'] = "Espacement des modules";
 L['Hide order hall bar'] = "Cacher la barre du hall de classe";
@@ -76,6 +77,7 @@ L['Always Show Item Level'] = "Toujours montrer le niveau d'objet";
 L['Minimum Durability to Become Active'] = "Activation au minimum de durabilité";
 L['Maximum Durability to Show Item Level'] = "Durabilité maximum pour montrer le niveau d'item";
 
+L['Master Volume'] = "Volume principal";
 L["Volume step"] = "Incrément de volume";
 
 L['Time Format'] = "Format de l'heure";

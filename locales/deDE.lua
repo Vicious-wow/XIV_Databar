@@ -15,6 +15,7 @@ L['Bottom'] = "Unten";
 L['Bar Color'] = "Leistenfarbe";
 L['Use Class Color for Bar'] = "Benutze Klassenfarbe für Leiste";
 L["Miscellaneous"] = true;
+L['Hide Bar in combat'] = true;
 L['Bar Padding'] = "Leistenabstand";
 L['Module Spacing'] = "Modulabstand";
 L['Hide order hall bar'] = true;
@@ -76,6 +77,7 @@ L['Always Show Item Level'] = "Rüstungslevel immer anzeigen";
 L['Minimum Durability to Become Active'] = "Minimale Haltbarkeit für Anzeige";
 L['Maximum Durability to Show Item Level'] = "Maximale Haltbarkeit für Rüstungslevel-Anzeige";
 
+L['Master Volume'] =true;
 L["Volume step"] = true;
 
 L['Time Format'] = "Uhrzeit-Format";

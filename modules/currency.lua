@@ -58,10 +58,6 @@ function CurrencyModule:Refresh()
       self.xpBar:SetValue(UnitXP('player'))
       self.xpText:SetText(string.upper(LEVEL..' '..UnitLevel("player")..' '..UnitClass('player')))
     end
-    self:RegisterEvent('PLAYER_REGEN_ENABLED', function()
-      self:Refresh()
-      self:UnregisterEvent('PLAYER_REGEN_ENABLED')
-    end)
     return
   end
   if self.currencyFrame == nil then return; end
