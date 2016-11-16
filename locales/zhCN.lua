@@ -76,6 +76,8 @@ L['Always Show Item Level'] = "始终显示物品等级";
 L['Minimum Durability to Become Active'] = "最低耐久度变得活跃";
 L['Maximum Durability to Show Item Level'] = "最大耐久度显示物品等级";
 
+L["Volume step"] = true;
+
 L['Time Format'] = "时间格式";
 L['Use Server Time'] = "使用服务器时间";
 L['New Event!'] = "新事件!";

@@ -75,6 +75,8 @@ L['Always Show Item Level'] = true;
 L['Minimum Durability to Become Active'] = true;
 L['Maximum Durability to Show Item Level'] = true;
 
+L["Volume step"] = true;
+
 L['Time Format'] = true;
 L['Use Server Time'] = true;
 L['New Event!'] = true;

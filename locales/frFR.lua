@@ -76,6 +76,8 @@ L['Always Show Item Level'] = "Toujours montrer le niveau d'objet";
 L['Minimum Durability to Become Active'] = "Activation au minimum de durabilité";
 L['Maximum Durability to Show Item Level'] = "Durabilité maximum pour montrer le niveau d'item";
 
+L["Volume step"] = "Incrément de volume";
+
 L['Time Format'] = "Format de l'heure";
 L['Use Server Time'] = "Utiliser l'heure du serveur";
 L['New Event!'] = "Nouvel événement";

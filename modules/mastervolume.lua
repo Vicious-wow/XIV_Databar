@@ -71,10 +71,10 @@ function VolumeModule:RegisterEvents()
 		self.text:SetTextColor(xb:GetColor('hover'))
 
 		GameTooltip:SetOwner(self.frame, "ANCHOR_BOTTOM")
-		GameTooltip:AddLine("[|cff6699FFMaster Volume|r]")
+		GameTooltip:AddLine("[|cff6699FF"..MASTER_VOLUME.."|r]")
 		GameTooltip:AddLine(" ")
-		GameTooltip:AddDoubleLine("<Left-click>", "|cffffffffMaster Volume UP|r")
-		GameTooltip:AddDoubleLine("<Right-click>", "|cffffffffMaster Volume DOWN|r")
+		GameTooltip:AddDoubleLine("<"..L['Left-Click']..">", "|cffffffff"..BINDING_NAME_MASTERVOLUMEUP.."|r")
+		GameTooltip:AddDoubleLine("<"..L['Right-Click']..">", "|cffffffff"..BINDING_NAME_MASTERVOLUMEDOWN.."|r")
 		GameTooltip:Show()
 	end)
 	
@@ -181,7 +181,7 @@ function VolumeModule:GetConfig()
         width = "full"
       },
 	  step = {
-		name = "Volume step",
+		name = L["Volume step"],
 		order = 1,
 		type = "range",
 		min = 1,

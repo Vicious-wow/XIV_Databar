@@ -76,6 +76,8 @@ L['Always Show Item Level'] = "Всегда показывать уровень 
 L['Minimum Durability to Become Active'] = "Прочность, до которой загораются цифры";
 L['Maximum Durability to Show Item Level'] = "Прочность, после которой показывается уровень предметов";
 
+L["Volume step"] = true;
+
 L['Time Format'] = "Формат времени";
 L['Use Server Time'] = "Использовать серверное время";
 L['New Event!'] = "Новое событие!";

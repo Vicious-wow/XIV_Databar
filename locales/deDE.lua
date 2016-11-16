@@ -76,6 +76,8 @@ L['Always Show Item Level'] = "Rüstungslevel immer anzeigen";
 L['Minimum Durability to Become Active'] = "Minimale Haltbarkeit für Anzeige";
 L['Maximum Durability to Show Item Level'] = "Maximale Haltbarkeit für Rüstungslevel-Anzeige";
 
+L["Volume step"] = true;
+
 L['Time Format'] = "Uhrzeit-Format";
 L['Use Server Time'] = "Server-Zeit benutzen";
 L['New Event!'] = "Neue Veranstaltung";
