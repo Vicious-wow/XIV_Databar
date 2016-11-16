@@ -1,6 +1,7 @@
 local AddOnName, Engine = ...;
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0");
-local L = AceLocale:NewLocale(AddOnName, "zhCN", true, false);
+local L = AceLocale:NewLocale(AddOnName, "zhCN", false, false);
+if not L then return end
 
 L['Modules'] = "模块";
 L['Left-Click'] = "左键单击";
