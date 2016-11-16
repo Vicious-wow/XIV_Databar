@@ -15,7 +15,7 @@ L['Bottom'] = "Внизу";
 L['Bar Color'] = "Цвет полосы";
 L['Use Class Color for Bar'] = "Использовать цвет класса для полосы";
 L["Miscellaneous"] = "Разное";
-L['Hide Bar in combat'] = true;
+L['Hide Bar in combat'] = "Прятать полосу во время боя";
 L['Bar Padding'] = "Заполнение";
 L['Module Spacing'] = "Расстояние между модулями";
 L['Hide order hall bar'] = "Прятать полосу оплота класса";
@@ -77,8 +77,8 @@ L['Always Show Item Level'] = "Всегда показывать уровень 
 L['Minimum Durability to Become Active'] = "Прочность, до которой загораются цифры";
 L['Maximum Durability to Show Item Level'] = "Прочность, после которой показывается уровень предметов";
 
-L['Master Volume'] = true;
-L["Volume step"] = true;
+L['Master Volume'] = "Общая громкость";
+L["Volume step"] = "Шаг изменения громкости";
 
 L['Time Format'] = "Формат времени";
 L['Use Server Time'] = "Использовать серверное время";
