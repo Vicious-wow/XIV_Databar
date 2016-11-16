@@ -207,7 +207,7 @@ function CurrencyModule:RegisterFrameEvents()
       if InCombatLockdown() then return; end
       local db = xb.db.profile
       self.curText[i]:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-      if xb.db.profile.modules.currency.showTooltip then
+      if db.modules.currency.showTooltip then
         GameTooltip:Hide()
       end
     end)
@@ -236,13 +236,18 @@ function CurrencyModule:RegisterFrameEvents()
   self.xpFrame:SetScript('OnEnter', function()
     if InCombatLockdown() then return; end
     self.xpText:SetTextColor(unpack(xb:HoverColors()))
-    self:ShowTooltip()
+	if xb.db.profile.modules.currency.showTooltip then
+      self:ShowTooltip()
+    end
   end)
 
   self.xpFrame:SetScript('OnLeave', function()
     if InCombatLockdown() then return; end
     local db = xb.db.profile
     self.xpText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+	if xb.db.profile.modules.currency.showTooltip then
+      GameTooltip:Hide()
+    end
   end)
 
   self:RegisterMessage('XIVBar_FrameHide', function(_, name)
