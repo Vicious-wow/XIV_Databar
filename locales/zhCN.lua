@@ -15,7 +15,7 @@ L['Bottom'] = "底部";
 L['Bar Color'] = "条颜色";
 L['Use Class Color for Bar'] = "条使用职业颜色";
 L["Miscellaneous"] = "杂项";
-L['Hide Bar in combat'] = true;
+L['Hide Bar in combat'] = "战斗中隐藏";
 L['Bar Padding'] = "条填充";
 L['Module Spacing'] = "模块间距";
 L['Hide order hall bar'] = "隐藏职业大厅条";
@@ -77,8 +77,8 @@ L['Always Show Item Level'] = "始终显示物品等级";
 L['Minimum Durability to Become Active'] = "最低耐久度变得活跃";
 L['Maximum Durability to Show Item Level'] = "最大耐久度显示物品等级";
 
-L['Master Volume'] = true;
-L["Volume step"] = true;
+L['Master Volume'] = "主音量";
+L["Volume step"] = "音量调节";
 
 L['Time Format'] = "时间格式";
 L['Use Server Time'] = "使用服务器时间";
