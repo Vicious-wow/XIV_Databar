@@ -202,11 +202,24 @@ end
 
 function XIVBar:HideBarEvent()
 	local bar = self:GetFrame("bar")
+	bar:UnregisterAllEvents()
+	bar.OnEvent = nil
+	bar:RegisterEvent("PET_BATTLE_OPENING_START")
+	bar:RegisterEvent("PET_BATTLE_CLOSE")
+	bar:SetScript("OnEvent", function(_, event, ...)
+		if event=="PET_BATTLE_OPENING_START" and XIV_Databar:IsVisible() then
+			XIV_Databar:Hide()
+		end
+		if event=="PET_BATTLE_CLOSE" and not XIV_Databar:IsVisible() then
+			XIV_Databar:Show()
+		end
+	end)
+
 	if self.db.profile.general.barCombatHide then
 		bar:RegisterEvent("PLAYER_REGEN_ENABLED")
 		bar:RegisterEvent("PLAYER_REGEN_DISABLED")
 
-		bar:SetScript("OnEvent", function(_, event, ...)
+		bar:HookScript("OnEvent", function(_, event, ...)
 			if event=="PLAYER_REGEN_DISABLED" and XIV_Databar:IsVisible() then
 				XIV_Databar:Hide()
 			end
@@ -215,9 +228,11 @@ function XIVBar:HideBarEvent()
 			end
 		end)
 	else
-		bar:UnregisterEvent("PLAYER_REGEN_ENABLED")
-		bar:UnregisterEvent("PLAYER_REGEN_DISABLED")
-		bar.OnEvent = nil
+		if bar:IsEventRegistered("PLAYER_REGEN_ENABLED") then
+			bar:UnregisterEvent("PLAYER_REGEN_ENABLED")
+		elseif bar:IsEventRegistered("PLAYER_REGEN_DISABLED") then
+			bar:UnregisterEvent("PLAYER_REGEN_DISABLED")
+		end
 	end
 end
 
