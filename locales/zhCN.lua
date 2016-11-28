@@ -74,8 +74,8 @@ L['Show Shop Button'] = "显示商城按钮";
 L['Show Help Button'] = "显示帮助按钮";
 
 L['Always Show Item Level'] = "始终显示物品等级";
-L['Minimum Durability to Become Active'] = "最低耐久度变得活跃";
-L['Maximum Durability to Show Item Level'] = "最大耐久度显示物品等级";
+L['Minimum Durability to Become Active'] = "当耐久度损失到多少时,变得活跃";
+L['Maximum Durability to Show Item Level'] = "当耐久度达到多少时,显示物品等级";
 
 L['Master Volume'] = "主音量";
 L["Volume step"] = "音量调节";
@@ -103,17 +103,17 @@ L['Session Total'] = "汇总";
 L['Show XP Bar Below Max Level'] = "未满级时显示经验条";
 L['Use Class Colors for XP Bar'] = "经验条使用职业颜色";
 L['Show Tooltips'] = "显示提示";
-L['Text on Right'] = "文在在右侧";
+L['Text on Right'] = "文字在右侧";
 L['Currency Select'] = "选择货币";
-L['First Currency'] = "第一货币";
-L['Second Currency'] = "第二货币";
-L['Third Currency'] = "第三货币";
+L['First Currency'] = "第一种货币";
+L['Second Currency'] = "第二种货币";
+L['Third Currency'] = "第三种货币";
 L['Rested'] = "精力充沛";
 
 L['Show World Ping'] = "显示世界延迟";
 L['Number of Addons To Show'] = "显示插件的数量";
 L['Addons to Show in Tooltip'] = "在提示中显示的插件";
-L['Show All Addons in Tooltip with Shift'] = "在提示中按Shift键显示所有插件";
+L['Show All Addons in Tooltip with Shift'] = "按住SHIFT键在提示中显示所有插件";
 L['Memory Usage'] = "内存占用";
 L['Garbage Collect'] = "垃圾收集";
 L['Cleaned'] = "已清理";
