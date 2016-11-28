@@ -573,7 +573,7 @@ function MenuModule:GuildHover(hoverFunc)
     tooltip:AddHeader("[|cff6699FF"..GUILD.."|r]",'|cff00ff00'..gName..'|r')
     tooltip:AddLine(" "," ")
 	if xb.db.profile.modules.microMenu.showGMOTD then
-		tooltip:AddLine('|cff00ff00'..GetGuildRosterMOTD()..':|r', ' ')
+		tooltip:AddLine('|cff00ff00'..GetGuildRosterMOTD()..':|r', ' ') --should be cut down
 	end
 
     local totalGuild, _ = GetNumGuildMembers()
@@ -595,11 +595,6 @@ function MenuModule:GuildHover(hoverFunc)
 		tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.glineHover = false; end)
 		tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
 		    if button == "LeftButton" then
-				if not name:find('%u%U*-%u%U') then
-					local homeRealm = GetRealmName()
-					homeRealm = homeRealm:gsub("%s+", "")
-					name=name.."-"..homeRealm
-				end
 				if modifierFunc() then
 					InviteUnit(name)
 				else
