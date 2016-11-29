@@ -98,7 +98,11 @@ function TalentModule:Refresh()
     else
       self.specBar:SetStatusBarColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
     end
-    self.specBar:SetSize(self.specText:GetStringWidth(), (iconSize - textHeight - 2))
+    local barHeight = iconSize - textHeight - 2
+    if barHeight < 2 then 
+      barHeight = 2
+    end
+    self.specBar:SetSize(self.specText:GetStringWidth(), barHeight)
     self.specBar:SetPoint('BOTTOMLEFT', self.specIcon, 'BOTTOMRIGHT', 5, 0)
 
     self.specBarBg:SetAllPoints()
