@@ -6,6 +6,11 @@ if not L then return end
 L['Modules'] = "Module";
 L['Left-Click'] = "Links-Klick";
 L['Right-Click'] = "Rechts-Klick";
+L['k'] = true; -- short for 1000
+L['M'] = true; -- short for 1000000
+L['B'] = true; -- short for 1000000000
+L['L'] = true; -- For the local ping
+L['W'] = true; -- For the world ping
 
 -- General
 L["Positioning"] = true;
@@ -126,6 +131,7 @@ L['Set Loot Specialization'] = "Beute-Spezialisierung auswählen";
 L['Current Specialization'] = "Aktuelle Spezialisierung";
 L['Current Loot Specialization'] = "Aktuelle Beute-Spezialisierung";
 L['Talent Minimum Width'] = "Minimale Breite für Talente";
+L['Open Artifact'] = true;
 L['Remaining'] = "Ausbleibend";
 L['Available Ranks'] = "Verfügbare Ränge";
 L['Artifact Knowledge'] = "Artefaktwissen";

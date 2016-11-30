@@ -198,31 +198,35 @@ function TalentModule:RegisterFrameEvents()
     GameTooltip:Hide()
     if button == 'LeftButton' then
       if not InCombatLockdown() then
-        if self.specPopup:IsVisible() then
-          self.specPopup:Hide()
-          if xb.db.profile.modules.tradeskill.showTooltip then
-            self:ShowTooltip()
-          end
-        else
-          self.lootSpecPopup:Hide()
-          self:CreateSpecPopup()
-          self.specPopup:Show()
-        end
+		if IsShiftKeyDown() then
+			if self.lootSpecPopup:IsVisible() then
+			  self.lootSpecPopup:Hide()
+			  if xb.db.profile.modules.tradeskill.showTooltip then
+				self:ShowTooltip()
+			  end
+			else
+			  self.specPopup:Hide()
+			  self:CreateLootSpecPopup()
+			  self.lootSpecPopup:Show()
+			end
+		else
+			if self.specPopup:IsVisible() then
+			  self.specPopup:Hide()
+			  if xb.db.profile.modules.tradeskill.showTooltip then
+				self:ShowTooltip()
+			  end
+			else
+			  self.lootSpecPopup:Hide()
+			  self:CreateSpecPopup()
+			  self.specPopup:Show()
+			end
+		end
       end
     end
 
     if button == 'RightButton' then
       if not InCombatLockdown() then
-        if self.lootSpecPopup:IsVisible() then
-          self.lootSpecPopup:Hide()
-          if xb.db.profile.modules.tradeskill.showTooltip then
-            self:ShowTooltip()
-          end
-        else
-          self.specPopup:Hide()
-          self:CreateLootSpecPopup()
-          self.lootSpecPopup:Show()
-        end
+        SocketInventoryItem(16)
       end
     end
   end)
@@ -489,7 +493,8 @@ function TalentModule:ShowTooltip()
 
   GameTooltip:AddLine(" ")
   GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Set Specialization'], 1, 1, 0, 1, 1, 1)
-  GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Set Loot Specialization'], 1, 1, 0, 1, 1, 1)
+  GameTooltip:AddDoubleLine('<'..SHIFT_KEY_TEXT.."+"..L['Left-Click']..'>', L['Set Loot Specialization'], 1, 1, 0, 1, 1, 1)
+  GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Open Artifact'], 1, 1, 0, 1, 1, 1)
   GameTooltip:Show()
 end
 

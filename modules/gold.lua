@@ -186,11 +186,11 @@ local function shortenNumber(num)
 	if num < 1000 then
 		return tostring(num)
 	elseif num < 1000000 then
-		return format("%.1fK",num/1000)
+		return format("%.1f"..L['k'],num/1000)
 	elseif num < 1000000000 then
-		return format("%.2fM",num/1000000)
+		return format("%.2f"..L['M'],num/1000000)
 	else
-		return format("%.3fB",num/1000000000)
+		return format("%.3f"..L['B'],num/1000000000)
 	end
 end
 

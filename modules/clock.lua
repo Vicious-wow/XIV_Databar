@@ -105,7 +105,7 @@ function ClockModule:RegisterFrameEvents()
     if ClockModule.elapsed >= 1 then
       local clockTime = nil
       if xb.db.profile.modules.clock.serverTime then
-        clockTime = GetServerTime() -- GameTime_GetGameTime() ?
+        clockTime = GetServerTime()
       else
         clockTime = time()
       end
@@ -131,15 +131,42 @@ function ClockModule:RegisterFrameEvents()
     GameTooltip:AddLine("[|cff6699FF"..TIMEMANAGER_TITLE.."|r]")
     GameTooltip:AddLine(" ")
     local clockTime = nil
-    local ttTimeText = ''
     if xb.db.profile.modules.clock.serverTime then
       clockTime = time()
-      ttTimeText = L['Local Time'];
     else
       clockTime = GetServerTime()
-      ttTimeText = L['Realm Time'];
     end
-    GameTooltip:AddDoubleLine(ttTimeText, date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime), 1, 1, 0, 1, 1, 1)
+
+	local optFormat = xb.db.profile.modules.clock.timeFormat
+	local hour, minute = GetGameTime()
+	local realmTime = ""
+	if optFormat:find("twoFour") then
+		realmTime = GameTime_GetFormattedTime(hour, minute, false)
+		if optFormat == "twoFour" then
+			if hour < 10 then
+				realmTime = "0"..realmTime
+			end
+		end
+	else
+		realmTime = GameTime_GetFormattedTime(hour, minute, true)
+		if optFormat:find("NoAm") then
+			if optFormat == "twelveNoAm" then
+				if hour < 10 then
+					realmTime = "0"..realmTime
+				end
+			end
+			realmTime = string.sub(realmTime,1,string.len(realmTime)-3)
+		else
+			if optFormat == "twelveAmPm" then
+				if hour < 10 then
+					realmTime = "0"..realmTime
+				end
+			end
+		end
+	end
+
+    GameTooltip:AddDoubleLine(L['Local Time'], date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime), 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine(L['Realm Time'], realmTime, 1, 1, 0, 1, 1, 1)
     GameTooltip:AddLine(" ")
     GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Open Calendar'], 1, 1, 0, 1, 1, 1)
     GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Open Clock'], 1, 1, 0, 1, 1, 1)

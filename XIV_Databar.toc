@@ -1,10 +1,10 @@
 ## Interface: 70100
 ## Title: XIV_Databar
-## Author: |cffbbbbbbMille|cff990000XIV|r
-## Version: 2.0.13.1
+## Author: |cffbbbbbbMille|cff990000XIV|r and Mikeprod
+## Version: 2.0.14
 ## Notes: Adds a bottombar by the request of |cffffffffu/sammojo|r on Reddit, Icons made by |cffffffffu/sammojo|r. Previously maintained by |cff00FF99Saxitoxin|r.
 ## SavedVariables: TEST_CONFIG, XIVBarDB
-## X-Issues: https://github.com/MilleXIV/XIV_Databar/issues
+## X-Issues: https://github.com/Mikeprod/XIV_Databar/issues
 
 embeds.xml
 

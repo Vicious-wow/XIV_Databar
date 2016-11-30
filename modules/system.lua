@@ -115,8 +115,8 @@ function SystemModule:UpdateTexts()
   
   self.fpsText:SetText(floor(GetFramerate())..FPS_ABBR)
   local _, _, homePing, worldPing = GetNetStats()
-  self.pingText:SetText(floor(homePing)..MILLISECONDS_ABBR)
-  self.worldPingText:SetText(floor(worldPing)..MILLISECONDS_ABBR)
+  self.pingText:SetText(L['L']..":"..floor(homePing)..MILLISECONDS_ABBR)
+  self.worldPingText:SetText(L['W']..":"..floor(worldPing)..MILLISECONDS_ABBR)
 end
 
 function SystemModule:CreateFrames()
@@ -139,7 +139,7 @@ function SystemModule:HoverFunction()
     self.pingText:SetTextColor(unpack(xb:HoverColors()))
     self.worldPingText:SetTextColor(unpack(xb:HoverColors()))
   end
-  if xb.db.profile.modules.system.showTooltip then
+  if xb.db.profile.modules.system.showTooltip and not self.fpsFrame:IsMouseOver() then
     self:ShowTooltip()
   end
 end

@@ -5,6 +5,12 @@ local L = AceLocale:NewLocale(AddOnName, "enUS", true, false);
 L['Modules'] = true;
 L['Left-Click'] = true;
 L['Right-Click'] = true;
+L['k'] = true; -- short for 1000
+L['M'] = true; -- short for 1000000
+L['B'] = true; -- short for 1000000000
+L['L'] = true; -- For the local ping
+L['W'] = true; -- For the world ping
+
 
 -- General
 L["Positioning"] = true;
@@ -125,6 +131,7 @@ L['Set Loot Specialization'] = true;
 L['Current Specialization'] = true;
 L['Current Loot Specialization'] = true;
 L['Talent Minimum Width'] = true;
+L['Open Artifact'] = true;
 L['Remaining'] = true;
 L['Available Ranks'] = true;
 L['Artifact Knowledge'] = true;

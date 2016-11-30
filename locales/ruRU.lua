@@ -6,6 +6,11 @@ if not L then return end
 L['Modules'] = "Модули";
 L['Left-Click'] = "Левая кнопка мыши";
 L['Right-Click'] = "Правая кнопка мыши";
+L['k'] = true; -- short for 1000
+L['M'] = true; -- short for 1000000
+L['B'] = true; -- short for 1000000000
+L['L'] = true; -- For the local ping
+L['W'] = true; -- For the world ping
 
 -- General
 L["Positioning"] = "Позиция";
@@ -126,6 +131,7 @@ L['Set Loot Specialization'] = "Выбрать специализацию для
 L['Current Specialization'] = "Текущая специализация";
 L['Current Loot Specialization'] = "Текущая специализация для добычи";
 L['Talent Minimum Width'] = "Минимальная ширина модуля талантов";
+L['Open Artifact'] = true;
 L['Remaining'] = "Осталось";
 L['Available Ranks'] = "Доступно уровней";
 L['Artifact Knowledge'] = "Знание артефакта";

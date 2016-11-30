@@ -6,6 +6,11 @@ if not L then return end
 L['Modules'] = "Modules";
 L['Left-Click'] = "Clic gauche";
 L['Right-Click'] = "Clic droit";
+L['k'] = true; -- short for 1000
+L['M'] = "m"; -- short for 1000000
+L['B'] = "M"; -- short for 1000000000
+L['L'] = true; -- For the local ping
+L['W'] = "M"; -- For the world ping
 
 -- General
 L["Positioning"] = "Positionnement";
@@ -126,6 +131,7 @@ L['Set Loot Specialization'] = "Spécialisation du butin";
 L['Current Specialization'] = "Spécialisation actuelle";
 L['Current Loot Specialization'] = "Spécialisation du butin actuelle";
 L['Talent Minimum Width'] = "Longueur minimum";
+L['Open Artifact'] = "Ouvrir l'Arme Prodigieuse";
 L['Remaining'] = "Restant";
 L['Available Ranks'] = "Rangs disponibles";
 L['Artifact Knowledge'] = "Connaissance de l'arme prodigieuse";
