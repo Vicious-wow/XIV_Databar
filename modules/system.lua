@@ -115,8 +115,8 @@ function SystemModule:UpdateTexts()
   
   self.fpsText:SetText(floor(GetFramerate())..FPS_ABBR)
   local _, _, homePing, worldPing = GetNetStats()
-  self.pingText:SetText(L['L']..":"..floor(homePing)..MILLISECONDS_ABBR)
-  self.worldPingText:SetText(L['W']..":"..floor(worldPing)..MILLISECONDS_ABBR)
+  self.pingText:SetText(L['L']..": "..floor(homePing)..MILLISECONDS_ABBR)
+  self.worldPingText:SetText(L['W']..": "..floor(worldPing)..MILLISECONDS_ABBR)
 end
 
 function SystemModule:CreateFrames()

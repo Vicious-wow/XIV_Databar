@@ -101,7 +101,7 @@ function MenuModule:Refresh()
     if name == 'menu' then
       frame:SetPoint("LEFT", xb.db.profile.modules.microMenu.iconSpacing, 0)
       totalWidth = totalWidth + frame:GetWidth() + xb.db.profile.modules.microMenu.iconSpacing
-    elseif name == 'chat' then
+    elseif frame:GetParent():GetName() == 'menu' then
       frame:SetPoint("LEFT", frame:GetParent(), "RIGHT", xb.db.profile.modules.microMenu.mainMenuSpacing, 0)
       totalWidth = totalWidth + frame:GetWidth() + xb.db.profile.modules.microMenu.mainMenuSpacing
     else
