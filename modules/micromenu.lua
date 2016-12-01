@@ -162,11 +162,13 @@ function MenuModule:CreateFrames()
   if xb.db.profile.modules.microMenu.guild then
     self.frames.guild = CreateFrame("BUTTON", "guild", parentFrame)
     parentFrame = self.frames.guild
-	self.text.guild = self.text.guild or self.frames.guild:CreateFontString(nil, 'OVERLAY')
-    self.bgTexture.guild = self.bgTexture.guild or self.frames.guild:CreateTexture(nil, "OVERLAY")
+	self.text.guild = self.frames.guild:CreateFontString(nil, 'OVERLAY')
+    self.bgTexture.guild = self.frames.guild:CreateTexture(nil, "OVERLAY")
   else
 	if self.frames.guild then
 		self.frames.guild = nil
+		self.text.guild = nil
+		self.bgTexture.guild = nil
 	end
   end
 

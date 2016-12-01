@@ -29,7 +29,7 @@ end
 
 function TalentModule:OnEnable()
   if self.talentFrame == nil then
-    self.talentFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
+    self.talentFrame = CreateFrame("FRAME", "talentFrame", xb:GetFrame('bar'))
     xb:RegisterFrame('talentFrame', self.talentFrame)
   end
   self.talentFrame:Show()
@@ -48,6 +48,13 @@ function TalentModule:OnDisable()
   self:UnregisterEvent('TRADE_SKILL_UPDATE')
   self:UnregisterEvent('SPELLS_CHANGED')
   self:UnregisterEvent('UNIT_SPELLCAST_STOP')
+  self:UnregisterEvent('PLAYER_SPECIALIZATION_CHANGED')
+  self:UnregisterEvent('ACTIVE_TALENT_GROUP_CHANGED')
+  self:UnregisterEvent('PLAYER_LOOT_SPEC_UPDATED')
+  self:UnregisterEvent('ARTIFACT_CLOSE')
+  self:UnregisterEvent('UNIT_INVENTORY_CHANGED')
+  self:UnregisterEvent('ARTIFACT_XP_UPDATE')
+  self:UnregisterEvent('INSPECT_READY')
 end
 
 function TalentModule:Refresh()
@@ -57,9 +64,8 @@ function TalentModule:Refresh()
   if self.talentFrame == nil then return; end
   if not db.modules.talent.enabled then self:Disable(); return; end
 
-  --local artifactId = 0
-  local artifactId = self.LAD:GetActiveArtifactID() or 0
-
+  local artifactId = C_ArtifactUI.GetEquippedArtifactInfo() or 0
+  self.curArtifactId = artifactId
   self.currentSpecID = GetSpecialization()
   self.currentLootSpecID = GetLootSpecialization()
 
@@ -69,7 +75,6 @@ function TalentModule:Refresh()
   local textHeight = db.text.fontSize
   if artifactId > 0 then
     textHeight = floor((xb:GetHeight() - 4) / 2)
-    self.curArtifactId = artifactId
   end
   self.specIcon:SetTexture(self.classIcon)
   self.specIcon:SetTexCoord(unpack(self.specCoords[self.currentSpecID]))
@@ -80,7 +85,7 @@ function TalentModule:Refresh()
 
   self.specText:SetFont(xb:GetFont(textHeight))
   self.specText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-  self.specText:SetText(string.upper(name))
+  self.specText:SetText(string.upper(name or ""))
 
   if artifactId > 0 then
     self.specText:SetPoint('TOPLEFT', self.specIcon, 'TOPRIGHT', 5, 0)
@@ -108,8 +113,17 @@ function TalentModule:Refresh()
     self.specBarBg:SetAllPoints()
     self.specBarBg:SetColorTexture(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
     self:UpdateArtifactBar(artifactId)
+	self.specBar:Show()
+  else
+	if self.specBar and self.specBar:IsVisible() then
+		self.specBar:Hide()
+	end
   end
-  self.specFrame:SetSize(iconSize + self.specText:GetStringWidth() + 5, xb:GetHeight())
+  if self.specBar:IsVisible() then
+	self.specFrame:SetSize(iconSize + self.specBar:GetWidth() + 5, xb:GetHeight())
+  else
+	self.specFrame:SetSize(iconSize + self.specText:GetWidth() + 5, xb:GetHeight())
+  end
   self.specFrame:SetPoint('LEFT')
 
   if self.specFrame:GetWidth() < db.modules.talent.minWidth then
@@ -121,7 +135,6 @@ function TalentModule:Refresh()
   end
 
   self.talentFrame:SetSize(self.specFrame:GetWidth(), xb:GetHeight())
-
   local relativeAnchorPoint = 'LEFT'
   local xOffset = db.general.moduleSpacing
   local anchorFrame = xb:GetFrame('clockFrame')
@@ -167,12 +180,13 @@ function TalentModule:RegisterFrameEvents()
   self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', 'Refresh')
   self:RegisterEvent('ACTIVE_TALENT_GROUP_CHANGED', 'Refresh')
   self:RegisterEvent('PLAYER_LOOT_SPEC_UPDATED', 'Refresh')
+  self:RegisterEvent('ARTIFACT_CLOSE', 'Refresh')
+  self:RegisterEvent('UNIT_INVENTORY_CHANGED', 'Refresh')
+  self:RegisterEvent('INSPECT_READY', 'Refresh')
 
   self:RegisterEvent('ARTIFACT_XP_UPDATE', function()
     self:UpdateArtifactBar(self.curArtifactId)
   end)
-
-  self:RegisterEvent('UNIT_INVENTORY_CHANGED', 'Refresh')
 
   self.specFrame:EnableMouse(true)
   self.specFrame:RegisterForClicks('AnyUp')
@@ -226,7 +240,9 @@ function TalentModule:RegisterFrameEvents()
 
     if button == 'RightButton' then
       if not InCombatLockdown() then
-        SocketInventoryItem(16)
+		if self.curArtifactId > 0 then
+			SocketInventoryItem(16)
+		end
       end
     end
   end)
@@ -480,7 +496,7 @@ function TalentModule:ShowTooltip()
     GameTooltip:AddLine(" ")
     local _, artifactData = self.LAD:GetArtifactInfo(self.curArtifactId)
     local knowLevel, knowMult = self.LAD:GetArtifactKnowledge()
-    if knowLevel > 0 then
+    if knowLevel and knowLevel > 0 then
       GameTooltip:AddDoubleLine(L['Artifact Knowledge']..':', string.format('%d (x%d)', knowLevel, ((knowMult) - 1 * 100)), 1, 1, 0, 1, 1, 1)
       GameTooltip:AddLine(" ")
     end
@@ -494,7 +510,9 @@ function TalentModule:ShowTooltip()
   GameTooltip:AddLine(" ")
   GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Set Specialization'], 1, 1, 0, 1, 1, 1)
   GameTooltip:AddDoubleLine('<'..SHIFT_KEY_TEXT.."+"..L['Left-Click']..'>', L['Set Loot Specialization'], 1, 1, 0, 1, 1, 1)
-  GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Open Artifact'], 1, 1, 0, 1, 1, 1)
+  if self.curArtifactId > 0 then
+	GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Open Artifact'], 1, 1, 0, 1, 1, 1)
+  end
   GameTooltip:Show()
 end
 
