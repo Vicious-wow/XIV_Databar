@@ -327,11 +327,6 @@ function MenuModule:RegisterFrameEvents()
         GameTooltip:Hide()
         leaveFunc()
       end)
-      frame:SetScript('OnUpdate', function()
-		C_Timer.After(10, function()
-			MenuModule:UpdateGuildText()
-		end)
-	  end)
     elseif name == 'social' then
       local leaveFunc = self:DefaultLeave(name)
       frame:SetScript("OnEnter", self:SocialHover(self:DefaultHover(name)))
@@ -343,10 +338,10 @@ function MenuModule:RegisterFrameEvents()
   end
 
   self:RegisterEvent('GUILD_ROSTER_UPDATE', function()
-    self:UpdateGuildText(true)
+    self:UpdateGuildText()
   end)
   self:RegisterEvent('CHAT_MSG_GUILD', function()
-    self:UpdateGuildText(true)
+    self:UpdateGuildText()
   end)
   self:RegisterEvent('BN_FRIEND_ACCOUNT_ONLINE', 'UpdateFriendText')
   self:RegisterEvent('BN_FRIEND_ACCOUNT_OFFLINE', 'UpdateFriendText')
@@ -360,11 +355,9 @@ function MenuModule:UnregisterFrameEvents()
   self:UnregisterEvent('FRIENDLIST_UPDATE')
 end
 
-function MenuModule:UpdateGuildText(isEvent)
+function MenuModule:UpdateGuildText()
   if xb.db.profile.modules.microMenu.hideSocialText or not xb.db.profile.modules.microMenu.guild then return; end
-  if isEvent == nil then
-    GuildRoster()
-  end
+  GuildRoster()
   if IsInGuild() then
     local _, onlineMembers = GetNumGuildMembers()
     self.text.guild:SetText(onlineMembers)
