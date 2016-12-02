@@ -69,8 +69,12 @@ function VolumeModule:RegisterEvents()
 		if InCombatLockdown() then return end
 		self.icon:SetVertexColor(xb:GetColor('hover'))
 		self.text:SetTextColor(xb:GetColor('hover'))
-
-		GameTooltip:SetOwner(self.frame, "ANCHOR_BOTTOM")
+		
+		if xb.db.profile.general.barPosition == "TOP" then
+			GameTooltip:SetOwner(self.frame, "ANCHOR_BOTTOM")
+		else
+			GameTooltip:SetOwner(self.frame, "ANCHOR_TOP")
+		end
 		GameTooltip:AddLine("[|cff6699FF"..MASTER_VOLUME.."|r]")
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddDoubleLine("<"..L['Left-Click']..">", "|cffffffff"..BINDING_NAME_MASTERVOLUMEUP.."|r")
