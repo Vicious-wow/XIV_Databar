@@ -64,7 +64,7 @@ function TalentModule:Refresh()
   if self.talentFrame == nil then return; end
   if not db.modules.talent.enabled then self:Disable(); return; end
 
-  local artifactId = C_ArtifactUI.GetEquippedArtifactInfo() or 0
+  local artifactId = self.LAD:GetActiveArtifactID() or 0
   self.curArtifactId = artifactId
   self.currentSpecID = GetSpecialization()
   self.currentLootSpecID = GetLootSpecialization()
@@ -154,7 +154,6 @@ function TalentModule:Refresh()
 end
 
 function TalentModule:UpdateArtifactBar(artifactId)
-  --if true then return; end
   local _, artifactData = self.LAD:GetArtifactInfo(artifactId)
   self.specBar:SetMinMaxValues(0, artifactData.maxPower)
   self.specBar:SetValue(artifactData.power)
@@ -183,8 +182,9 @@ function TalentModule:RegisterFrameEvents()
   self:RegisterEvent('ARTIFACT_CLOSE', 'Refresh')
   self:RegisterEvent('UNIT_INVENTORY_CHANGED', 'Refresh')
   self:RegisterEvent('INSPECT_READY', 'Refresh')
-
-  self:RegisterEvent('ARTIFACT_XP_UPDATE', function()
+  self.LAD:RegisterCallback('ARTIFACT_EQUIPPED_CHANGED',self.Refresh)
+  self.LAD:RegisterCallback('ARTIFACT_KNOWLEDGE_CHANGED',self.Refresh)
+  self.LAD:RegisterCallback('ARTIFACT_POWER_CHANGED', function()
     self:UpdateArtifactBar(self.curArtifactId)
   end)
 
