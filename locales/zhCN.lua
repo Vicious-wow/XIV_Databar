@@ -9,8 +9,8 @@ L['Right-Click'] = "右键单击";
 L['k'] = true; -- short for 1000
 L['M'] = true; -- short for 1000000
 L['B'] = true; -- short for 1000000000
-L['L'] = true; -- For the local ping
-L['W'] = true; -- For the world ping
+L['L'] = "本地"; -- For the local ping
+L['W'] = "世界"; -- For the world ping
 
 -- General
 L["Positioning"] = "位置";
@@ -131,7 +131,7 @@ L['Set Loot Specialization'] = "设置拾取专精";
 L['Current Specialization'] = "当前专精";
 L['Current Loot Specialization'] = "当前拾取专精";
 L['Talent Minimum Width'] = "天赋最小宽度";
-L['Open Artifact'] = true;
+L['Open Artifact'] = "打开神器";
 L['Remaining'] = "剩余";
 L['Available Ranks'] = "神器等级";
 L['Artifact Knowledge'] = "神器知识";
