@@ -1,9 +1,25 @@
-local AddOnName, XIVBar = ...;
-local _G = _G;
-local pairs, unpack, select = pairs, unpack, select
-LibStub("AceAddon-3.0"):NewAddon(XIVBar, AddOnName, "AceConsole-3.0", "AceEvent-3.0");
-local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true);
+local AddOnName, Core = ...;
+XB = LibStub("AceAddon-3.0"):NewAddon(Core, AddOnName, "AceConsole-3.0", "AceEvent-3.0");
+XB:SetDefaultModuleLibraries("AceEvent-3.0", "AceConsole-3.0")
+--local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true);
+XB.LSM = LibStub('LibSharedMedia-3.0');
 
+XB.version = 2.1
+XB.releaseType = "a"
+
+XB.playerName = UnitName("player")
+XB.playerClass = select(2, UnitClass("player"))
+
+function XB:OnInitialize()
+	self.db = LibStub("AceDB-3.0"):New("XIVBarDB",nil,true)
+end
+
+function XB:RegisterModule(name, ...)
+	local mod = self:NewModule(name, ...)
+	self[name] = mod
+	return mod
+end
+--[[
 XIVBar.L = L
 
 XIVBar.constants = {
@@ -67,7 +83,7 @@ XIVBar.defaults = {
     }
 };
 
-XIVBar.LSM = LibStub('LibSharedMedia-3.0');
+
 
 function XIVBar:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults)
@@ -197,6 +213,17 @@ function XIVBar:CreateMainBar()
     if self.frames.bar == nil then
         self:RegisterFrame('bar', CreateFrame("FRAME", "XIV_Databar", UIParent))
         self.frames.bgTexture = self.frames.bgTexture or self.frames.bar:CreateTexture(nil, "BACKGROUND")
+		XIVBar:GetFrame("bar").enableMouse = true
+		XIVBar:GetFrame("bar").clampedToScreen = true
+		XIVBar:GetFrame("bar").movable = true
+		XIVBar:GetFrame("bar"):SetScript("OnMouseDown",function()
+			self.frames.bgTexture:SetColorTexture(0,1,0,0.4);
+			local curX, curY = GetCursorPosition()
+			local uiScale = UIParent:GetEffectiveScale()
+			curX, curY = curX / uiScale, curY / uiScale
+			local anchor,object,relativeToObj,x,y = self.frames.bar:GetPoint()
+			self.frames.bar:SetPoint(anchor,object,relativeToObj,curX,curY)
+		end)
     end
 end
 
@@ -364,6 +391,47 @@ function XIVBar:ResetUI()
 	if not MinimapCluster:IsUserPlaced() then
 		MinimapCluster:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0);
 	end
+end
+
+function XIVBar:splitLongLine(text,maxLetters)
+	maxLetters = maxLetters or 250
+	local result = {}
+	repeat
+		local lettersNow = maxLetters
+		local utf8pos = 1
+		local textLen = string.len(text)
+		while true do
+			local char = string.sub(text,utf8pos,utf8pos)
+			local c = char:byte()
+
+			local lastPos = utf8pos
+
+			if c > 0 and c <= 127 then
+				utf8pos = utf8pos + 1
+			elseif c >= 194 and c <= 223 then
+				utf8pos = utf8pos + 2
+			elseif c >= 224 and c <= 239 then
+				utf8pos = utf8pos + 3
+			elseif c >= 240 and c <= 244 then
+				utf8pos = utf8pos + 4
+			else
+				utf8pos = utf8pos + 1
+			end
+
+				lettersNow = lastPos - 1
+			if utf8pos > lettersNow then
+				break
+			elseif utf8pos >= textLen then
+				break
+			end
+		end
+		result[#result + 1] = string.sub(text,1,lettersNow)
+		text = string.sub(text,lettersNow+1)
+	until string.len(text) < maxLetters
+	if string.len(text) > 0 then
+		result[#result + 1] = text
+	end
+	return unpack(result)
 end
 
 function XIVBar:GetGeneralOptions()
@@ -631,3 +699,4 @@ function XIVBar:GetTextColorOptions()
         }
     }
 end
+]]
