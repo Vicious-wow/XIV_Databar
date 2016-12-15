@@ -196,33 +196,18 @@ end
 
 function GoldModule:FormatCoinText(money)
   local showSC = xb.db.profile.modules.gold.showSmallCoins
-  local shortThousands = xb.db.profile.modules.gold.shortThousands
-  local g, s, c = self:SeparateCoins(money)
-  local formattedString = ''
-  if g > 0 then
-    formattedString = '%s'..GOLD_AMOUNT_SYMBOL
-    if g > 1000 and shortThousands then
-      formattedString = shortenNumber(g)..GOLD_AMOUNT_SYMBOL
-    end
-  end
-  if s > 0 and (g < 1 or showSC) then
-    if g > 1 then
-      formattedString = formattedString..' '
-    end
-    formattedString = formattedString..'%d'..SILVER_AMOUNT_SYMBOL
-  end
-  if c > 0 and (s < 1 or showSC) then
-    if g > 1 or s > 1 then
-      formattedString = formattedString..' '
-    end
-    formattedString = formattedString..'%d'..COPPER_AMOUNT_SYMBOL
+  if money == 0 then
+	return showSC and string.format("%s"..GOLD_AMOUNT_SYMBOL.." %s"..SILVER_AMOUNT_SYMBOL.." %s"..COPPER_AMOUNT_SYMBOL,0,0,0) or money..GOLD_AMOUNT_SYMBOL
   end
 
-  local ret = string.format(formattedString, BreakUpLargeNumbers(g), s, c)
-  if money < 0 then
-    ret = '-'..ret
+  local shortThousands = xb.db.profile.modules.gold.shortThousands
+  local g, s, c = self:SeparateCoins(money)
+
+  if showSC then
+	return (shortThousands and shortenNumber(g) or BreakUpLargeNumbers(g))..GOLD_AMOUNT_SYMBOL..' '..s..SILVER_AMOUNT_SYMBOL..' '..c..COPPER_AMOUNT_SYMBOL
+  else
+	return g > 0 and (shortThousands and shortenNumber(g)..GOLD_AMOUNT_SYMBOL) or BreakUpLargeNumbers(g)..GOLD_AMOUNT_SYMBOL
   end
-  return ret
 end
 
 function GoldModule:SeparateCoins(money)
