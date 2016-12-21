@@ -505,11 +505,12 @@ function XIVBar:GetGeneralOptions()
 end
 
 function XIVBar:GetTextOptions()
-    local t = self.LSM:List(self.LSM.MediaType.FONT);
+	-- Don't know if this still needed, so i keep it commendet out.
+    --[[local t = self.LSM:List(self.LSM.MediaType.FONT);
     local fontList = {};
     for k,v in pairs(t) do
         fontList[v] = v;
-    end
+    end]]
     return {
         name = LOCALE_TEXT_LABEL,
         type = "group",
@@ -519,8 +520,9 @@ function XIVBar:GetTextOptions()
             font = {
                 name = L['Font'],
                 type = "select",
+				dialogControl = 'LSM30_Font',
                 order = 1,
-                values = fontList,
+				values = AceGUIWidgetLSMlists.font,
                 style = "dropdown",
                 get = function() return self.db.profile.text.font; end,
                 set = function(info, val) self.db.profile.text.font = val; self:Refresh(); end
