@@ -12,6 +12,7 @@ XB.playerClass = select(2, UnitClass("player"))
 
 function XB:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("XIVBarDB",nil,true)
+	self.db.RegisterCallback(self, 'OnProfileReset',function() self:Disable(); self:Enable() end)
 end
 
 function XB:RegisterModule(name, ...)
@@ -82,7 +83,6 @@ XIVBar.defaults = {
         }
     }
 };
-
 
 
 function XIVBar:OnInitialize()
@@ -227,41 +227,6 @@ function XIVBar:CreateMainBar()
     end
 end
 
-function XIVBar:HideBarEvent()
-	local bar = self:GetFrame("bar")
-	bar:UnregisterAllEvents()
-	bar.OnEvent = nil
-	bar:RegisterEvent("PET_BATTLE_OPENING_START")
-	bar:RegisterEvent("PET_BATTLE_CLOSE")
-	bar:SetScript("OnEvent", function(_, event, ...)
-		if event=="PET_BATTLE_OPENING_START" and XIV_Databar:IsVisible() then
-			XIV_Databar:Hide()
-		end
-		if event=="PET_BATTLE_CLOSE" and not XIV_Databar:IsVisible() then
-			XIV_Databar:Show()
-		end
-	end)
-
-	if self.db.profile.general.barCombatHide then
-		bar:RegisterEvent("PLAYER_REGEN_ENABLED")
-		bar:RegisterEvent("PLAYER_REGEN_DISABLED")
-
-		bar:HookScript("OnEvent", function(_, event, ...)
-			if event=="PLAYER_REGEN_DISABLED" and XIV_Databar:IsVisible() then
-				XIV_Databar:Hide()
-			end
-			if event=="PLAYER_REGEN_ENABLED" and not XIV_Databar:IsVisible() then
-				XIV_Databar:Show()
-			end
-		end)
-	else
-		if bar:IsEventRegistered("PLAYER_REGEN_ENABLED") then
-			bar:UnregisterEvent("PLAYER_REGEN_ENABLED")
-		elseif bar:IsEventRegistered("PLAYER_REGEN_DISABLED") then
-			bar:UnregisterEvent("PLAYER_REGEN_DISABLED")
-		end
-	end
-end
 
 function XIVBar:GetHeight()
     return (self.db.profile.text.fontSize * 2) + self.db.profile.general.barPadding
@@ -347,50 +312,6 @@ function XIVBar:PrintTable(table, prefix)
             print(prefix..'.'..k..': '..tostring(v))
         end
     end
-end
-
-function OffsetUI()
-    local inOrderHall = C_Garrison.IsPlayerInGarrison(LE_GARRISON_TYPE_7_0);
-
-    local offset=XIVBar.frames.bar:GetHeight();
-    local buffsAreaTopOffset = offset;
-
-    if (PlayerFrame and not PlayerFrame:IsUserPlaced() and not PlayerFrame_IsAnimatedOut(PlayerFrame)) then
-        PlayerFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -19, -4 - offset)
-    end
-
-    if (TargetFrame and not TargetFrame:IsUserPlaced()) then
-        TargetFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 250, -4 - offset);
-    end
-
-    local ticketStatusFrameShown = TicketStatusFrame and TicketStatusFrame:IsShown();
-    local gmChatStatusFrameShown = GMChatStatusFrame and GMChatStatusFrame:IsShown();
-    if (ticketStatusFrameShown) then
-        TicketStatusFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -180, 0 - offset);
-        buffsAreaTopOffset = buffsAreaTopOffset + TicketStatusFrame:GetHeight();
-    end
-    if (gmChatStatusFrameShown) then
-        GMChatStatusFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -170, -5 - offset);
-        buffsAreaTopOffset = buffsAreaTopOffset + GMChatStatusFrame:GetHeight() + 5;
-    end
-    if (not ticketStatusFrameShown and not gmChatStatusFrameShown) then
-        buffsAreaTopOffset = buffsAreaTopOffset + 13;
-    end
-	if(not MinimapCluster:IsUserPlaced() and MinimapCluster:GetTop()-UIParent:GetHeight() < 1) then
-		MinimapCluster:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0 - buffsAreaTopOffset);
-	end
-		
-    BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -205, 0 - buffsAreaTopOffset);
-end
-
-function XIVBar:ResetUI()
-	if topOffsetBlizz then
-		UIParent_UpdateTopFramePositions = topOffsetBlizz
-	end
-	UIParent_UpdateTopFramePositions();
-	if not MinimapCluster:IsUserPlaced() then
-		MinimapCluster:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0);
-	end
 end
 
 function XIVBar:splitLongLine(text,maxLetters)

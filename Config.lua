@@ -40,13 +40,26 @@ local options = {
         }
     }
 }
+
+local function ToggleConfig(cat)
+	--category to open
+    InterfaceOptionsFrame.selectedTab = 2;
+	InterfaceOptionsFrame:Show()--weird hack ; options registration is wrong in some way
+	InterfaceOptionsFrame_OpenToCategory(addonName)
+end
+
 function Config:OnInitialize()
-    AceConfig:RegisterOptionsTable("XIV_Databar", options)
+    AceConfig:RegisterOptionsTable(addonName, options)
+	configDialog:AddToBlizOptions(addonName,addonName)
+	self:RegisterChatCommand("xb",ToggleConfig)
+	self:RegisterChatCommand("xivb",ToggleConfig)
+	self:RegisterChatCommand("xivbar",ToggleConfig)
+	self:RegisterChatCommand("xivdatabar",ToggleConfig)
+	self:RegisterChatCommand("xiv_databar",ToggleConfig)
 end
 
 function Config:OnEnable()
     options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(XB.db)
-    configDialog:AddToBlizOptions(addonName,addonName)
 end
 
 function Config:Register(title, config, order)
