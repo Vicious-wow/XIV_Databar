@@ -54,6 +54,30 @@ function MenuModule:OnInitialize()
   }
 end
 
+-- Skin Support for ElvUI/TukUI
+function MenuModule:SkinFrame(frame, name)
+	if IsAddOnLoaded("ElvUI") or IsAddOnLoaded("Tukui") then
+		if frame.StripTextures then
+			frame:StripTextures()
+		end
+		if frame.SetTemplate then
+			frame:SetTemplate("Transparent")
+		end
+
+		local close = _G[name.."CloseButton"] or frame.CloseButton
+		if close and close.SetAlpha then
+			if ElvUI then
+				ElvUI[1]:GetModule('Skins'):HandleCloseButton(close)
+			end
+
+			if Tukui and Tukui[1] and Tukui[1].SkinCloseButton then
+				Tukui[1].SkinCloseButton(close)
+			end
+			close:SetAlpha(1)
+		end
+	end
+end
+
 function MenuModule:OnEnable()
   if not xb.db.profile.modules.microMenu.enabled then return; end
   if self.microMenuFrame == nil then
@@ -419,6 +443,7 @@ function MenuModule:SocialHover(hoverFunc)
 	tooltip:SetScript("OnEnter",function() self.tipHover=true end)
 	tooltip:SetScript("OnLeave",function() self.tipHover=false end)
 	tooltip:SetScript("OnUpdate",function() if not self.tipHover and not self.lineHover then tooltip:Release() end end)
+	MenuModule:SkinFrame(tooltip, "SocialToolTip")
     local totalBNFriends, totalBNOnlineFriends = BNGetNumFriends()
     local totalFriends, totalOnlineFriends = GetNumFriends()
 	local charNameFormat
@@ -561,7 +586,8 @@ function MenuModule:GuildHover(hoverFunc)
 	tooltip:SetScript("OnEnter",function() self.gtipHover=true end)
 	tooltip:SetScript("OnLeave",function() self.gtipHover=false end)
 	tooltip:SetScript("OnUpdate",function() if not self.gtipHover and not self.glineHover then tooltip:Release() end end)
-	
+	MenuModule:SkinFrame(tooltip, "SocialToolTip")
+
     GuildRoster()
     tooltip:SmartAnchorTo(MenuModule.frames.guild)
 	local gName, _, _, _ = GetGuildInfo('player')
