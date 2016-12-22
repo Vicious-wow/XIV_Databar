@@ -10,6 +10,25 @@ XB.releaseType = "a"
 XB.playerName = UnitName("player")
 XB.playerClass = select(2, UnitClass("player"))
 
+local mediaFold = "Interface\\AddOns\\"..AddOnName.."\\media\\"
+
+XB.icons = {
+	anchor = mediaFold.."datatexts\\anchor",
+	exp = mediaFold.."datatexts\\exp",
+	fps = mediaFold.."datatexts\\fps",
+	garr = mediaFold.."datatexts\\garr",
+	garres = mediaFold.."datatexts\\garres",
+	gold = mediaFold.."datatexts\\gold",
+	hearth = mediaFold.."datatexts\\hearth",
+	honor = mediaFold.."datatexts\\honor",
+	ping = mediaFold.."datatexts\\ping",
+	repair = mediaFold.."datatexts\\repair",
+	reroll = mediaFold.."datatexts\\reroll",
+	seal = mediaFold.."datatexts\\seal",
+	shicomp = mediaFold.."datatexts\\shipcomp",
+	sound = mediaFold.."datatexts\\sound"
+}
+
 function XB:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("XIVBarDB",nil,true)
 	self.db.RegisterCallback(self, 'OnProfileReset',function() self:Disable(); self:Enable() end)

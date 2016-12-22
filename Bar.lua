@@ -5,7 +5,7 @@ local Bar = XB:RegisterModule("Bar")
 ----------------------------------------------------------------------------------------------------------
 -- Local variables
 ----------------------------------------------------------------------------------------------------------
-local barFrame, barTexture, overlay
+local barFrame, barTexture, overlay, overlayAnchor
 
 local validStrata = {
 	BACKGROUND = "BACKGROUND",
@@ -39,7 +39,8 @@ local function round(number)
 end
 
 local function offsetUI()
-	if not string.find(Bar.settings.anchor,"TOP") then return end
+	if not string.find(Bar.settings.anchor,"TOP") then return end -- Because there is no need to offet the top UI when the bar is not anchored on top
+
     local inOrderHall = C_Garrison.IsPlayerInGarrison(LE_GARRISON_TYPE_7_0);
 
     local offset=Bar.settings.h;
@@ -74,10 +75,7 @@ local function offsetUI()
 end
 
 local function resetUI()
-	if topOffsetBlizz then
-		UIParent_UpdateTopFramePositions = topOffsetBlizz
-	end
-	UIParent_UpdateTopFramePositions();
+	UIParent_UpdateTopFramePositions()
 	if not MinimapCluster:IsUserPlaced() then
 		MinimapCluster:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0);
 	end
@@ -110,6 +108,8 @@ local function barOnDragStop(self)
 		parent:StopMovingOrSizing()
 		savePosition(parent)
 		parent.isMoving = nil
+		overlayAnchor:ClearAllPoints()
+		overlayAnchor:SetPoint(Bar.settings.anchor,overlay,Bar.settings.anchor)
 	end
 end
 
@@ -148,25 +148,19 @@ local function hideBarEvent()
 	end
 end
 
-local function hookHideOHBar()
+local function hookFunctions()
 	hooksecurefunc("UIParent_UpdateTopFramePositions",function(self)
 		if OrderHallCommandBar and OrderHallCommandBar:IsVisible() then
 			if Bar.settings.ohHide then
 				OrderHallCommandBar:Hide()
 			end
 		end
-	end)
-end
-
-local function hookOffsetUI()
-	hooksecurefunc("UIParent_UpdateTopFramePositions",function()
 		if Bar.settings.offset then
 			offsetUI()
-		else
-			resetUI()
 		end
 	end)
 end
+
 ----------------------------------------------------------------------------------------------------------
 -- Options
 ----------------------------------------------------------------------------------------------------------
@@ -178,7 +172,6 @@ local bar_defaut = {
         h = 35,
         fs = true,
         anchor = "BOTTOMLEFT",
-		scale = 0.83,
 		strata = "HIGH",
         lock = true,
         ohHide = false,
@@ -276,23 +269,13 @@ local bar_config = {
         set = function(_,val) Bar.settings.anchor = val; Bar:Update(); end,
         order = 12
     },
-	scale = {
-		type = "range",
-		name = "Scale",
-		desc = "Scale of the bar to get room for all icon and text",
-		min = 0,
-		max = 2,
-		get = function() return Bar.settings.scale; end,
-		set = function(_,val) Bar.settings.scale = val; Bar:Update(); end,
-		order = 13
-	},
 	strata = {
 		type = "select",
 		name = "Frame strata",
 		values = validStrata,
 		get = function() return Bar.settings.strata end,
 		set = function(_,val) Bar.settings.strata = val; Bar:Update(); end,
-		order = 14
+		order = 13
 	},
     color = {
         name = "Bar color",
@@ -348,7 +331,6 @@ local bar_config = {
                     if val then
                         LoadAddOn("Blizzard_OrderHallUI");
                         OrderHallCommandBar:Hide();
-						hookHideOHBar()
                     end
                 end
             },
@@ -383,10 +365,13 @@ function Bar:OnInitialize()
 end
 
 function Bar:OnEnable()
+	Bar.settings.lock = Bar.settings.lock or not Bar.settings.lock --Locking bar if it was not locked on reload/relog
 	self:CreateBar()
 	hideBarEvent()
-	hookHideOHBar()
-	hookOffsetUI()
+	hookFunctions()
+	if Bar.settings.offset then
+		C_Timer.After(1,offsetUI)
+	end
 end
 
 function Bar:OnDisable()
@@ -401,11 +386,10 @@ function Bar:Update()
 end
 
 function Bar:CreateBar()
-	local x,y,w,h,s,color,strata,anchor = Bar.settings.x,Bar.settings.y,Bar.settings.w,Bar.settings.h,Bar.settings.scale,Bar.settings.color,Bar.settings.strata,Bar.settings.anchor
+	local x,y,w,h,color,strata,anchor = Bar.settings.x,Bar.settings.y,Bar.settings.w,Bar.settings.h,Bar.settings.color,Bar.settings.strata,Bar.settings.anchor
 
 	barFrame = barFrame or CreateFrame("Frame",AddOnName, UIParent)
-	barFrame:SetSize(w/s, h/s)
-	barFrame:SetScale(s)
+	barFrame:SetSize(w, h)
 	barFrame:SetFrameStrata(strata)
 	barFrame:ClearAllPoints()
 	barFrame:SetPoint(anchor,x,y)
@@ -441,12 +425,19 @@ function Bar:CreateBar()
 	overlay:SetFrameLevel(barFrame:GetFrameLevel() + 10)
 	overlay:ClearAllPoints()
 	overlay:SetPoint(anchor,barFrame,anchor)
-	overlay:SetSize(w/s, h/s)
+	overlay:SetSize(w, h)
+
+	overlayAnchor = overlayAnchor or overlay:CreateTexture(nil,"ARTWORK")
+	overlayAnchor:SetSize(13,13)
+	overlayAnchor:SetTexture(XB.icons.anchor)
+	overlayAnchor:ClearAllPoints()
+	overlayAnchor:SetPoint(anchor,overlay,anchor)
 
 	if not Bar.settings.lock then
 		overlay:Show()
+		overlayAnchor:Show()
 	else
 		overlay:Hide()
+		overlayAnchor:Hide()
 	end
-	barFrame.overlay = overlay
 end
