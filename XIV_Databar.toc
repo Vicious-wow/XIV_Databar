@@ -12,4 +12,4 @@ embeds.xml
 core.lua
 Config.lua
 Bar.lua
-#modules\load_modules.xml
+modules\load_modules.xml

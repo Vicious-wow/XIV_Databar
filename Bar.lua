@@ -18,18 +18,6 @@ local validStrata = {
 	TOOLTIP = "TOOLTIP"
 }
 
-local validAnchors = {
-    CENTER = "CENTER",
-    LEFT = "LEFT",
-    RIGHT = "RIGHT",
-    TOP = "TOP",
-    TOPLEFT = "TOPLEFT",
-    TOPRIGHT = "TOPRIGHT",
-    BOTTOM = "BOTTOM",
-    BOTTOMLEFT = "BOTTOMLEFT",
-    BOTTOMRIGHT = "BOTTOMRIGHT",
-}
-
 ----------------------------------------------------------------------------------------------------------
 -- Private functions
 ----------------------------------------------------------------------------------------------------------
@@ -181,6 +169,7 @@ local bar_defaut = {
         useCC = false
     }
 }
+
 local bar_config = {
     title = {
         type = "description",
@@ -264,7 +253,7 @@ local bar_config = {
         type = "select",
 		name = "Anchor",
         desc = "Where the bar should be anchored",
-        values = validAnchors,
+        values = XB.validAnchors,
         get = function() return Bar.settings.anchor; end,
         set = function(_,val) Bar.settings.anchor = val; Bar:Update(); end,
         order = 12
@@ -440,4 +429,8 @@ function Bar:CreateBar()
 		overlay:Hide()
 		overlayAnchor:Hide()
 	end
+end
+
+function Bar:GetFrame()
+	return barFrame
 end

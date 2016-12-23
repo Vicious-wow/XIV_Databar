@@ -29,6 +29,18 @@ XB.icons = {
 	sound = mediaFold.."datatexts\\sound"
 }
 
+XB.validAnchors = {
+    CENTER = "CENTER",
+    LEFT = "LEFT",
+    RIGHT = "RIGHT",
+    TOP = "TOP",
+    TOPLEFT = "TOPLEFT",
+    TOPRIGHT = "TOPRIGHT",
+    BOTTOM = "BOTTOM",
+    BOTTOMLEFT = "BOTTOMLEFT",
+    BOTTOMRIGHT = "BOTTOMRIGHT",
+}
+
 function XB:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("XIVBarDB",nil,true)
 	self.db.RegisterCallback(self, 'OnProfileReset',function() self:Disable(); self:Enable() end)
@@ -39,6 +51,8 @@ function XB:RegisterModule(name, ...)
 	self[name] = mod
 	return mod
 end
+
+
 --[[
 XIVBar.L = L
 

@@ -1,5 +1,6 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-  <!--<Script file="test.lua" />-->
+  <Script file="menubutton.lua" />
+  <!--<Script file="test.lua" />
   <Script file="micromenu.lua" />
   <Script file="clock.lua" />
   <Script file="armor.lua" />
@@ -9,5 +10,5 @@
   <Script file="currency.lua" />
   <Script file="system.lua" />
   <Script file="talent.lua" />
-  <Script file="mastervolume.lua" />
+  <Script file="mastervolume.lua" />-->
 </Ui>
