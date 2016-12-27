@@ -5,7 +5,7 @@ local Bar = XB:RegisterModule("Bar")
 ----------------------------------------------------------------------------------------------------------
 -- Local variables
 ----------------------------------------------------------------------------------------------------------
-local barFrame, barTexture, overlay, overlayAnchor
+local barFrame, barTexture
 
 local validStrata = {
 	BACKGROUND = "BACKGROUND",
@@ -55,49 +55,17 @@ local function offsetUI()
     if (not ticketStatusFrameShown and not gmChatStatusFrameShown) then
         buffsAreaTopOffset = buffsAreaTopOffset + 13;
     end
-	if(not MinimapCluster:IsUserPlaced() and MinimapCluster:GetTop()-UIParent:GetHeight() < 1) then
+	if(not MinimapCluster:IsUserPlaced() and (MinimapCluster:GetTop()-UIParent:GetHeight() < 1 and not inOrderHall)) then
 		MinimapCluster:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0 - buffsAreaTopOffset);
 	end
 
-    BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -205, 0 - buffsAreaTopOffset);
+	BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -205, 0 - buffsAreaTopOffset);
 end
 
 local function resetUI()
 	UIParent_UpdateTopFramePositions()
 	if not MinimapCluster:IsUserPlaced() then
 		MinimapCluster:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0);
-	end
-end
-
-local function savePosition(self)
-	Bar.settings.anchor,_,_,Bar.settings.x,Bar.settings.y = self:GetPoint()
-end
-
-local function barOnEnter(self)
-	if not self:GetParent().isMoving then
-		self:SetBackdropBorderColor(0.5, 0.5, 0, 1)
-	end
-end
-
-local function barOnLeave(self)
-	self:SetBackdropBorderColor(0, 0, 0, 0)
-end
-
-local function barOnDragStart(self)
-	local parent = self:GetParent()
-	parent:StartMoving()
-	self:SetBackdropBorderColor(0, 0, 0, 0)
-	parent.isMoving = true
-end
-
-local function barOnDragStop(self)
-	local parent = self:GetParent()
-	if parent.isMoving then
-		parent:StopMovingOrSizing()
-		savePosition(parent)
-		parent.isMoving = nil
-		overlayAnchor:ClearAllPoints()
-		overlayAnchor:SetPoint(Bar.settings.anchor,overlay,Bar.settings.anchor)
 	end
 end
 
@@ -186,7 +154,7 @@ local bar_config = {
     unlock = {
         type = "toggle",
         name = "Unlock",
-        desc = "Move the bar position with the mouse",
+        desc = "(Un)locks the frame in order to position it by moving it with your mouse",
         get = function() return not Bar.settings.lock; end,
         set = function(_,val) Bar.settings.lock = not val; Bar:Update(); end,
         order = 2
@@ -390,44 +358,14 @@ function Bar:CreateBar()
 	barTexture:SetColorTexture(unpack(color))
 	barFrame:Show()
 
-	--Overlay for uloncked bar for user positionning
-	overlay = overlay or CreateFrame("Button", "Overlay", barFrame)
-	overlay:EnableMouse(true)
-	overlay:RegisterForDrag("LeftButton")
-	overlay:RegisterForClicks("LeftButtonUp")
-	overlay:SetBackdrop({
-		bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-		tile = true,
-		tileSize = 16,
-		edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-		edgeSize = 16,
-		insets = {left = 5, right = 3, top = 3, bottom = 5}
-	})
-	overlay:SetBackdropColor(0, 1, 0, 0.5)
-	overlay:SetBackdropBorderColor(0.5, 0.5, 0, 0)
-
-	overlay:SetScript("OnEnter", barOnEnter)
-	overlay:SetScript("OnLeave", barOnLeave)
-	overlay:SetScript("OnDragStart", barOnDragStart)
-	overlay:SetScript("OnDragStop", barOnDragStop)
-
-	overlay:SetFrameLevel(barFrame:GetFrameLevel() + 10)
-	overlay:ClearAllPoints()
-	overlay:SetPoint(anchor,barFrame,anchor)
-	overlay:SetSize(w, h)
-
-	overlayAnchor = overlayAnchor or overlay:CreateTexture(nil,"ARTWORK")
-	overlayAnchor:SetSize(13,13)
-	overlayAnchor:SetTexture(XB.icons.anchor)
-	overlayAnchor:ClearAllPoints()
-	overlayAnchor:SetPoint(anchor,overlay,anchor)
+	XB:AddOverlay(self,barFrame,anchor)
 
 	if not Bar.settings.lock then
-		overlay:Show()
-		overlayAnchor:Show()
+		barFrame.overlay:Show()
+		barFrame.overlay.anchor:Show()
 	else
-		overlay:Hide()
-		overlayAnchor:Hide()
+		barFrame.overlay:Hide()
+		barFrame.overlay.anchor:Hide()
 	end
 end
 

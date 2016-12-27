@@ -41,7 +41,7 @@ local options = {
     }
 }
 
-local function ToggleConfig(cat)
+function ToggleConfig()
 	--category to open
     InterfaceOptionsFrame.selectedTab = 2;
 	InterfaceOptionsFrame:Show()--weird hack ; options registration is wrong in some way

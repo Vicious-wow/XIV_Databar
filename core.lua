@@ -4,6 +4,10 @@ XB:SetDefaultModuleLibraries("AceEvent-3.0", "AceConsole-3.0")
 --local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true);
 XB.LSM = LibStub('LibSharedMedia-3.0');
 
+
+----------------------------------------------------------------------------------------------------------
+-- Variables
+----------------------------------------------------------------------------------------------------------
 XB.version = 2.1
 XB.releaseType = "a"
 
@@ -41,6 +45,45 @@ XB.validAnchors = {
     BOTTOMRIGHT = "BOTTOMRIGHT",
 }
 
+XB.modifiers = {
+	 "None",
+	SHIFT_KEY_TEXT,
+	ALT_KEY_TEXT,
+	CTRL_KEY_TEXT
+}
+
+XB.mouseButtons = {
+	"Left-Click",
+	HELPFRAME_REPORT_PLAYER_RIGHT_CLICK
+}
+
+----------------------------------------------------------------------------------------------------------
+-- Private functions
+----------------------------------------------------------------------------------------------------------
+local function savePosition(parent,module)
+	module.settings.anchor,_,_,module.settings.x,module.settings.y = parent:GetPoint()
+end
+
+local function frameOnEnter(self)
+	if not self:GetParent().isMoving then
+		self:SetBackdropBorderColor(0.5, 0.5, 0, 1)
+	end
+end
+
+local function frameOnLeave(self)
+	self:SetBackdropBorderColor(0, 0, 0, 0)
+end
+
+local function frameOnDragStart(self)
+	local parent = self:GetParent()
+	parent:StartMoving()
+	self:SetBackdropBorderColor(0, 0, 0, 0)
+	parent.isMoving = true
+end
+
+----------------------------------------------------------------------------------------------------------
+-- Module functions
+----------------------------------------------------------------------------------------------------------
 function XB:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("XIVBarDB",nil,true)
 	self.db.RegisterCallback(self, 'OnProfileReset',function() self:Disable(); self:Enable() end)
@@ -53,6 +96,50 @@ function XB:RegisterModule(name, ...)
 end
 
 
+function XB:AddOverlay(module,parent,anchor)
+	--Overlay for unlocked bar for user positionning
+	parent.overlay = parent.overlay or CreateFrame("Button", "Overlay"..parent:GetName(), parent)
+	local overlay = parent.overlay
+	overlay:EnableMouse(true)
+	overlay:RegisterForDrag("LeftButton")
+	overlay:RegisterForClicks("LeftButtonUp")
+	overlay:SetBackdrop({
+		bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+		tile = true,
+		tileSize = 16,
+		edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+		edgeSize = 16,
+		insets = {left = 5, right = 3, top = 3, bottom = 5}
+	})
+	overlay:SetBackdropColor(0, 1, 0, 0.5)
+	overlay:SetBackdropBorderColor(0.5, 0.5, 0, 0)
+
+	overlay:SetFrameLevel(parent:GetFrameLevel() + 10)
+	overlay:ClearAllPoints()
+	overlay:SetPoint(anchor,parent,anchor)
+	overlay:SetSize(parent:GetWidth(), parent:GetHeight())
+
+	overlay.anchor = overlay.anchor or overlay:CreateTexture(nil,"ARTWORK")
+	local overlayAnchor = overlay.anchor
+	overlayAnchor:SetSize(13,13)
+	overlayAnchor:SetTexture(XB.icons.anchor)
+	overlayAnchor:ClearAllPoints()
+	overlayAnchor:SetPoint(anchor,overlay,anchor)
+
+	overlay:SetScript("OnEnter", frameOnEnter)
+	overlay:SetScript("OnLeave", frameOnLeave)
+	overlay:SetScript("OnDragStart", frameOnDragStart)
+	overlay:SetScript("OnDragStop", function(self)
+		local parent = self:GetParent()
+		if parent.isMoving then
+			parent:StopMovingOrSizing()
+			savePosition(parent,module)
+			parent.isMoving = nil
+			self.anchor:ClearAllPoints()
+			self.anchor:SetPoint(module.settings.anchor,self,module.settings.anchor)
+		end
+	end)
+end
 --[[
 XIVBar.L = L
 
