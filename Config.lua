@@ -42,7 +42,8 @@ local options = {
 }
 
 function ToggleConfig()
-	--category to open
+	-- TODO: category to open
+	if InterfaceOptionsFrame:IsShown() then InterfaceOptionsFrame:Hide(); return end
     InterfaceOptionsFrame.selectedTab = 2;
 	InterfaceOptionsFrame:Show()--weird hack ; options registration is wrong in some way
 	InterfaceOptionsFrame_OpenToCategory(addonName)

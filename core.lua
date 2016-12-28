@@ -57,6 +57,9 @@ XB.mouseButtons = {
 	HELPFRAME_REPORT_PLAYER_RIGHT_CLICK
 }
 
+-- TODO: Add an option for that
+PlayerFrame.name:SetFont("Interface\\AddOns\\oUF_Drk\\media\\BigNoodleTitling.ttf", 11, "THINOUTLINE")
+TargetFrame.name:SetFont("Interface\\AddOns\\oUF_Drk\\media\\BigNoodleTitling.ttf", 11, "THINOUTLINE")
 ----------------------------------------------------------------------------------------------------------
 -- Private functions
 ----------------------------------------------------------------------------------------------------------
@@ -94,7 +97,6 @@ function XB:RegisterModule(name, ...)
 	self[name] = mod
 	return mod
 end
-
 
 function XB:AddOverlay(module,parent,anchor)
 	--Overlay for unlocked bar for user positionning
@@ -140,6 +142,30 @@ function XB:AddOverlay(module,parent,anchor)
 		end
 	end)
 end
+
+function XB:SkinTooltip(frame, name)
+	if IsAddOnLoaded("ElvUI") or IsAddOnLoaded("Tukui") then
+		if frame.StripTextures then
+			frame:StripTextures()
+		end
+		if frame.SetTemplate then
+			frame:SetTemplate("Transparent")
+		end
+
+		local close = _G[name.."CloseButton"] or frame.CloseButton
+		if close and close.SetAlpha then
+			if ElvUI then
+				ElvUI[1]:GetModule('Skins'):HandleCloseButton(close)
+			end
+
+			if Tukui and Tukui[1] and Tukui[1].SkinCloseButton then
+				Tukui[1].SkinCloseButton(close)
+			end
+			close:SetAlpha(1)
+		end
+	end
+end
+
 --[[
 XIVBar.L = L
 

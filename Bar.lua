@@ -55,7 +55,7 @@ local function offsetUI()
     if (not ticketStatusFrameShown and not gmChatStatusFrameShown) then
         buffsAreaTopOffset = buffsAreaTopOffset + 13;
     end
-	if(not MinimapCluster:IsUserPlaced() and (MinimapCluster:GetTop()-UIParent:GetHeight() < 1 and not inOrderHall)) then
+	if(not MinimapCluster:IsUserPlaced() and MinimapCluster:GetTop()-UIParent:GetHeight() < 1) then
 		MinimapCluster:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0 - buffsAreaTopOffset);
 	end
 
@@ -117,6 +117,21 @@ local function hookFunctions()
 	end)
 end
 
+local function anchorScreen()
+	local anchoredLeft = Bar.settings.anchor:find("LEFT")
+	local anchoredRight = Bar.settings.anchor:find("RIGHT")
+
+	if not anchoredLeft and not anchoredRight then
+		barFrame:SetPoint("LEFT")
+		barFrame:SetPoint("RIGHT")
+	elseif anchoredLeft then
+		local otherPoint = string.gsub(Bar.settings.anchor,"LEFT","RIGHT")
+		barFrame:SetPoint(otherPoint)
+	else
+		local otherPoint = string.gsub(Bar.settings.anchor,"RIGHT","LEFT")
+		barFrame:SetPoint(otherPoint)
+	end
+end
 ----------------------------------------------------------------------------------------------------------
 -- Options
 ----------------------------------------------------------------------------------------------------------
@@ -126,8 +141,9 @@ local bar_defaut = {
         y = 0,
         w = round(GetScreenWidth()),
         h = 35,
+		s = 0.83,
         fs = true,
-        anchor = "BOTTOMLEFT",
+        anchor = "BOTTOM",
 		strata = "HIGH",
         lock = true,
         ohHide = false,
@@ -217,6 +233,16 @@ local bar_config = {
         set = function(_,val) Bar.settings.h = val; Bar:Update(); end,
         order = 7
     },
+	scale = {
+		type = "range",
+        name = "Scale",
+        desc = "Scale factor of the bar",
+        min = 0.1,
+        max = 2,
+        get = function() return Bar.settings.s; end,
+        set = function(_,val) Bar.settings.s = val; Bar:Update(); end,
+        order = 8
+	},
     anchor = {
         type = "select",
 		name = "Anchor",
@@ -343,13 +369,17 @@ function Bar:Update()
 end
 
 function Bar:CreateBar()
-	local x,y,w,h,color,strata,anchor = Bar.settings.x,Bar.settings.y,Bar.settings.w,Bar.settings.h,Bar.settings.color,Bar.settings.strata,Bar.settings.anchor
+	local x,y,w,h,color,strata,anchor,s = Bar.settings.x,Bar.settings.y,Bar.settings.w,Bar.settings.h,Bar.settings.color,Bar.settings.strata,Bar.settings.anchor,Bar.settings.s
 
 	barFrame = barFrame or CreateFrame("Frame",AddOnName, UIParent)
 	barFrame:SetSize(w, h)
+	barFrame:SetScale(s)
 	barFrame:SetFrameStrata(strata)
 	barFrame:ClearAllPoints()
 	barFrame:SetPoint(anchor,x,y)
+	if Bar.settings.fs then
+		anchorScreen()
+	end
 	barFrame:SetMovable(true)
 	barFrame:SetClampedToScreen(true)
 

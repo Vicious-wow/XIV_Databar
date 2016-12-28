@@ -26,8 +26,64 @@ local function refreshOptions()
 	mb_config.posX.max = round(BarFrame:GetWidth())
 	mb_config.posY.min = -round(BarFrame:GetHeight())
 	mb_config.posY.max = round(BarFrame:GetHeight())
-	mb_config.width.max = round(BarFrame:GetWidth()*2)
-	mb_config.height.max = round(BarFrame:GetHeight()*2)
+	mb_config.width.max = round(BarFrame:GetWidth())
+	mb_config.height.max = round(BarFrame:GetHeight())
+end
+
+local function clickFunctions(self,button,down)
+	if InCombatLockdown() and not Mb.settings.combatEn then return end
+
+	-- ReloadUI function
+	local modifierR = Mb.settings.modReload == 1 or (Mb.settings.modReload == 2 and IsShiftKeyDown or (Mb.settings.modReload == 3 and IsAltKeyDown or IsControlKeyDown))
+	local clickR = Mb.settings.clickReload == 1 and "LeftButton" or "RightButton"
+	if type(modifierR)=="function" then
+		if modifierR() and button == clickR then
+			ReloadUI(); return
+		end
+	else
+		if not IsModifierKeyDown() and button == clickR then
+			ReloadUI(); return
+		end
+	end
+
+	-- GameMenu function
+	local modifierM = Mb.settings.modMenu == 1 or (Mb.settings.modMenu == 2 and IsShiftKeyDown or (Mb.settings.modMenu == 3 and IsAltKeyDown or IsControlKeyDown))
+	local clickM = Mb.settings.clickMenu == 1 and "LeftButton" or "RightButton"
+	if type(modifierM)=="function" then
+		if modifierM() and button == clickM then
+			ToggleFrame(GameMenuFrame); return
+		end
+	else
+		if not IsModifierKeyDown() and button == clickM then
+			ToggleFrame(GameMenuFrame); return
+		end
+	end
+
+	-- AddonList function
+	local modifierA = Mb.settings.modAddonL == 1 and XB.modifiers[Mb.settings.modAddonL] or (Mb.settings.modAddonL == 2 and IsShiftKeyDown or (Mb.settings.modAddonL == 3 and IsAltKeyDown or IsControlKeyDown))
+	local clickA = Mb.settings.clickAddonL == 1 and "LeftButton" or "RightButton"
+	if type(modifierA)=="function" then
+		if modifierA() and button == clickA then
+			ToggleFrame(AddonList); return
+		end
+	else
+		if not IsModifierKeyDown() and button == clickA then
+			ToggleFrame(AddonList); return
+		end
+	end
+
+	-- Options function
+	local modifierO = Mb.settings.modOpts == 1 or (Mb.settings.modOpts == 2 and IsShiftKeyDown or (Mb.settings.modOpts == 3 and IsAltKeyDown or IsControlKeyDown))
+	local clickO = Mb.settings.clickOpts == 1 and "LeftButton" or "RightButton" --ToggleConfig()
+	if type(modifierO)=="function" then
+		if modifierO() and button == clickO then
+			ToggleConfig()
+		end
+	else
+		if not IsModifierKeyDown() and button == clickO then
+			ToggleConfig()
+		end
+	end
 end
 
 ----------------------------------------------------------------------------------------------------------
@@ -41,12 +97,13 @@ local mb_default = {
 		y = 0,
 		w = 32,
 		h = 32,
-		scale = 0.83,
 		anchor = "LEFT",
 		combatEn = false,
 		tooltip = false,
 		color = {1,1,1,.75},
-		hover = XB.playerClass == "PRIEST" and {.5,.5,.5,.75} or {ccR,ccG,ccB,.75},
+		colorCC = false,
+		hover = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
+		hoverCC = not (XB.playerClass == "PRIEST"),
 		modMenu = 1,
 		clickMenu = 1,
 		modReload = 2,
@@ -78,8 +135,8 @@ mb_config = {
 	posX = {
 		name = "X position",
 		type = "range",
-		min = BarFrame and -BarFrame:GetWidth() or 0,
-		max = BarFrame and BarFrame:GetWidth() or 1,
+		min = 0,
+		max = 1,
 		step = 1,
 		get = function() return Mb.settings.x end,
 		set = function(_,val) Mb.settings.x = val; Mb:Update() end,
@@ -88,8 +145,8 @@ mb_config = {
 	posY = {
 		name = "Y position",
 		type = "range",
-		min = BarFrame and -BarFrame:GetHeight() or 0,
-		max = BarFrame and BarFrame:GetHeight() or 1,
+		min = 0,
+		max = 1,
 		step = 1,
 		get = function() return Mb.settings.y end,
 		set = function(_,val) Mb.settings.y = val; Mb:Update() end,
@@ -99,7 +156,7 @@ mb_config = {
 		name = "Width",
 		type = "range",
 		min = 1,
-		max = BarFrame and BarFrame:GetWidth() or 2,
+		max = 2,
 		step = 1,
 		get = function() return Mb.settings.w end,
 		set = function(_,val) Mb.settings.w = val; Mb:Update() end,
@@ -109,21 +166,11 @@ mb_config = {
 		name = "Height",
 		type = "range",
 		min = 1,
-		max = BarFrame and BarFrame:GetHeight() or 2,
+		max = 2,
 		step = 1,
 		get = function() return Mb.settings.h end,
 		set = function(_,val) Mb.settings.h = val; Mb:Update() end,
 		order = 6
-	},
-	scale = {
-		name = "Scale",
-		type = "range",
-		min = 0.1,
-		max = 2,
-		get = function() return Mb.settings.scale end,
-		set = function(_,val) Mb.settings.scale = val; Mb:Update() end,
-		order = 8
-		
 	},
 	anchor = {
 		name = "Anchor",
@@ -140,28 +187,64 @@ mb_config = {
 			normal = {
 				name = "Icon Color",
 				type = "color",
+				hasAlpha = true,
 				get = function() return unpack(Mb.settings.color) end,
 				set = function(_,r,g,b,a)
-				end
+					if not Mb.settings.colorCC then
+                        Mb.settings.color = {r,g,b,a};
+                    else
+                        local cr,cg,cb = GetClassColor(XB.playerClass)
+                        Mb.settings.color = {cr,cg,cb,a}
+                    end
+					Mb:Update()
+				end,
+				order = 1
 			},
 			normalCC = {
 				name = "Class color ",
 				type = "toggle",
-				get = function() return end,
-				set = function(_,val) end
+				desc = "Only the alpha can be set with the color picker",
+				get = function() return Mb.settings.colorCC end,
+				set = function(_,val)
+					Mb.settings.colorCC = val
+					if val then
+                        local r,g,b = GetClassColor(XB.playerClass);
+                        Mb.settings.color = {r,g,b,Mb.settings.color[4]}
+                    end
+					Mb:Update()
+				end,
+				order = 2
 			},
 			hover = {
 				name = "Hover color",
 				type = "color",
+				hasAlpha = true,
 				get = function() return unpack(Mb.settings.hover) end,
 				set = function(_,r,g,b,a)
-				end
+					if not Mb.settings.hoverCC then
+                        Mb.settings.hover = {r,g,b,a};
+                    else
+                        local cr,cg,cb = GetClassColor(XB.playerClass)
+                        Mb.settings.hover = {cr,cg,cb,a}
+                    end
+					Mb:Update()
+				end,
+				order = 3
 			},
 			hoverCC = {
 				name = "Class color",
 				type = "toggle",
-				get = function() return end,
-				set = function(_,val) end
+				desc = "Only the alpha can be set with the color picker",
+				get = function() return Mb.settings.hoverCC end,
+				set = function(_,val)
+					Mb.settings.hoverCC = val
+					if val then
+                        local r,g,b = GetClassColor(XB.playerClass);
+                        Mb.settings.hover = {r,g,b,Mb.settings.hover[4]}
+                    end
+					Mb:Update()
+				end,
+				order = 4
 			},
 		}
 	},
@@ -290,7 +373,11 @@ function Mb:OnEnable()
 	Mb.settings.lock = Mb.settings.lock or not Mb.settings.lock --Locking frame if it was not locked on reload/relog
 	refreshOptions()
 	XB.Config:Register("MenuButton",mb_config)
-	self:CreateButton()
+	if self.settings.enable then
+		self:CreateButton()
+	else
+		self:Disable()
+	end
 end
 
 function Mb:OnDisable()
@@ -302,17 +389,23 @@ end
 function Mb:Update()
 	refreshOptions()
 	XB.Config:Register("MenuButton",mb_config)
-	self:CreateButton()
+
+	if self.settings.enable and not self:IsEnabled() then
+		self:Enable()
+	elseif not self.settings.enable and self:IsEnabled() then
+		self:Disable()
+	else
+		self:CreateButton()
+	end
 end
 
 function Mb:CreateButton()
-	local x,y,w,h,s,color,hover,anchor = Mb.settings.x,Mb.settings.y,Mb.settings.w,Mb.settings.h,Mb.settings.scale,Mb.settings.color,Mb.settings.hover,Mb.settings.anchor
+	local x,y,w,h,color,hover,anchor = Mb.settings.x,Mb.settings.y,Mb.settings.w,Mb.settings.h,Mb.settings.color,Mb.settings.hover,Mb.settings.anchor
 
 	gameMenuFrame = gameMenuFrame or CreateFrame("BUTTON","GameMenu",BarFrame)
 	gameMenuFrame:ClearAllPoints()
 	gameMenuFrame:SetPoint(anchor,x,y)
 	gameMenuFrame:SetSize(w, h)
-	gameMenuFrame:SetScale(s)
 	gameMenuFrame:SetMovable(true)
 	gameMenuFrame:SetClampedToScreen(true)
 	gameMenuFrame:EnableMouse(true)
@@ -341,6 +434,7 @@ function Mb:CreateButton()
 			tooltip:AddLine('|cffffff00<'..(self.settings.modReload==1 and XB.mouseButtons[self.settings.clickReload] or XB.modifiers[self.settings.modReload].."+"..XB.mouseButtons[self.settings.clickReload])..'> |cffffffff'..'Reloads the UI'..'|r')
 			tooltip:AddLine('|cffffff00<'..(self.settings.modOpts==1 and XB.mouseButtons[self.settings.clickOpts] or XB.modifiers[self.settings.modOpts].."+"..XB.mouseButtons[self.settings.clickOpts])..'> |cffffffff'..'Opens the option panel'..'|r')
 			tooltip:AddLine('|cffffff00<'..(self.settings.modAddonL==1 and XB.mouseButtons[self.settings.clickAddonL] or XB.modifiers[self.settings.modAddonL].."+"..XB.mouseButtons[self.settings.clickAddonL])..'> |cffffffff'..'Opens '..ADDON_LIST..'|r')
+			XB:SkinTooltip(tooltip,"GameMenuTip")
 			tooltip:Show()
 		end
 	end)
@@ -352,61 +446,7 @@ function Mb:CreateButton()
 		end
 	end)
 
-	gameMenuFrame:SetScript("OnClick", function(self, button, down)
-		if InCombatLockdown() and not Mb.settings.combatEn then return end
-		
-		-- ReloadUI function
-		local modifierR = Mb.settings.modReload == 1 or (Mb.settings.modReload == 2 and IsShiftKeyDown or (Mb.settings.modReload == 3 and IsAltKeyDown or IsControlKeyDown))
-		local clickR = Mb.settings.clickReload == 1 and "LeftButton" or "RightButton"
-		if type(modifierR)=="function" then
-			if modifierR() and button == clickR then
-				ReloadUI(); return
-			end
-		else 
-			if not IsModifierKeyDown() and button == clickR then
-				ReloadUI(); return
-			end
-		end
-		
-		-- GameMenu function
-		local modifierM = Mb.settings.modMenu == 1 or (Mb.settings.modMenu == 2 and IsShiftKeyDown or (Mb.settings.modMenu == 3 and IsAltKeyDown or IsControlKeyDown))
-		local clickM = Mb.settings.clickMenu == 1 and "LeftButton" or "RightButton"
-		if type(modifierM)=="function" then
-			if modifierM() and button == clickM then
-				ToggleFrame(GameMenuFrame); return
-			end
-		else 
-			if not IsModifierKeyDown() and button == clickM then
-				ToggleFrame(GameMenuFrame); return
-			end
-		end
-		
-		-- AddonList function
-		local modifierA = Mb.settings.modAddonL == 1 and XB.modifiers[Mb.settings.modAddonL] or (Mb.settings.modAddonL == 2 and IsShiftKeyDown or (Mb.settings.modAddonL == 3 and IsAltKeyDown or IsControlKeyDown))
-		local clickA = Mb.settings.clickAddonL == 1 and "LeftButton" or "RightButton" 
-		if type(modifierA)=="function" then
-			if modifierA() and button == clickA then
-				ToggleFrame(AddonList); return
-			end
-		else 
-			if not IsModifierKeyDown() and button == clickA then
-				ToggleFrame(AddonList); return
-			end
-		end
-		
-		-- Options function
-		local modifierO = Mb.settings.modOpts == 1 or (Mb.settings.modOpts == 2 and IsShiftKeyDown or (Mb.settings.modOpts == 3 and IsAltKeyDown or IsControlKeyDown))
-		local clickO = Mb.settings.clickOpts == 1 and "LeftButton" or "RightButton" --ToggleConfig()
-		if type(modifierO)=="function" then
-			if modifierO() and button == clickO then
-				ToggleConfig()
-			end
-		else 
-			if not IsModifierKeyDown() and button == clickO then
-				ToggleConfig()
-			end
-		end
-	end)
+	gameMenuFrame:SetScript("OnClick", clickFunctions)
 
 	XB:AddOverlay(self,gameMenuFrame,anchor)
 	
