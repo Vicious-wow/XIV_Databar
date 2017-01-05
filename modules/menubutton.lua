@@ -15,11 +15,6 @@ local mb_config
 -- Private functions
 ----------------------------------------------------------------------------------------------------------
 
-local function round(number)
-    local int = math.floor(number)
-    return number-int <=0.5 and int or int+1
-end
-
 local function refreshOptions()
 	Bar,BarFrame = XB:GetModule("Bar"),XB:GetModule("Bar"):GetFrame()
 	mb_config.posX.min = -round(BarFrame:GetWidth())
@@ -93,7 +88,7 @@ local mb_default = {
 	profile = {
 		enable = true,
 		lock = true,
-		x = 0,
+		x = 2,
 		y = 0,
 		w = 32,
 		h = 32,
@@ -400,6 +395,13 @@ function Mb:Update()
 end
 
 function Mb:CreateButton()
+	if not self.settings.enable then
+		if gameMenuFrame and gameMenuFrame:IsVisible() then
+			gameMenuFrame:Hide()
+		end
+		return
+	end
+
 	local x,y,w,h,color,hover,anchor = Mb.settings.x,Mb.settings.y,Mb.settings.w,Mb.settings.h,Mb.settings.color,Mb.settings.hover,Mb.settings.anchor
 
 	gameMenuFrame = gameMenuFrame or CreateFrame("BUTTON","GameMenu",BarFrame)
@@ -416,7 +418,7 @@ function Mb:CreateButton()
 	gameMenuIcon:ClearAllPoints()
 	gameMenuIcon:SetPoint("CENTER")
 	gameMenuIcon:SetSize(w,h)
-	gameMenuIcon:SetTexture("Interface\\AddOns\\"..addOnName.."\\media\\microbar\\menu")
+	gameMenuIcon:SetTexture(XB.menuIcons.menu)
 	gameMenuIcon:SetVertexColor(unpack(color))
 
 	gameMenuFrame:SetScript("OnEnter", function()

@@ -21,10 +21,6 @@ local validStrata = {
 ----------------------------------------------------------------------------------------------------------
 -- Private functions
 ----------------------------------------------------------------------------------------------------------
-local function round(number)
-    local int = math.floor(number)
-    return number-int <=0.5 and int or int+1
-end
 
 local function offsetUI()
 	if not string.find(Bar.settings.anchor,"TOP") then return end -- Because there is no need to offet the top UI when the bar is not anchored on top
@@ -70,6 +66,7 @@ local function resetUI()
 end
 
 local function hideBarEvent()
+	-- Add in vehicule option
 	barFrame:UnregisterAllEvents()
 	barFrame.OnEvent = nil
 	barFrame:RegisterEvent("PET_BATTLE_OPENING_START")

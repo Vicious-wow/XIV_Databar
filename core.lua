@@ -8,29 +8,36 @@ XB.LSM = LibStub('LibSharedMedia-3.0');
 ----------------------------------------------------------------------------------------------------------
 -- Variables
 ----------------------------------------------------------------------------------------------------------
-XB.version = 2.1
+XB.version = "3.0"
 XB.releaseType = "a"
 
 XB.playerName = UnitName("player")
 XB.playerClass = select(2, UnitClass("player"))
 
-local mediaFold = "Interface\\AddOns\\"..AddOnName.."\\media\\"
+XB.mediaFold = "Interface\\AddOns\\"..AddOnName.."\\media\\"
 
 XB.icons = {
-	anchor = mediaFold.."datatexts\\anchor",
-	exp = mediaFold.."datatexts\\exp",
-	fps = mediaFold.."datatexts\\fps",
-	garr = mediaFold.."datatexts\\garr",
-	garres = mediaFold.."datatexts\\garres",
-	gold = mediaFold.."datatexts\\gold",
-	hearth = mediaFold.."datatexts\\hearth",
-	honor = mediaFold.."datatexts\\honor",
-	ping = mediaFold.."datatexts\\ping",
-	repair = mediaFold.."datatexts\\repair",
-	reroll = mediaFold.."datatexts\\reroll",
-	seal = mediaFold.."datatexts\\seal",
-	shicomp = mediaFold.."datatexts\\shipcomp",
-	sound = mediaFold.."datatexts\\sound"
+	anchor = XB.mediaFold.."datatexts\\anchor",
+	exp = XB.mediaFold.."datatexts\\exp",
+	fps = XB.mediaFold.."datatexts\\fps",
+	garr = XB.mediaFold.."datatexts\\garr",
+	garres = XB.mediaFold.."datatexts\\garres",
+	gold = XB.mediaFold.."datatexts\\gold",
+	hearth = XB.mediaFold.."datatexts\\hearth",
+	honor = XB.mediaFold.."datatexts\\honor",
+	ping = XB.mediaFold.."datatexts\\ping",
+	repair = XB.mediaFold.."datatexts\\repair",
+	reroll = XB.mediaFold.."datatexts\\reroll",
+	seal = XB.mediaFold.."datatexts\\seal",
+	shicomp = XB.mediaFold.."datatexts\\shipcomp",
+	sound = XB.mediaFold.."datatexts\\sound"
+}
+
+XB.menuIcons = {
+	menu = XB.mediaFold.."microbar\\menu",
+	chat = XB.mediaFold.."microbar\\chat",
+	guild = XB.mediaFold.."microbar\\guild",
+	social = XB.mediaFold.."microbar\\social",
 }
 
 XB.validAnchors = {
@@ -60,6 +67,11 @@ XB.mouseButtons = {
 -- TODO: Add an option for that
 PlayerFrame.name:SetFont("Interface\\AddOns\\oUF_Drk\\media\\BigNoodleTitling.ttf", 11, "THINOUTLINE")
 TargetFrame.name:SetFont("Interface\\AddOns\\oUF_Drk\\media\\BigNoodleTitling.ttf", 11, "THINOUTLINE")
+
+function round(number)
+    local int = math.floor(number)
+    return number-int <=0.5 and int or int+1
+end
 ----------------------------------------------------------------------------------------------------------
 -- Private functions
 ----------------------------------------------------------------------------------------------------------
