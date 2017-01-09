@@ -69,6 +69,7 @@ function Config:Register(title, config, order)
         name = title,
         order = order,
         type = "group",
+		childGroups = "tab",
         args = config
     }
 end

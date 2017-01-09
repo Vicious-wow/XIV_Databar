@@ -152,110 +152,117 @@ local bar_defaut = {
 }
 
 local bar_config = {
-    title = {
-        type = "description",
-        name = "|cff64b4ffBar options",
-        fontSize = "large",
-        order = 0
-    },
-    desc = {
-        type = "description",
-        name = "Options for the display of the bar",
-        fontSize = "medium",
-        order = 1
-    },
-    unlock = {
-        type = "toggle",
-        name = "Unlock",
-        desc = "(Un)locks the frame in order to position it by moving it with your mouse",
-        get = function() return not Bar.settings.lock; end,
-        set = function(_,val) Bar.settings.lock = not val; Bar:Update(); end,
-        order = 2
-    },
-    fullScreen = {
-        name = VIDEO_OPTIONS_FULLSCREEN,
-        type = "toggle",
-        get = function() return Bar.settings.fs; end,
-        set = function(_,val)
-			Bar.settings.fs = val
-			if val then
-				Bar.settings.w = round(GetScreenWidth())
-			end
-			Bar:Update()
-		end,
-        order = 3
-    },
-    posX = {
-        type = "range",
-        name = "X position",
-        desc = "Sets the horizontal position of the bar",
-        min = -math.floor(GetScreenWidth()),
-        max = math.floor(GetScreenWidth()),
-        step = 1,
-        get = function() return Bar.settings.x; end,
-        set = function(_,val) Bar.settings.x = val; Bar:Update(); end,
-        order = 4
-    },
-    posY = {
-        type = "range",
-        name = "Y position",
-        desc = "Sets the vertical position of the bar",
-        min = -math.floor(GetScreenHeight()),
-        max = math.floor(GetScreenHeight()),
-        step = 1,
-        get = function() return Bar.settings.y; end,
-        set = function(_,val) Bar.settings.y = val; Bar:Update(); end,
-        order = 5
-    },
-    width = {
-        type = "range",
-        name = "Width",
-        desc = "Sets the width of the bar if not fullscreen",
-        min = 1,
-        max = round(GetScreenWidth()),
-        step = 1,
-        get = function() return Bar.settings.w; end,
-        set = function(_,val) Bar.settings.w = val; Bar:Update(); end,
-        disabled = function() return Bar.settings.fs; end,
-        order = 6
-    },
-    height = {
-        type = "range",
-        name = "Height",
-        desc = "Sets the height of the bar",
-        min = 1,
-        max = round(GetScreenHeight()),
-        step = 1,
-        get = function() return Bar.settings.h; end,
-        set = function(_,val) Bar.settings.h = val; Bar:Update(); end,
-        order = 7
-    },
-	scale = {
-		type = "range",
-        name = "Scale",
-        desc = "Scale factor of the bar",
-        min = 0.1,
-        max = 2,
-        get = function() return Bar.settings.s; end,
-        set = function(_,val) Bar.settings.s = val; Bar:Update(); end,
-        order = 8
+	title = {
+		type = "description",
+		name = "|cff64b4ffBar",
+		fontSize = "large",
+		order = 0
 	},
-    anchor = {
-        type = "select",
-		name = "Anchor",
-        desc = "Where the bar should be anchored",
-        values = XB.validAnchors,
-        get = function() return Bar.settings.anchor; end,
-        set = function(_,val) Bar.settings.anchor = val; Bar:Update(); end,
-        order = 12
-    },
-	strata = {
-		type = "select",
-		name = "Frame strata",
-		values = validStrata,
-		get = function() return Bar.settings.strata end,
-		set = function(_,val) Bar.settings.strata = val; Bar:Update(); end,
-		order = 13
+	desc = {
+		type = "description",
+		name = "Options for the bar appearance",
+		fontSize = "medium",
+		order = 1
+	},
+	general = {
+		name = "General",
+		type = "group",
+		order = 1,
+		args = {
+			unlock = {
+				type = "toggle",
+				name = "Unlock",
+				desc = "(Un)locks the frame in order to position it by moving it with your mouse",
+				get = function() return not Bar.settings.lock; end,
+				set = function(_,val) Bar.settings.lock = not val; Bar:Update(); end,
+				order = 2
+			},
+			fullScreen = {
+				name = VIDEO_OPTIONS_FULLSCREEN,
+				type = "toggle",
+				get = function() return Bar.settings.fs; end,
+				set = function(_,val)
+					Bar.settings.fs = val
+					if val then
+						Bar.settings.w = round(GetScreenWidth())
+					end
+					Bar:Update()
+				end,
+				order = 3
+			},
+			posX = {
+				type = "range",
+				name = "X position",
+				desc = "Sets the horizontal position of the bar",
+				min = -math.floor(GetScreenWidth()),
+				max = math.floor(GetScreenWidth()),
+				step = 1,
+				get = function() return Bar.settings.x; end,
+				set = function(_,val) Bar.settings.x = val; Bar:Update(); end,
+				order = 4
+			},
+			posY = {
+				type = "range",
+				name = "Y position",
+				desc = "Sets the vertical position of the bar",
+				min = -math.floor(GetScreenHeight()),
+				max = math.floor(GetScreenHeight()),
+				step = 1,
+				get = function() return Bar.settings.y; end,
+				set = function(_,val) Bar.settings.y = val; Bar:Update(); end,
+				order = 5
+			},
+			width = {
+				type = "range",
+				name = "Width",
+				desc = "Sets the width of the bar if not fullscreen",
+				min = 1,
+				max = round(GetScreenWidth()),
+				step = 1,
+				get = function() return Bar.settings.w; end,
+				set = function(_,val) Bar.settings.w = val; Bar:Update(); end,
+				disabled = function() return Bar.settings.fs; end,
+				order = 6
+			},
+			height = {
+				type = "range",
+				name = "Height",
+				desc = "Sets the height of the bar",
+				min = 1,
+				max = round(GetScreenHeight()),
+				step = 1,
+				get = function() return Bar.settings.h; end,
+				set = function(_,val) Bar.settings.h = val; Bar:Update(); end,
+				order = 7
+			},
+			scale = {
+				type = "range",
+				name = "Scale",
+				desc = "Scale factor of the bar",
+				min = 0.1,
+				max = 2,
+				get = function() return Bar.settings.s; end,
+				set = function(_,val) Bar.settings.s = val; Bar:Update(); end,
+				order = 8
+			},
+			anchor = {
+				type = "select",
+				name = "Anchor",
+				desc = "Where the bar should be anchored",
+				values = XB.validAnchors,
+				get = function() return Bar.settings.anchor; end,
+				set = function(_,val) Bar.settings.anchor = val; Bar:Update(); end,
+				order = 12
+			},
+			strata = {
+				type = "select",
+				name = "Frame strata",
+				values = validStrata,
+				get = function() return Bar.settings.strata end,
+				set = function(_,val) Bar.settings.strata = val; Bar:Update(); end,
+				order = 13
+			}
+		}
 	},
     color = {
         name = "Bar color",

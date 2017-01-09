@@ -472,46 +472,7 @@ function XIVBar:PrintTable(table, prefix)
     end
 end
 
-function XIVBar:splitLongLine(text,maxLetters)
-	maxLetters = maxLetters or 250
-	local result = {}
-	repeat
-		local lettersNow = maxLetters
-		local utf8pos = 1
-		local textLen = string.len(text)
-		while true do
-			local char = string.sub(text,utf8pos,utf8pos)
-			local c = char:byte()
 
-			local lastPos = utf8pos
-
-			if c > 0 and c <= 127 then
-				utf8pos = utf8pos + 1
-			elseif c >= 194 and c <= 223 then
-				utf8pos = utf8pos + 2
-			elseif c >= 224 and c <= 239 then
-				utf8pos = utf8pos + 3
-			elseif c >= 240 and c <= 244 then
-				utf8pos = utf8pos + 4
-			else
-				utf8pos = utf8pos + 1
-			end
-
-				lettersNow = lastPos - 1
-			if utf8pos > lettersNow then
-				break
-			elseif utf8pos >= textLen then
-				break
-			end
-		end
-		result[#result + 1] = string.sub(text,1,lettersNow)
-		text = string.sub(text,lettersNow+1)
-	until string.len(text) < maxLetters
-	if string.len(text) > 0 then
-		result[#result + 1] = text
-	end
-	return unpack(result)
-end
 
 function XIVBar:GetGeneralOptions()
     return {

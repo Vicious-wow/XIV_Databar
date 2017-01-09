@@ -14,15 +14,30 @@ local mb_config
 ----------------------------------------------------------------------------------------------------------
 -- Private functions
 ----------------------------------------------------------------------------------------------------------
+local function tooltip()
+	if libTT:IsAcquired("GameMenuTip") then
+		libTT:Release(libTT:Acquire("GameMenuTip"))
+	end
+	local tooltip = libTT:Acquire("GameMenuTip", 1, "LEFT")
+	tooltip:SmartAnchorTo(gameMenuFrame)
+	tooltip:AddHeader('[|cff6699FF'..MAINMENU_BUTTON..'|r]')
+	tooltip:AddLine(' ',' ')
+	tooltip:AddLine('|cffffff00<'..(Mb.settings.modMenu==1 and XB.mouseButtons[Mb.settings.clickMenu] or XB.modifiers[Mb.settings.modMenu].."+"..XB.mouseButtons[Mb.settings.clickMenu])..'> |cffffffff'..'Opens '..MAINMENU_BUTTON..'|r')
+	tooltip:AddLine('|cffffff00<'..(Mb.settings.modReload==1 and XB.mouseButtons[Mb.settings.clickReload] or XB.modifiers[Mb.settings.modReload].."+"..XB.mouseButtons[Mb.settings.clickReload])..'> |cffffffff'..'Reloads the UI'..'|r')
+	tooltip:AddLine('|cffffff00<'..(Mb.settings.modOpts==1 and XB.mouseButtons[Mb.settings.clickOpts] or XB.modifiers[Mb.settings.modOpts].."+"..XB.mouseButtons[Mb.settings.clickOpts])..'> |cffffffff'..'Opens the option panel'..'|r')
+	tooltip:AddLine('|cffffff00<'..(Mb.settings.modAddonL==1 and XB.mouseButtons[Mb.settings.clickAddonL] or XB.modifiers[Mb.settings.modAddonL].."+"..XB.mouseButtons[Mb.settings.clickAddonL])..'> |cffffffff'..'Opens '..ADDON_LIST..'|r')
+	XB:SkinTooltip(tooltip,"GameMenuTip")
+	tooltip:Show()
+end
 
 local function refreshOptions()
 	Bar,BarFrame = XB:GetModule("Bar"),XB:GetModule("Bar"):GetFrame()
-	mb_config.posX.min = -round(BarFrame:GetWidth())
-	mb_config.posX.max = round(BarFrame:GetWidth())
-	mb_config.posY.min = -round(BarFrame:GetHeight())
-	mb_config.posY.max = round(BarFrame:GetHeight())
-	mb_config.width.max = round(BarFrame:GetWidth())
-	mb_config.height.max = round(BarFrame:GetHeight())
+	mb_config.general.args.posX.min = -round(BarFrame:GetWidth())
+	mb_config.general.args.posX.max = round(BarFrame:GetWidth())
+	mb_config.general.args.posY.min = -round(BarFrame:GetHeight())
+	mb_config.general.args.posY.max = round(BarFrame:GetHeight())
+	mb_config.general.args.width.max = round(BarFrame:GetWidth())
+	mb_config.general.args.height.max = round(BarFrame:GetHeight())
 end
 
 local function clickFunctions(self,button,down)
@@ -111,69 +126,87 @@ local mb_default = {
 }
 
 mb_config = {
-	enable = {
-		name = "Enable",
-		type = "toggle",
-		desc = "Enable the Game Menu Button",
-		get = function() return Mb.settings.enable end,
-		set = function(_,val) Mb.settings.enable = val; Mb:Update() end,
+	title = {
+		type = "description",
+		name = "|cff64b4ffGame menu module",
+		fontSize = "large",
+		order = 0
+	},
+	desc = {
+		type = "description",
+		name = "Options for the game menu module",
+		fontSize = "medium",
 		order = 1
 	},
-	lock = {
-		name = "Unlock",
-		type = "toggle",
-		desc = "(Un)locks the frame in order to position it by moving it with your mouse",
-		get = function() return Mb.settings.lock end,
-		set = function(_,val) Mb.settings.lock = val; Mb:Update() end,
-		order = 2
-	},
-	posX = {
-		name = "X position",
-		type = "range",
-		min = 0,
-		max = 1,
-		step = 1,
-		get = function() return Mb.settings.x end,
-		set = function(_,val) Mb.settings.x = val; Mb:Update() end,
-		order = 3
-	},
-	posY = {
-		name = "Y position",
-		type = "range",
-		min = 0,
-		max = 1,
-		step = 1,
-		get = function() return Mb.settings.y end,
-		set = function(_,val) Mb.settings.y = val; Mb:Update() end,
-		order = 4
-	},
-	width = {
-		name = "Width",
-		type = "range",
-		min = 1,
-		max = 2,
-		step = 1,
-		get = function() return Mb.settings.w end,
-		set = function(_,val) Mb.settings.w = val; Mb:Update() end,
-		order = 5
-	},
-	height = {
-		name = "Height",
-		type = "range",
-		min = 1,
-		max = 2,
-		step = 1,
-		get = function() return Mb.settings.h end,
-		set = function(_,val) Mb.settings.h = val; Mb:Update() end,
-		order = 6
-	},
-	anchor = {
-		name = "Anchor",
-		type = "select",
-		values = XB.validAnchors,
-		get = function() return Mb.settings.anchor end,
-		set = function(_,val) Mb.settings.anchor = val; Mb:Update() end,
-		order = 7
+	general = {
+		name = "General",
+		type = "group",
+		args = {
+			enable = {
+				name = "Enable",
+				type = "toggle",
+				desc = "Enable the Game Menu Button",
+				get = function() return Mb.settings.enable end,
+				set = function(_,val) Mb.settings.enable = val; Mb:Update() end,
+				order = 1
+			},
+			lock = {
+				name = "Unlock",
+				type = "toggle",
+				desc = "(Un)locks the frame in order to position it by moving it with your mouse",
+				get = function() return Mb.settings.lock end,
+				set = function(_,val) Mb.settings.lock = val; Mb:Update() end,
+				order = 2
+			},
+			posX = {
+				name = "X position",
+				type = "range",
+				min = 0,
+				max = 1,
+				step = 1,
+				get = function() return Mb.settings.x end,
+				set = function(_,val) Mb.settings.x = val; Mb:Update() end,
+				order = 3
+			},
+			posY = {
+				name = "Y position",
+				type = "range",
+				min = 0,
+				max = 1,
+				step = 1,
+				get = function() return Mb.settings.y end,
+				set = function(_,val) Mb.settings.y = val; Mb:Update() end,
+				order = 4
+			},
+			width = {
+				name = "Width",
+				type = "range",
+				min = 1,
+				max = 2,
+				step = 1,
+				get = function() return Mb.settings.w end,
+				set = function(_,val) Mb.settings.w = val; Mb:Update() end,
+				order = 5
+			},
+			height = {
+				name = "Height",
+				type = "range",
+				min = 1,
+				max = 2,
+				step = 1,
+				get = function() return Mb.settings.h end,
+				set = function(_,val) Mb.settings.h = val; Mb:Update() end,
+				order = 6
+			},
+			anchor = {
+				name = "Anchor",
+				type = "select",
+				values = XB.validAnchors,
+				get = function() return Mb.settings.anchor end,
+				set = function(_,val) Mb.settings.anchor = val; Mb:Update() end,
+				order = 7
+			}
+		}
 	},
 	color = {
 		name = "Icon Color",
@@ -248,9 +281,9 @@ mb_config = {
 		type = "group",
 		args = {
 			inCombatEnable = {
-				name = "Hover in combat",
+				name = "Enable in combat",
 				type = "toggle",
-				desc = "Enable hovering actions during combat",
+				desc = "Enable hovering and actions during combat",
 				get = function() return Mb.settings.combatEn end,
 				set = function(_,val) Mb.settings.combatEn = val; Mb:Update() end,
 				order = 1
@@ -263,11 +296,16 @@ mb_config = {
 				set = function(_,val) Mb.settings.tooltip = val; Mb:Update() end,
 				order = 2
 			},
+			functionsDesc = {
+				name = "|cff64b4ffClick functions",
+				type = "description",
+				fontSize = "large",
+				order = 3
+			},
 			gameMenu = {
 				name = MAINMENU_BUTTON,
 				type = "group",
-				inline = true,
-				order = 3,
+				order = 4,
 				args = {
 					modifier = {
 						name = "Modifier",
@@ -288,8 +326,7 @@ mb_config = {
 			reload = {
 				name = "Reload UI",
 				type = "group",
-				inline = true,
-				order = 4,
+				order = 5,
 				args = {
 					modifier = {
 						name = "Modifier",
@@ -310,8 +347,7 @@ mb_config = {
 			options = {
 				name = "Options panel",
 				type = "group",
-				inline = true,
-				order = 5,
+				order = 6,
 				args = {
 					modifier = {
 						name = "Modifier",
@@ -332,8 +368,7 @@ mb_config = {
 			addonsL = {
 				name = ADDON_LIST,
 				type = "group",
-				inline = true,
-				order = 6,
+				order = 7,
 				args = {
 					modifier = {
 						name = "Modifier",
@@ -367,7 +402,7 @@ end
 function Mb:OnEnable()
 	Mb.settings.lock = Mb.settings.lock or not Mb.settings.lock --Locking frame if it was not locked on reload/relog
 	refreshOptions()
-	XB.Config:Register("MenuButton",mb_config)
+	XB.Config:Register("Game menu",mb_config)
 	if self.settings.enable then
 		self:CreateButton()
 	else
@@ -425,19 +460,7 @@ function Mb:CreateButton()
 		if InCombatLockdown() and not Mb.settings.combatEn then return end
 		gameMenuIcon:SetVertexColor(unpack(hover))
 		if Mb.settings.tooltip then
-			if libTT:IsAcquired("GameMenuTip") then
-				libTT:Release(libTT:Acquire("GameMenuTip"))
-			end
-			local tooltip = libTT:Acquire("GameMenuTip", 1, "LEFT")
-			tooltip:SmartAnchorTo(gameMenuFrame)
-			tooltip:AddHeader('[|cff6699FF'..MAINMENU_BUTTON..'|r]')
-			tooltip:AddLine(' ',' ')
-			tooltip:AddLine('|cffffff00<'..(self.settings.modMenu==1 and XB.mouseButtons[self.settings.clickMenu] or XB.modifiers[self.settings.modMenu].."+"..XB.mouseButtons[self.settings.clickMenu])..'> |cffffffff'..'Opens '..MAINMENU_BUTTON..'|r')
-			tooltip:AddLine('|cffffff00<'..(self.settings.modReload==1 and XB.mouseButtons[self.settings.clickReload] or XB.modifiers[self.settings.modReload].."+"..XB.mouseButtons[self.settings.clickReload])..'> |cffffffff'..'Reloads the UI'..'|r')
-			tooltip:AddLine('|cffffff00<'..(self.settings.modOpts==1 and XB.mouseButtons[self.settings.clickOpts] or XB.modifiers[self.settings.modOpts].."+"..XB.mouseButtons[self.settings.clickOpts])..'> |cffffffff'..'Opens the option panel'..'|r')
-			tooltip:AddLine('|cffffff00<'..(self.settings.modAddonL==1 and XB.mouseButtons[self.settings.clickAddonL] or XB.modifiers[self.settings.modAddonL].."+"..XB.mouseButtons[self.settings.clickAddonL])..'> |cffffffff'..'Opens '..ADDON_LIST..'|r')
-			XB:SkinTooltip(tooltip,"GameMenuTip")
-			tooltip:Show()
+			tooltip()
 		end
 	end)
 
