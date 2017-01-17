@@ -28,6 +28,7 @@ function TalentModule:OnInitialize()
 end
 
 function TalentModule:OnEnable()
+  if not xb.db.profile.modules.talent.enabled then self:Disable(); return; end
   if self.talentFrame == nil then
     self.talentFrame = CreateFrame("FRAME", "talentFrame", xb:GetFrame('bar'))
     xb:RegisterFrame('talentFrame', self.talentFrame)
@@ -44,7 +45,9 @@ function TalentModule:OnEnable()
 end
 
 function TalentModule:OnDisable()
-  self.talentFrame:Hide()
+  if self.talentFrame and self.talentFrame:IsVisible() then
+	self.talentFrame:Hide()
+  end
   self:UnregisterEvent('TRADE_SKILL_UPDATE')
   self:UnregisterEvent('SPELLS_CHANGED')
   self:UnregisterEvent('UNIT_SPELLCAST_STOP')
