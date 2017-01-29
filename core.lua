@@ -64,6 +64,15 @@ XB.mouseButtons = {
 	HELPFRAME_REPORT_PLAYER_RIGHT_CLICK
 }
 
+XB.gameIcons = {
+	app = "Interface\\FriendsFrame\\Battlenet-Battleneticon.blp",
+	d3 = "Interface\\FriendsFrame\\Battlenet-D3icon.blp",
+	hots = "Interface\\FriendsFrame\\Battlenet-HotSicon.blp",
+	hs = "Interface\\FriendsFrame\\Battlenet-WTCGicon.blp",
+	overwatch = "Interface\\FriendsFrame\\Battlenet-OVERWATCHicon.blp",
+	sc2 = "Interface\\FriendsFrame\\Battlenet-Sc2icon.blp",
+	wow = "Interface\\FriendsFrame\\Battlenet-WoWicon.blp"
+}
 -- TODO: Add an option for that
 PlayerFrame.name:SetFont("Interface\\AddOns\\oUF_Drk\\media\\BigNoodleTitling.ttf", 11, "THINOUTLINE")
 TargetFrame.name:SetFont("Interface\\AddOns\\oUF_Drk\\media\\BigNoodleTitling.ttf", 11, "THINOUTLINE")
@@ -102,6 +111,8 @@ end
 function XB:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("XIVBarDB",nil,true)
 	self.db.RegisterCallback(self, 'OnProfileReset',function() self:Disable(); self:Enable() end)
+	self.db.RegisterCallback(self, 'OnProfileCopied',function() self:Disable(); self:Enable() end)
+	self.db.RegisterCallback(self, 'OnProfileChanged',function() self:Disable(); self:Enable() end)
 end
 
 function XB:RegisterModule(name, ...)
@@ -140,19 +151,22 @@ function XB:AddOverlay(module,parent,anchor)
 	overlayAnchor:ClearAllPoints()
 	overlayAnchor:SetPoint(anchor,overlay,anchor)
 
-	overlay:SetScript("OnEnter", frameOnEnter)
-	overlay:SetScript("OnLeave", frameOnLeave)
-	overlay:SetScript("OnDragStart", frameOnDragStart)
-	overlay:SetScript("OnDragStop", function(self)
-		local parent = self:GetParent()
-		if parent.isMoving then
-			parent:StopMovingOrSizing()
-			savePosition(parent,module)
-			parent.isMoving = nil
-			self.anchor:ClearAllPoints()
-			self.anchor:SetPoint(module.settings.anchor,self,module.settings.anchor)
-		end
-	end)
+
+	if not overlay:GetScript("OnEnter") and overlay:GetScript("OnEnter")~= frameOnEnter then
+		overlay:SetScript("OnEnter", frameOnEnter)
+		overlay:SetScript("OnLeave", frameOnLeave)
+		overlay:SetScript("OnDragStart", frameOnDragStart)
+		overlay:SetScript("OnDragStop", function(self)
+			local parent = self:GetParent()
+			if parent.isMoving then
+				parent:StopMovingOrSizing()
+				savePosition(parent,module)
+				parent.isMoving = nil
+				self.anchor:ClearAllPoints()
+				self.anchor:SetPoint(module.settings.anchor,self,module.settings.anchor)
+			end
+		end)
+	end
 end
 
 function XB:SkinTooltip(frame, name)

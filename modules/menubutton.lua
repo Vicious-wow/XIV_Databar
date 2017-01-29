@@ -48,7 +48,7 @@ local function clickFunctions(self,button,down)
 	local clickR = Mb.settings.clickReload == 1 and "LeftButton" or "RightButton"
 	if type(modifierR)=="function" then
 		if modifierR() and button == clickR then
-			ReloadUI(); return
+			ReloadUI(); return -- For now 7.2 does not allow ReloadUI() func call
 		end
 	else
 		if not IsModifierKeyDown() and button == clickR then
@@ -456,22 +456,24 @@ function Mb:CreateButton()
 	gameMenuIcon:SetTexture(XB.menuIcons.menu)
 	gameMenuIcon:SetVertexColor(unpack(color))
 
-	gameMenuFrame:SetScript("OnEnter", function()
-		if InCombatLockdown() and not Mb.settings.combatEn then return end
-		gameMenuIcon:SetVertexColor(unpack(hover))
-		if Mb.settings.tooltip then
-			tooltip()
-		end
-	end)
+	if not gameMenuFrame:GetScript() then
+		gameMenuFrame:SetScript("OnEnter", function()
+			if InCombatLockdown() and not Mb.settings.combatEn then return end
+			gameMenuIcon:SetVertexColor(unpack(hover))
+			if Mb.settings.tooltip then
+				tooltip()
+			end
+		end)
 
-	gameMenuFrame:SetScript("OnLeave", function() 
-		gameMenuIcon:SetVertexColor(unpack(color))
-		if libTT:IsAcquired("GameMenuTip") then
-			libTT:Release(libTT:Acquire("GameMenuTip"))
-		end
-	end)
+		gameMenuFrame:SetScript("OnLeave", function()
+			gameMenuIcon:SetVertexColor(unpack(color))
+			if libTT:IsAcquired("GameMenuTip") then
+				libTT:Release(libTT:Acquire("GameMenuTip"))
+			end
+		end)
 
-	gameMenuFrame:SetScript("OnClick", clickFunctions)
+		gameMenuFrame:SetScript("OnClick", clickFunctions)
+	end
 
 	XB:AddOverlay(self,gameMenuFrame,anchor)
 	

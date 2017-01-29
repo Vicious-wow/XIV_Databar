@@ -9,7 +9,7 @@ local ccR,ccG,ccB = GetClassColor(XB.playerClass)
 local libTT
 local social_config
 local Bar,BarFrame
-local groupFrame,chatFrame,chatFrameIcon,guildFrame,guildIcon,guildText,guildTextBG,socialFrame
+local groupFrame,chatFrame,chatFrameIcon,guildFrame,guildIcon,guildText,guildTextBG,socialFrame,socialIcon,socialText,socialTextBG
 
 local MOBILE_ONLINE_ICON = "Interface\\ChatFrame\\UI-ChatIcon-ArmoryChat";
 local MOBILE_BUSY_ICON = "Interface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile";
@@ -157,7 +157,7 @@ local function guildTooltip()
 	end
 
 	if ( IsInGuild() ) then
-		--GuildRoster()
+		GuildRoster()
 		local guildName, guildRank, _ = GetGuildInfo("player")
 		local guildMotto = GetGuildRosterMOTD()
 		local numOnline = select(3,GetNumGuildMembers())
@@ -278,6 +278,129 @@ local function guildTooltip()
 		XB:SkinTooltip(tooltip,"GuildTooltip")
 		tooltip:Show()
 	end
+end
+
+local function ClassColourCode(class,table)
+	local initialClass = class
+    for k, v in pairs(LOCALIZED_CLASS_NAMES_FEMALE) do
+        if class == v then
+            class = k
+            break
+        end
+    end
+	if class == initialClass then
+		for k, v in pairs(LOCALIZED_CLASS_NAMES_MALE) do
+			if class == v then
+				class = k
+				break
+			end
+		end
+	end
+	if table then
+		return RAID_CLASS_COLORS[class]
+	else
+		return string.format("|c%s", RAID_CLASS_COLORS[class].colorStr)
+	end
+end
+
+local function socialTooltip()
+	--TODO: better rendering of the tooltip content + add zone and level to BTag toon
+	if libTT:IsAcquired("SocialTooltip") then
+		libTT:Release(libTT:Acquire("SocialTooltip"))
+	end
+
+	local tooltip = libTT:Acquire("SocialTooltip", 1)
+	tooltip:SmartAnchorTo(socialFrame)
+	tooltip:SetAutoHideDelay(.5, socialFrame)
+	tooltip:SetCellMarginH(0)
+	tooltip:EnableMouse(true)
+	
+	tooltip:AddLine("[|cff6699FFSocial|r]")
+	tooltip:AddLine(" ")
+	--------------------------
+	local onlineBnetFriends = false
+	for j = 1, BNGetNumFriends() do
+		local BNid, BNname, battleTag, _, toonname, toonid, client, online, lastonline, isafk, isdnd, broadcast, note = BNGetFriendInfo(j)
+		toonname = BNet_GetValidatedCharacterName(toonname,battleTag,client)
+		local class = toonid and select(8, BNGetGameAccountInfo(toonid)) or ""
+		--groupe par jeu
+		
+		if ( online ) then
+			battleTag = battleTag or "[noBTag]"
+			
+			local statusIcon
+			if isafk then 
+				statusIcon = getStatusIcon(true,false,1)
+			elseif isdnd then
+				statusIcon = getStatusIcon(true,false,2)
+			else
+				statusIcon = getStatusIcon(true,false,0)
+			end
+			
+			local gameIcon = "Interface\\Icons\\INV_Misc_QuestionMark.blp"
+			if client == BNET_CLIENT_APP then 
+				gameIcon = XB.gameIcons.app
+			elseif client == BNET_CLIENT_D3 then
+				gameIcon = XB.gameIcons.d3
+			elseif client == BNET_CLIENT_HEROES then
+				gameIcon = XB.gameIcons.hots
+			elseif client == BNET_CLIENT_S2 then
+				gameIcon = XB.gameIcons.sc2
+			elseif client == BNET_CLIENT_WOW then
+				gameIcon = XB.gameIcons.wow
+			elseif client == BNET_CLIENT_WTCG then
+				gameIcon = XB.gameIcons.hs
+			elseif client == BNET_CLIENT_OVERWATCH then
+				gameIcon = XB.gameIcons.overwatch
+			end
+			--[[ if client == "WoW" then 
+				toonname = ("(|cffecd672"..toonname.."|r)")
+			else
+				toonname = "" 
+			end ]]
+			
+			if not note or note == "" then
+				note = ""
+			else
+				note = ("(|cffecd672"..note.."|r)")
+			end
+			
+			local lineL = string.format("|T%s:16|t|T%s:16|t|cff82c5ff %s|r %s",statusIcon,gameIcon, BNname, note)
+			local lineR = class ~= "" and (CanCooperateWithGameAccount(toonid) and ClassColourCode(class)..toonname.."|r" or FRIENDS_OTHER_NAME_COLOR_CODE..toonname.."|r") or ""
+			tooltip:AddLine(lineL.." "..lineR)
+			tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() end)
+			tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() end)
+			onlineBnetFriends = true
+		end
+	end
+	
+	if onlineBnetFriends then tooltip:AddLine(" ") end
+
+	local onlineFriends = false
+		for i = 1, GetNumFriends() do
+			local name, lvl, class, area, online, status, note = GetFriendInfo(i)
+			if ( online ) then
+				local statusIcon
+				if status == CHAT_FLAG_AFK then 
+					statusIcon = getStatusIcon(true,false,1)
+				elseif status == CHAT_FLAG_DND then
+					statusIcon = getStatusIcon(true,false,2)
+				else
+					statusIcon = getStatusIcon(true,false,0)
+				end
+				local classColor = select(4,GetClassColor(class:gsub(" ",""):upper()))
+				local lineL = string.format("|T%s:16|t %s %s", statusIcon, WrapTextInColorCode(name,classColor), WrapTextInColorCode(string.format(FRIENDS_LEVEL_TEMPLATE, lvl, class),classColor))
+				local lineR = string.format("%s", area or "")
+				tooltip:AddLine(lineL.." "..lineR)
+				tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() end)
+				tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() end)
+				onlineFriends = true
+			end
+		end
+	if onlineFriends then tooltip:AddLine(" ") end
+	tooltip:AddLine("<Left-click> Open Friends List")
+	-----------------------
+	tooltip:Show()
 end
 
 local function refreshOptions()
@@ -1086,7 +1209,7 @@ function Social:CreateFrames()
 	self:CreateGroupFrame()
 	self:CreateChatFrame()
 	self:CreateGuildFrame()
-	--self:CreateSocialFrame()
+	self:CreateSocialFrame()
 end
 
 function Social:CreateGroupFrame()
@@ -1203,7 +1326,13 @@ function Social:CreateGuildFrame()
 	guildFrame:SetScript("OnEnter", function()
 		if InCombatLockdown() and not self.settings.guild.combatEn then return end
 
+		
 		guildIcon:SetVertexColor(unpack(self.settings.guild.hover))
+		
+		if libTT:IsAcquired("SocialTooltip") then
+			libTT:Release(libTT:Acquire("SocialTooltip"))
+		end
+		
 		if not self.settings.guild.tooltip then return end
 		guildTooltip()
 	end)
@@ -1213,7 +1342,7 @@ function Social:CreateGuildFrame()
 	end)
 
 	guildFrame:SetScript("OnClick", function(self, button)
-		if InCombatLockdown() and not Social.settings.combatEn then return end
+		if InCombatLockdown() and not Social.settings.guild.combatEn then return end
 
 		if button == "LeftButton" then 
 			if ( IsInGuild() ) then
@@ -1227,128 +1356,156 @@ function Social:CreateGuildFrame()
 end
 
 function Social:CreateSocialFrame()
-	local friendFrame = CreateFrame("BUTTON",nil, cfg.SXframe)
-	friendFrame:SetSize(32, 32)
-	friendFrame:SetPoint("LEFT",guildFrame,36,0)
-	friendFrame:EnableMouse(true)
-	friendFrame:RegisterForClicks("AnyUp")
 
-	local friendIcon = friendFrame:CreateTexture(nil,"OVERLAY",nil,7)
-	friendIcon:SetSize(32,32)
-	friendIcon:SetPoint("CENTER")
-	friendIcon:SetTexture(cfg.mediaFolder.."microbar\\social")
-	friendIcon:SetVertexColor(unpack(cfg.color.normal))
 
-	local friendText = guildFrame:CreateFontString(nil, "OVERLAY")
-	friendText:SetFont(cfg.text.font, cfg.text.smallFontSize)
-	friendText:SetPoint("CENTER", friendFrame, "TOP")
-	if cfg.core.position ~= "BOTTOM" then
-		friendText:SetPoint("CENTER", friendFrame, "BOTTOM")
+
+
+
+	if not self.settings.social.enable then
+		if guildFrame and guildFrame:IsVisible() then
+			guildFrame:Hide()
+		end
+		return
 	end
 
-	local friendTextBG = guildFrame:CreateTexture(nil,"OVERLAY",nil,7)
-	friendTextBG:SetColorTexture(unpack(cfg.color.barcolor))
 
 
-	friendFrame:SetScript("OnEnter", function()
-		if InCombatLockdown() then return end
-		friendIcon:SetVertexColor(unpack(cfg.color.hover))
-		if not cfg.micromenu.showTooltip then return end
+
+
+
+	local x,y,a,w,h,color,hover = self.settings.social.x,self.settings.social.y,self.settings.social.anchor,self.settings.social.w,self.settings.social.h,self.settings.social.color,self.settings.social.hover
+
+	socialFrame = socialFrame or CreateFrame("BUTTON",nil, groupFrame)
+	socialFrame:SetSize(w, h)
+	socialFrame:SetPoint(a,x,y)
+	socialFrame:EnableMouse(true)
+	socialFrame:RegisterForClicks("AnyUp")
+
+	socialIcon = socialIcon or socialFrame:CreateTexture(nil,"OVERLAY",nil,7)
+	socialIcon:SetSize(w,h)
+	socialIcon:SetPoint("CENTER")
+	socialIcon:SetTexture(XB.menuIcons.social)
+	socialIcon:SetVertexColor(unpack(color))
+
+	socialText = socialText or socialFrame:CreateFontString(nil, "OVERLAY")
+
+	socialText:SetFont(XB.mediaFold.."font\\homizio_bold.ttf", 11)
+	socialText:SetPoint("CENTER", socialFrame, "TOP")
+
+	if Bar.settings.anchor:find("TOP") then
+		socialText:SetPoint("CENTER", friendFrame, "BOTTOM")
+	end
+
+	socialTextBG = socialTextBG or socialFrame:CreateTexture(nil,"OVERLAY",nil,7)
+	socialTextBG:SetColorTexture(unpack(Bar.settings.color))
+
+
+	socialFrame:SetScript("OnEnter", function()
+		if InCombatLockdown() and not Social.settings.social.combatEn then return end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		socialIcon:SetVertexColor(unpack(hover))
+		
+
+		if libTT:IsAcquired("GuildTooltip") then
+			libTT:Release(libTT:Acquire("GuildTooltip"))
+		end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		if not self.settings.social.tooltip then return end
+
+
+
+
+
 		local totalBNet, numBNetOnline = BNGetNumFriends()
 		if numBNetOnline then
-		GameTooltip:SetOwner(friendFrame, cfg.tooltipPos)
-		GameTooltip:AddLine("[|cff6699FFSocial|r]")
-		GameTooltip:AddLine(" ")
-		--------------------------
-		local onlineBnetFriends = false
-		for j = 1, BNGetNumFriends() do
-			local BNid, BNname, battleTag, _, toonname, toonid, client, online, lastonline, isafk, isdnd, broadcast, note = BNGetFriendInfo(j)
-			if ( online ) then
-				
-				if (not battleTag) then battleTag = "[noTag]" end
-				local status = ""
-				
-				local statusIcon = "Interface\\FriendsFrame\\StatusIcon-Online.blp"
-				if ( isafk ) then 
-					statusIcon = "Interface\\FriendsFrame\\StatusIcon-Away.blp"
-					status = "(AFK)"
-				end
-				if  ( isdnd ) == "D3" then
-					statusIcon = "Interface\\FriendsFrame\\StatusIcon-DnD.blp"
-					status = "(DND)"
-				end
-				
-				local gameIcon = "Interface\\Icons\\INV_Misc_QuestionMark.blp"
-				if client == "App" then 
-					gameIcon = "Interface\\FriendsFrame\\Battlenet-Battleneticon.blp"
-					client = "Bnet"
-				elseif client == "D3" then
-					gameIcon = "Interface\\FriendsFrame\\Battlenet-D3icon.blp"
-					client = "Diablo III"
-				elseif client == "Hero" then
-					gameIcon = "Interface\\FriendsFrame\\Battlenet-HotSicon.blp"
-					client = "Hero of the Storm"
-				elseif client == "S2" then
-					gameIcon = "Interface\\FriendsFrame\\Battlenet-Sc2icon.blp"
-					client = "Starcraft 2"
-				elseif client == "WoW" then
-					gameIcon = "Interface\\FriendsFrame\\Battlenet-WoWicon.blp"
-				elseif client == "WTCG" then
-					gameIcon = "Interface\\FriendsFrame\\Battlenet-WTCGicon.blp"
-					client = "Heartstone"
-				end
-				if client == "WoW" then 
-					toonname = ("(|cffecd672"..toonname.."|r)")
-				else
-					toonname = "" 
-				end
-				
-				if not note then
-				note = ""
-				else
-				note = ("(|cffecd672"..note.."|r)")
-				end
-				
-				local lineL = string.format("|T%s:16|t|cff82c5ff %s|r %s",statusIcon, BNname, note)
-				local lineR = string.format("%s %s |T%s:16|t",toonname, client or "",  gameIcon)
-				GameTooltip:AddDoubleLine(lineL,lineR)
-				onlineBnetFriends = true
-			end
+			socialTooltip()
 		end
-		
-	if onlineBnetFriends then GameTooltip:AddLine(" ") end
 
-	local onlineFriends = false
-		for i = 1, GetNumFriends() do
-			local name, lvl, class, area, online, status, note = GetFriendInfo(i)
-			if ( online ) then
-				local status = ""
-				local statusIcon = "Interface\\FriendsFrame\\StatusIcon-Online.blp"
-				if ( isafk ) then 
-					statusIcon = "Interface\\FriendsFrame\\StatusIcon-Away.blp"
-					status = "(AFK)"
-				end
-				if  ( isdnd ) == "D3" then
-					statusIcon = "Interface\\FriendsFrame\\StatusIcon-DnD.blp"
-					status = "(DND)"
-				end
-				local lineL = string.format("|T%s:16|t %s, lvl:%s %s", statusIcon, name, lvl, class)
-				local lineR = string.format("%s", area or "")
-				GameTooltip:AddDoubleLine(lineL,lineR)
-				onlineFriends = true
-			end
-		end
-	if onlineFriends then GameTooltip:AddLine(" ") end
-	GameTooltip:AddDoubleLine("<Left-click>", "Open Friends List", 1, 1, 0, 1, 1, 1)
-	-----------------------
-	GameTooltip:Show()
-	end
+
+
+
+
 	end)
 
-	friendFrame:SetScript("OnLeave", function() if ( GameTooltip:IsShown() ) then GameTooltip:Hide() end friendIcon:SetVertexColor(unpack(cfg.color.normal)) end)
+	socialFrame:SetScript("OnLeave", function() socialIcon:SetVertexColor(unpack(color)) end)
 
-	friendFrame:SetScript("OnClick", function(self, button, down)
-		if InCombatLockdown() then return end
+	socialFrame:SetScript("OnClick", function(_, button)
+		if InCombatLockdown() and not Social.settings.social.combatEn then return end
 		if button == "LeftButton" then
 			ToggleFriendsFrame()
 		end
