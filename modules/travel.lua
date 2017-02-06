@@ -22,6 +22,7 @@ function TravelModule:OnInitialize()
     37118, -- Scroll of Recall 1
     44314, -- Scroll of Recall 2
     44315, -- Scroll of Recall 3
+    142542, -- Tome of Town Portal
   }
 
   self.portButtons = {}
