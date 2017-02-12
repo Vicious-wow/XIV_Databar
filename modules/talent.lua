@@ -9,7 +9,32 @@ function TalentModule:GetName()
   return TALENTS;
 end
 
+-- Skin Support for ElvUI/TukUI
+function TalentModule:SkinFrame(frame, name)
+	if IsAddOnLoaded("ElvUI") or IsAddOnLoaded("Tukui") then
+		if frame.StripTextures then
+			frame:StripTextures()
+		end
+		if frame.SetTemplate then
+			frame:SetTemplate("Transparent")
+		end
+
+		local close = _G[name.."CloseButton"] or frame.CloseButton
+		if close and close.SetAlpha then
+			if ElvUI then
+				ElvUI[1]:GetModule('Skins'):HandleCloseButton(close)
+			end
+
+			if Tukui and Tukui[1] and Tukui[1].SkinCloseButton then
+				Tukui[1].SkinCloseButton(close)
+			end
+			close:SetAlpha(1)
+		end
+	end
+end
+
 function TalentModule:OnInitialize()
+  self.LTip=LibStub('LibQTip-1.0')
   self.currentSpecID = 0
   self.currentLootSpecID = 0
   self.specCoords = {
@@ -208,11 +233,15 @@ function TalentModule:RegisterFrameEvents()
     local db = xb.db.profile
     self.specText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
     if xb.db.profile.modules.tradeskill.showTooltip then
-      GameTooltip:Hide()
+      if self.LTip:IsAcquired("TalentTooltip") then
+		self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
+	  end
     end
   end)
   self.specFrame:SetScript('OnClick', function(_, button)
-    GameTooltip:Hide()
+    if self.LTip:IsAcquired("TalentTooltip") then
+	  self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
+    end
     if button == 'LeftButton' then
       if not InCombatLockdown() then
 		if IsShiftKeyDown() then
@@ -483,9 +512,13 @@ function TalentModule:CreateLootSpecPopup()
 end
 
 function TalentModule:ShowTooltip()
-  GameTooltip:SetOwner(self.talentFrame, 'ANCHOR_'..xb.miniTextPosition)
-  GameTooltip:AddLine("[|cff6699FF"..SPECIALIZATION.."|r]")
-  GameTooltip:AddLine(" ")
+  if self.LTip:IsAcquired("TalentTooltip") then
+	self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
+  end
+  local tooltip = self.LTip:Acquire("TalentTooltip",2,"LEFT","RIGHT")
+  tooltip:SmartAnchorTo(self.talentFrame)
+  tooltip:AddHeader("[|cff6699FF"..SPECIALIZATION.."|r]")
+  tooltip:AddLine(" ")
 
   local name = ''
   if self.currentLootSpecID == 0 then
@@ -493,30 +526,31 @@ function TalentModule:ShowTooltip()
   else
     _, name, _ = GetSpecializationInfoByID(self.currentLootSpecID)
   end
-  GameTooltip:AddDoubleLine(L['Current Loot Specialization'], name, 1, 1, 0, 1, 1, 1)
+  tooltip:AddLine("|cFFFFFF00"..L['Current Loot Specialization'].."|r", "|cFFFFFFFF"..name.."|r")
 
   if self.curArtifactId > 0 then
-    GameTooltip:AddLine(" ")
+    tooltip:AddLine(" ")
     local _, artifactData = self.LAD:GetArtifactInfo(self.curArtifactId)
     local knowLevel, knowMult = self.LAD:GetArtifactKnowledge()
     if knowLevel and knowLevel > 0 then
-      GameTooltip:AddDoubleLine(L['Artifact Knowledge']..':', string.format('%d (x%d)', knowLevel, ((knowMult) - 1 * 100)), 1, 1, 0, 1, 1, 1)
-      GameTooltip:AddLine(" ")
+      tooltip:AddLine("|cFFFFFF00"..L['Artifact Knowledge']..':|r', "|cFFFFFFFF"..string.format('%d (x%d)', knowLevel, ((knowMult) - 1 * 100)).."|r")
+      tooltip:AddLine(" ")
     end
-    GameTooltip:AddDoubleLine(ARTIFACT_POWER..':', string.format('%d / %d (%d%%)', artifactData.power, artifactData.maxPower, floor((artifactData.power / artifactData.maxPower) * 100)), 1, 1, 0, 1, 1, 1)
-    GameTooltip:AddDoubleLine(L['Remaining']..':', string.format('%d (%d%%)', artifactData.powerForNextRank, floor((artifactData.powerForNextRank / artifactData.maxPower) * 100)), 1, 1, 0, 1, 1, 1)
+    tooltip:AddLine("|cFFFFFF00"..ARTIFACT_POWER..':|r', "|cFFFFFFFF"..string.format('%d / %d (%d%%)', artifactData.power, artifactData.maxPower, floor((artifactData.power / artifactData.maxPower) * 100)).."|r")
+    tooltip:AddLine("|cFFFFFF00"..L['Remaining']..':|r', "|cFFFFFFFF"..string.format('%d (%d%%)', artifactData.powerForNextRank, floor((artifactData.powerForNextRank / artifactData.maxPower) * 100)).."|r")
     if artifactData.numRanksPurchasable > 0 then
-      GameTooltip:AddDoubleLine(L['Available Ranks']..':', string.format('%d', artifactData.numRanksPurchasable), 1, 1, 0, 1, 1, 1)
+      tooltip:AddLine("|cFFFFFF00"..L['Available Ranks']..':|r', "|cFFFFFFFF"..string.format('%d', artifactData.numRanksPurchasable).."|r")
     end
   end
 
-  GameTooltip:AddLine(" ")
-  GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Set Specialization'], 1, 1, 0, 1, 1, 1)
-  GameTooltip:AddDoubleLine('<'..SHIFT_KEY_TEXT.."+"..L['Left-Click']..'>', L['Set Loot Specialization'], 1, 1, 0, 1, 1, 1)
+  tooltip:AddLine(" ")
+  tooltip:AddLine('|cFFFFFF00<'..L['Left-Click']..'>|r', "|cFFFFFFFF"..L['Set Specialization'].."|r")
+  tooltip:AddLine('|cFFFFFF00<'..SHIFT_KEY_TEXT.."+"..L['Left-Click']..'>|r', "|cFFFFFFFF"..L['Set Loot Specialization'].."|r")
   if self.curArtifactId > 0 then
-	GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Open Artifact'], 1, 1, 0, 1, 1, 1)
+	tooltip:AddLine('|cFFFFFF00<'..L['Right-Click']..'>|r', "|cFFFFFFFF"..L['Open Artifact'].."|r")
   end
-  GameTooltip:Show()
+  self:SkinFrame(tooltip,"TalentTooltip")
+  tooltip:Show()
 end
 
 function TalentModule:GetDefaultOptions()
