@@ -431,6 +431,7 @@ function TravelModule:Refresh()
   self.portPopup:Hide()
 
   local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
+  self.portButton:Show()
   if self.portButton:IsVisible() then
     totalWidth = totalWidth + self.portButton:GetWidth()
   end

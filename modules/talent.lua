@@ -141,6 +141,7 @@ function TalentModule:Refresh()
     self.specBarBg:SetAllPoints()
     self.specBarBg:SetColorTexture(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
     self:UpdateArtifactBar(artifactId)
+	self.specText:Show()
 	self.specBar:Show()
   else
 	if self.specBar and self.specBar:IsVisible() then
