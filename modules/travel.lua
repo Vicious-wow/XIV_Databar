@@ -49,15 +49,15 @@ function TravelModule:OnDisable()
 end
 
 function TravelModule:CreateFrames()
-  self.hearthButton = self.hearthButton or CreateFrame('BUTTON', nil, self.hearthFrame, "SecureActionButtonTemplate")
+  self.hearthButton = self.hearthButton or CreateFrame('BUTTON', "hearthButton", self.hearthFrame, "SecureActionButtonTemplate")
   self.hearthIcon = self.hearthIcon or self.hearthButton:CreateTexture(nil, 'OVERLAY')
   self.hearthText = self.hearthText or self.hearthButton:CreateFontString(nil, 'OVERLAY')
 
-  self.portButton = self.portButton or CreateFrame('BUTTON', nil, self.hearthFrame, "SecureActionButtonTemplate")
+  self.portButton = self.portButton or CreateFrame('BUTTON', "portButton", self.hearthFrame, "SecureActionButtonTemplate")
   self.portIcon = self.portIcon or self.portButton:CreateTexture(nil, 'OVERLAY')
   self.portText = self.portText or self.portButton:CreateFontString(nil, 'OVERLAY')
 
-  self.portPopup = self.portPopup or CreateFrame('BUTTON', nil, self.portButton)
+  self.portPopup = self.portPopup or CreateFrame('BUTTON', "portPopup", self.portButton)
   self.popupTexture = self.popupTexture or self.portPopup:CreateTexture(nil, 'BACKGROUND')
 end
 
@@ -436,6 +436,7 @@ function TravelModule:Refresh()
   end
   self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
   self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
+  self.hearthFrame:Show()
 end
 
 function TravelModule:FindFirstOption()
