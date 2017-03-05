@@ -242,11 +242,11 @@ local function guildTooltip()
 						local clickW = opt.whispClick == 1 and "LeftButton" or "RightButton"
 						if type(modifierW)=="function" then
 							if modifierW() and button == clickW then
-								ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..name.." "); return
+								ChatFrame_SendTell(name); return
 							end
 						else
 							if not IsModifierKeyDown() and button == clickW then
-								ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..name.." "); return
+								ChatFrame_SendTell(name); return
 							end
 						end
 						--Invite func
@@ -309,10 +309,10 @@ local function socialTooltip()
 		libTT:Release(libTT:Acquire("SocialTooltip"))
 	end
 
-	local tooltip = libTT:Acquire("SocialTooltip", 1)
+	local tooltip = libTT:Acquire("SocialTooltip", 4)
 	tooltip:SmartAnchorTo(socialFrame)
 	tooltip:SetAutoHideDelay(.5, socialFrame)
-	tooltip:SetCellMarginH(0)
+	tooltip:SetCellMarginH(2)
 	tooltip:EnableMouse(true)
 	
 	tooltip:AddLine("[|cff6699FFSocial|r]")
@@ -323,6 +323,8 @@ local function socialTooltip()
 		local BNid, BNname, battleTag, _, toonname, toonid, client, online, lastonline, isafk, isdnd, broadcast, note = BNGetFriendInfo(j)
 		toonname = BNet_GetValidatedCharacterName(toonname,battleTag,client)
 		local class = toonid and select(8, BNGetGameAccountInfo(toonid)) or ""
+		local area = toonid and select(10, BNGetGameAccountInfo(toonid)) or ""
+		local realmName = toonid and select(4,BNGetGameAccountInfo(toonid)) or ""
 		--groupe par jeu
 		
 		if ( online ) then
@@ -353,24 +355,36 @@ local function socialTooltip()
 			elseif client == BNET_CLIENT_OVERWATCH then
 				gameIcon = XB.gameIcons.overwatch
 			end
-			--[[ if client == "WoW" then 
-				toonname = ("(|cffecd672"..toonname.."|r)")
-			else
-				toonname = "" 
-			end ]]
 			
 			if not note or note == "" then
 				note = ""
 			else
-				note = ("(|cffecd672"..note.."|r)")
+				note = ("|cffecd672"..note.."|r")
 			end
 			
-			local lineL = string.format("|T%s:16|t|T%s:16|t|cff82c5ff %s|r %s",statusIcon,gameIcon, BNname, note)
+			local lineL = string.format("|T%s:16|t|T%s:16|t |cff82c5ff%s|r",statusIcon,gameIcon, BNname)
 			local lineR = class ~= "" and (CanCooperateWithGameAccount(toonid) and ClassColourCode(class)..toonname.."|r" or FRIENDS_OTHER_NAME_COLOR_CODE..toonname.."|r") or ""
-			tooltip:AddLine(lineL.." "..lineR)
-			tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() end)
-			tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() end)
-			onlineBnetFriends = true
+			if true then --client ~= BNET_CLIENT_APP opt
+				tooltip:AddLine(lineL,lineR,area,note)
+				tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() end)
+				tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() end)
+				tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
+					if button == "LeftButton" then
+						if false then --Modifier
+							if CanGroupWithAccount(BNid) then
+								InviteToGroup(toonname.."-"..realmName)
+							end
+						else
+							ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..BNname.." ")
+						end
+					elseif button == "RightButton" then
+						if toonname ~= "" and client == BNET_CLIENT_WOW then
+							ChatFrame_SendTell(toonname.."-"..realmName)
+						end
+					end
+				end)
+				onlineBnetFriends = true
+			end
 		end
 	end
 	
@@ -389,16 +403,31 @@ local function socialTooltip()
 					statusIcon = getStatusIcon(true,false,0)
 				end
 				local classColor = select(4,GetClassColor(class:gsub(" ",""):upper()))
-				local lineL = string.format("|T%s:16|t %s %s", statusIcon, WrapTextInColorCode(name,classColor), WrapTextInColorCode(string.format(FRIENDS_LEVEL_TEMPLATE, lvl, class),classColor))
-				local lineR = string.format("%s", area or "")
-				tooltip:AddLine(lineL.." "..lineR)
+				local lineL = string.format("|T%s:16|t %s", statusIcon, WrapTextInColorCode(name,classColor))
+				tooltip:AddLine(lineL,WrapTextInColorCode(string.format(FRIENDS_LEVEL_TEMPLATE, lvl, class),classColor),area or "",note or "")
 				tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() end)
 				tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() end)
+				tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
+					if not name:find('%u%U*-%u%U') then
+						local homeRealm = GetRealmName()
+						homeRealm = homeRealm:gsub("%s+", "")
+						name=name.."-"..homeRealm
+					end
+					if button == "RightButton" then
+						ChatFrame_SendTell(name)
+					elseif button == "LeftButton" then
+						if false then -- modifier
+							InviteUnit(name)
+						end
+					end
+				end)
 				onlineFriends = true
 			end
 		end
 	if onlineFriends then tooltip:AddLine(" ") end
-	tooltip:AddLine("<Left-click> Open Friends List")
+	tooltip:AddLine("|cffffff00<Left-Click>|r", '|cffffffffWhisper BNet|r')
+	tooltip:AddLine("|cffffff00<SHIFT+Left-Click>|r", '|cffffffff'..CALENDAR_INVITELIST_INVITETORAID..'|r')
+	tooltip:AddLine("|cffffff00<Right-Click>|r", '|cffffffffWhisper Character|r')
 	-----------------------
 	tooltip:Show()
 end

@@ -48,11 +48,11 @@ local function clickFunctions(self,button,down)
 	local clickR = Mb.settings.clickReload == 1 and "LeftButton" or "RightButton"
 	if type(modifierR)=="function" then
 		if modifierR() and button == clickR then
-			ReloadUI(); return -- For now 7.2 does not allow ReloadUI() func call
+			ChatFrame_OpenChat("/reload"); return -- For now 7.2 does not allow ReloadUI() func call
 		end
 	else
 		if not IsModifierKeyDown() and button == clickR then
-			ReloadUI(); return
+			ChatFrame_OpenChat("/reload"); return
 		end
 	end
 
@@ -456,7 +456,7 @@ function Mb:CreateButton()
 	gameMenuIcon:SetTexture(XB.menuIcons.menu)
 	gameMenuIcon:SetVertexColor(unpack(color))
 
-	if not gameMenuFrame:GetScript() then
+	if not gameMenuFrame:GetScript("OnEnter") then
 		gameMenuFrame:SetScript("OnEnter", function()
 			if InCombatLockdown() and not Mb.settings.combatEn then return end
 			gameMenuIcon:SetVertexColor(unpack(hover))
