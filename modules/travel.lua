@@ -239,7 +239,7 @@ function TravelModule:SetPortColor()
     v = self:FindFirstOption()
     v = v.portId
     if not (self:IsUsable(v)) then
-      self.portButton:Hide()
+      --self.portButton:Hide()
       return
     end
   end
