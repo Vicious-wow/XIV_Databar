@@ -19,7 +19,7 @@ local MOBILE_AWAY_ICON = "Interface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobil
 -- Private functions
 ----------------------------------------------------------------------------------------------------------
 local function chatClick(self, button)
-	if InCombatLockdown() and not Social.settings.chat.combatEn then return end
+	if InCombatLockdown() and not Social.settings.combatEn.chat then return end
 	if button == "LeftButton" then
 		if Social.settings.chat.anchorBar then
 			ChatMenu:ClearAllPoints()
@@ -444,19 +444,19 @@ local function refreshOptions()
 	opt.height.max = round(BarFrame:GetHeight())
 
 	opt = social_config.chat.args.general.args
-	opt.posX.min = -Social.settings.w + Social.settings.chat.w
-	opt.posX.max = Social.settings.w - Social.settings.chat.w
-	opt.posY.min = -Social.settings.h + Social.settings.chat.h
-	opt.posY.max = Social.settings.h - Social.settings.chat.h
-	opt.width.max = Social.settings.w
-	opt.height.max = Social.settings.h
+	opt.posX.min = -Social.settings.w.group + Social.settings.w.chat
+	opt.posX.max = Social.settings.w.group - Social.settings.w.chat
+	opt.posY.min = -Social.settings.h.group + Social.settings.h.chat
+	opt.posY.max = Social.settings.h.group - Social.settings.h.chat
+	opt.width.max = Social.settings.w.group
+	opt.height.max = Social.settings.h.group
 
-	social_config.guild.args.posX.min = -Social.settings.w + Social.settings.guild.w
-	social_config.guild.args.posX.max = Social.settings.w - Social.settings.guild.w
-	social_config.guild.args.posY.min = -Social.settings.h + Social.settings.guild.h
-	social_config.guild.args.posY.max = Social.settings.h - Social.settings.guild.h
-	social_config.guild.args.width.max = Social.settings.w
-	social_config.guild.args.height.max = Social.settings.h
+	social_config.guild.args.posX.min = -Social.settings.w.group + Social.settings.w.guild
+	social_config.guild.args.posX.max = Social.settings.w.group - Social.settings.w.guild
+	social_config.guild.args.posY.min = -Social.settings.h.group + Social.settings.h.guild
+	social_config.guild.args.posY.max = Social.settings.h.group - Social.settings.h.guild
+	social_config.guild.args.width.max = Social.settings.w.group
+	social_config.guild.args.height.max = Social.settings.h.group
 end
 
 ----------------------------------------------------------------------------------------------------------
@@ -464,46 +464,82 @@ end
 ----------------------------------------------------------------------------------------------------------
 local social_default = {
 	profile = {
-		enable = true,
+		enable = {
+			group = true,
+			chat = true,
+			guild = true,
+			social = true
+		},
 		lock = true,
-		x = 52,
-		y = 0,
-		w = 104,
-		h = 32,
-		anchor = "LEFT",
-		combatEn = false,
-		tooltip = false,
-		color = {1,1,1,.75},
-		colorCC = false,
-		hover = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
-		hoverCC = not (XB.playerClass == "PRIEST"),
+		x = {
+			group = 52,
+			chat = 0,
+			guild = 36,
+			social = 72
+		},
+		y = {
+			group = 0,
+			chat = 0,
+			guild = 0,
+			social = 0
+		},
+		w = { 
+			group = 104,
+			chat = 32,
+			guild = 32,
+			social = 32
+		},
+		h = {
+			group = 32,
+			chat = 32,
+			guild = 32,
+			social = 32
+		},
+		anchor = {
+			group = "LEFT",
+			chat = "LEFT",
+			guild = "LEFT",
+			social = "LEFT"
+		},
+		combatEn = {
+			group = false,
+			chat = false,
+			guild = false,
+			social = false
+		},
+		tooltip = {
+			group = false,
+			guild = true,
+			social = true
+		},
+		color = {
+			group = {1,1,1,.75},
+			chat = {1,1,1,.75},
+			guild = {1,1,1,.75},
+			social = {1,1,1,.75}
+		},
+		colorCC = {
+			group = false,
+			chat = false,
+			guild = false,
+			social = false
+		},
+		hover = {
+			group = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
+			chat = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
+			guild = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
+			social = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75}
+		},
+		hoverCC = {
+			group = not (XB.playerClass == "PRIEST"),
+			chat = not (XB.playerClass == "PRIEST"),
+			guild = not (XB.playerClass == "PRIEST"),
+			social = not (XB.playerClass == "PRIEST")
+		},
 		chat = {
-			enable = true,
-			x = 0,
-			y = 0,
-			w = 32,
-			h = 32,
-			anchor = "LEFT",
-			combatEn = false,
-			color = {1,1,1,.75},
-			colorCC = false,
-			hover = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
-			hoverCC = not (XB.playerClass == "PRIEST"),
 			anchorBar = true
 		},
 		guild = {
-			enable = true,
-			x = 36,
-			y = 0,
-			w = 32,
-			h = 32,
-			anchor = "LEFT",
-			combatEn = false,
-			tooltip = true,
-			color = {1,1,1,.75},
-			colorCC = false,
-			hover = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
-			hoverCC = not (XB.playerClass == "PRIEST"),
 			tooltipOpt = {
 				gmotd = false,
 				guildName = false,
@@ -525,20 +561,6 @@ local social_default = {
 				invClick = 1
 			}
 		},
-		social = {
-			enable = true,
-			x = 72,
-			y = 0,
-			w = 32,
-			h = 32,
-			anchor = "LEFT",
-			combatEn = false,
-			tooltip = true,
-			color = {1,1,1,.75},
-			colorCC = false,
-			hover = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
-			hoverCC = not (XB.playerClass == "PRIEST"),
-		}
 	}
 }
 
@@ -1242,14 +1264,14 @@ function Social:CreateFrames()
 end
 
 function Social:CreateGroupFrame()
-	if not self.settings.enable then
+	if not self.settings.enable.group then
 		if groupFrame and groupFrame:IsVisible() then
 			groupFrame:Hide()
 		end
 		return
 	end
 
-	local x,y,w,h,a = Social.settings.x,Social.settings.y,Social.settings.w,Social.settings.h,Social.settings.anchor
+	local x,y,w,h,a = Social.settings.x.group,Social.settings.y.group,Social.settings.w.group,Social.settings.h.group,Social.settings.anchor.group
 	groupFrame = groupFrame or CreateFrame("Frame","SocialGroup",BarFrame)
 	groupFrame:SetSize(w, h)
 	groupFrame:SetPoint(a,x,y)
@@ -1268,14 +1290,14 @@ function Social:CreateGroupFrame()
 end
 
 function Social:CreateChatFrame()
-	if not self.settings.chat.enable then
+	if not self.settings.enable.chat then
 		if chatFrame and chatFrame:IsVisible() then
 			chatFrame:Hide()
 		end
 		return
 	end
 	
-	local w,h,x,y,a,color,hover = self.settings.chat.w,self.settings.chat.h,self.settings.chat.x,self.settings.chat.y,self.settings.chat.anchor,self.settings.chat.color,self.settings.chat.hover
+	local w,h,x,y,a,color,hover = self.settings.w.chat,self.settings.h.chat,self.settings.x.chat,self.settings.y.chat,self.settings.anchor.chat,self.settings.color.chat,self.settings.hover.chat
 	
 	chatFrame = chatFrame or CreateFrame("BUTTON","ChatButton",groupFrame)
 	chatFrame:SetSize(w, h)
@@ -1291,7 +1313,7 @@ function Social:CreateChatFrame()
 	chatFrameIcon:SetVertexColor(unpack(color))
 	 
 	chatFrame:SetScript("OnEnter", function()
-		if InCombatLockdown() and not self.settings.chat.combatEn then return end
+		if InCombatLockdown() and not self.settings.combatEn.chat then return end
 		chatFrameIcon:SetVertexColor(unpack(hover))
 	end)
 
@@ -1301,14 +1323,14 @@ function Social:CreateChatFrame()
 end
 
 function Social:CreateGuildFrame()
-	if not self.settings.guild.enable then
+	if not self.settings.enable.guild then
 		if guildFrame and guildFrame:IsVisible() then
 			guildFrame:Hide()
 		end
 		return
 	end
 
-	local x,y,a,w,h,color,hover = self.settings.guild.x,self.settings.guild.y,self.settings.guild.anchor,self.settings.guild.w,self.settings.guild.h,self.settings.guild.color,self.settings.guild.hover
+	local x,y,a,w,h,color,hover = self.settings.x.guild,self.settings.y.guild,self.settings.anchor.guild,self.settings.w.guild,self.settings.h.guild,self.settings.color.guild,self.settings.hover.guild
 
 	guildFrame = guildFrame or CreateFrame("BUTTON","GuildButton", groupFrame)
 	guildFrame:SetSize(w,h)
@@ -1353,25 +1375,24 @@ function Social:CreateGuildFrame()
 	end)
 
 	guildFrame:SetScript("OnEnter", function()
-		if InCombatLockdown() and not self.settings.guild.combatEn then return end
+		if InCombatLockdown() and not self.settings.combatEn.guild then return end
 
-		
-		guildIcon:SetVertexColor(unpack(self.settings.guild.hover))
+		guildIcon:SetVertexColor(unpack(hover))
 		
 		if libTT:IsAcquired("SocialTooltip") then
 			libTT:Release(libTT:Acquire("SocialTooltip"))
 		end
 		
-		if not self.settings.guild.tooltip then return end
+		if not self.settings.tooltip.guild then return end
 		guildTooltip()
 	end)
 
 	guildFrame:SetScript("OnLeave", function()
-		guildIcon:SetVertexColor(unpack(self.settings.guild.color))
+		guildIcon:SetVertexColor(unpack(color))
 	end)
 
 	guildFrame:SetScript("OnClick", function(self, button)
-		if InCombatLockdown() and not Social.settings.guild.combatEn then return end
+		if InCombatLockdown() and not Social.settings.combatEn.guild then return end
 
 		if button == "LeftButton" then 
 			if ( IsInGuild() ) then
@@ -1385,30 +1406,25 @@ function Social:CreateGuildFrame()
 end
 
 function Social:CreateSocialFrame()
-
-
-
-
-
-	if not self.settings.social.enable then
-		if guildFrame and guildFrame:IsVisible() then
-			guildFrame:Hide()
+	if not self.settings.enable.social then
+		if socialFrame and socialFrame:IsVisible() then
+			socialFrame:Hide()
 		end
 		return
 	end
 
-
-
-
-
-
-	local x,y,a,w,h,color,hover = self.settings.social.x,self.settings.social.y,self.settings.social.anchor,self.settings.social.w,self.settings.social.h,self.settings.social.color,self.settings.social.hover
+	local x,y,a,w,h,color,hover = self.settings.x.social,self.settings.y.social,self.settings.anchor.social,self.settings.w.social,self.settings.h.social,self.settings.color.social,self.settings.hover.social
 
 	socialFrame = socialFrame or CreateFrame("BUTTON",nil, groupFrame)
 	socialFrame:SetSize(w, h)
 	socialFrame:SetPoint(a,x,y)
 	socialFrame:EnableMouse(true)
 	socialFrame:RegisterForClicks("AnyUp")
+	if not socialFrame:IsEventRegistered("BN_FRIEND_ACCOUNT_OFFLINE") then
+		socialFrame:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
+		socialFrame:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
+		socialFrame:RegisterEvent("FRIENDLIST_UPDATE")
+	end
 
 	socialIcon = socialIcon or socialFrame:CreateTexture(nil,"OVERLAY",nil,7)
 	socialIcon:SetSize(w,h)
@@ -1428,113 +1444,47 @@ function Social:CreateSocialFrame()
 	socialTextBG = socialTextBG or socialFrame:CreateTexture(nil,"OVERLAY",nil,7)
 	socialTextBG:SetColorTexture(unpack(Bar.settings.color))
 
+	socialText = socialText or socialFrame:CreateFontString(nil, "OVERLAY")
+	socialText:SetFont(XB.mediaFold.."font\\homizio_bold.ttf", 11) --Small fontSize
+	socialText:SetPoint("CENTER", socialFrame, "TOP")
+	if Bar.settings.anchor:find("TOP") then
+		socialText:SetPoint("CENTER", socialFrame, "BOTTOM")
+	end
+
+	socialTextBG = socialTextBG or socialFrame:CreateTexture(nil,"OVERLAY",nil,7)
+	socialTextBG:SetPoint("CENTER",socialText)
+	socialTextBG:SetColorTexture(unpack(Bar.settings.color))
+
+	local _, numBNetOnline = BNGetNumFriends()
+	local _, friendsOnline = GetNumFriends()
+	socialText:SetText(numBNetOnline+friendsOnline)
+	socialTextBG:SetSize(socialText:GetWidth()+4,socialText:GetHeight()+2)
 
 	socialFrame:SetScript("OnEnter", function()
-		if InCombatLockdown() and not Social.settings.social.combatEn then return end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		socialIcon:SetVertexColor(unpack(hover))
+		if InCombatLockdown() and not Social.settings.combatEn.social then return end
 		
-
+		socialIcon:SetVertexColor(unpack(hover))
 		if libTT:IsAcquired("GuildTooltip") then
 			libTT:Release(libTT:Acquire("GuildTooltip"))
 		end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-		if not self.settings.social.tooltip then return end
-
-
-
-
-
+		if not self.settings.tooltip.social then return end
 		local totalBNet, numBNetOnline = BNGetNumFriends()
 		if numBNetOnline then
 			socialTooltip()
 		end
-
-
-
-
-
 	end)
 
+	socialFrame:SetScript("OnEvent", function()
+		local numBNetOnline = select(2,BNGetNumFriends())
+		local numFriendOnline = select(2,GetNumFriends())
+		socialText:SetText(numBNetOnline+numFriendOnline)
+		socialTextBG:SetSize(socialText:GetWidth()+4,socialText:GetHeight()+2)
+	end)
 	socialFrame:SetScript("OnLeave", function() socialIcon:SetVertexColor(unpack(color)) end)
 
 	socialFrame:SetScript("OnClick", function(_, button)
-		if InCombatLockdown() and not Social.settings.social.combatEn then return end
+		if InCombatLockdown() and not Social.settings.combatEn.social then return end
 		if button == "LeftButton" then
 			ToggleFriendsFrame()
 		end
