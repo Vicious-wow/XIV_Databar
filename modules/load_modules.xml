@@ -1,8 +1,8 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
   <Script file="menubutton.lua" />
   <Script file="social.lua" />
-  <!--<Script file="micromenu.lua" />
-  <Script file="clock.lua" />
+  <Script file="micromenu.lua" />
+  <!--<Script file="clock.lua" />
  <Script file="armor.lua" />
  <Script file="travel.lua" />
  <Script file="gold.lua" />

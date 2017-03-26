@@ -38,6 +38,17 @@ XB.menuIcons = {
 	chat = XB.mediaFold.."microbar\\chat",
 	guild = XB.mediaFold.."microbar\\guild",
 	social = XB.mediaFold.."microbar\\social",
+	character = XB.mediaFold.."microbar\\char",
+	spellbook = XB.mediaFold.."microbar\\spell",
+	talents = XB.mediaFold.."microbar\\talent",
+	achievements = XB.mediaFold.."microbar\\ach",
+	quests = XB.mediaFold.."microbar\\quest",
+	lfg = XB.mediaFold.."microbar\\lfg",
+	pvp = XB.mediaFold.."microbar\\pvp",
+	collections = XB.mediaFold.."microbar\\pet",
+	adventure = XB.mediaFold.."microbar\\journal",
+	shop = XB.mediaFold.."microbar\\shop",
+	help = XB.mediaFold.."microbar\\help",
 }
 
 XB.validAnchors = {
