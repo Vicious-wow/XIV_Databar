@@ -1,4 +1,4 @@
-## Interface: 70100
+## Interface: 70200
 ## Title: XIV_Databar
 ## Author: |cffbbbbbbMille|cff990000XIV|r and Mikeprod
 ## Version: 2.0.15
