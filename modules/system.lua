@@ -80,7 +80,9 @@ function SystemModule:Refresh()
   if db.modules.system.showWorld then
 	self.worldPingText:SetText('000'..MILLISECONDS_ABBR)
   else
-	self.worldPingText:SetText('')
+	if self.worldPing then
+		self.worldPingText:SetText('')
+	end
   end
   self.pingText:SetText('000'..MILLISECONDS_ABBR) -- get the widest we can be
 
@@ -137,9 +139,7 @@ function SystemModule:CreateFrames()
   self.pingFrame = self.pingFrame or CreateFrame('BUTTON', nil, self.systemFrame)
   self.pingIcon = self.pingIcon or self.pingFrame:CreateTexture(nil, 'OVERLAY')
   self.pingText = self.pingText or self.pingFrame:CreateFontString(nil, 'OVERLAY')
-  if xb.db.profile.modules.system.showWorld then
-	self.worldPingText = self.worldPingText or self.pingFrame:CreateFontString(nil, 'OVERLAY')
-  end
+  self.worldPingText = self.worldPingText or self.pingFrame:CreateFontString(nil, 'OVERLAY')
 end
 
 function SystemModule:HoverFunction()
