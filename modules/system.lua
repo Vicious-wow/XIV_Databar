@@ -40,7 +40,7 @@ function SystemModule:Refresh()
     return
   end
 
-  local iconSize = db.text.fontSize + db.general.barPadding
+  local iconSize = db.text.fontSize --+ db.general.barPadding
 
   self.fpsIcon:SetTexture(xb.constants.mediaPath..'datatexts\\fps')
   self.fpsIcon:SetSize(iconSize, iconSize)
@@ -59,21 +59,31 @@ function SystemModule:Refresh()
   self.pingIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
 
   self.pingText:SetFont(xb:GetFont(db.text.fontSize))
-  self.worldPingText:SetFont(xb:GetFont(db.text.fontSize))
-
+  if db.modules.system.showWorld then
+	self.worldPingText:SetFont(xb:GetFont(db.text.fontSize))
+  end
   self.fpsText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
   self.pingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-  self.worldPingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-
+  if db.modules.system.showWorld then
+	self.worldPingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  end
   if self.fpsFrame:IsMouseOver() then
     self.fpsText:SetTextColor(unpack(xb:HoverColors()))
   end
   if self.pingFrame:IsMouseOver() then
     self.pingText:SetTextColor(unpack(xb:HoverColors()))
-    self.worldPingText:SetTextColor(unpack(xb:HoverColors()))
+	if db.modules.system.showWorld then
+		self.worldPingText:SetTextColor(unpack(xb:HoverColors()))
+	end
   end
 
-  self.worldPingText:SetText('000'..MILLISECONDS_ABBR)
+  if db.modules.system.showWorld then
+	self.worldPingText:SetText('000'..MILLISECONDS_ABBR)
+  else
+	if self.worldPing then
+		self.worldPingText:SetText('')
+	end
+  end
   self.pingText:SetText('000'..MILLISECONDS_ABBR) -- get the widest we can be
 
   local pingWidest = self.pingText:GetStringWidth() + 5
@@ -116,7 +126,9 @@ function SystemModule:UpdateTexts()
   self.fpsText:SetText(floor(GetFramerate())..FPS_ABBR)
   local _, _, homePing, worldPing = GetNetStats()
   self.pingText:SetText(L['L']..": "..floor(homePing)..MILLISECONDS_ABBR)
-  self.worldPingText:SetText(L['W']..": "..floor(worldPing)..MILLISECONDS_ABBR)
+  if xb.db.profile.modules.system.showWorld then
+	self.worldPingText:SetText(L['W']..": "..floor(worldPing)..MILLISECONDS_ABBR)
+  end
 end
 
 function SystemModule:CreateFrames()
@@ -137,7 +149,9 @@ function SystemModule:HoverFunction()
   end
   if self.pingFrame:IsMouseOver() then
     self.pingText:SetTextColor(unpack(xb:HoverColors()))
-    self.worldPingText:SetTextColor(unpack(xb:HoverColors()))
+	if xb.db.profile.modules.system.showWorld then
+		self.worldPingText:SetTextColor(unpack(xb:HoverColors()))
+	end
   end
   if xb.db.profile.modules.system.showTooltip and not self.fpsFrame:IsMouseOver() then
     self:ShowTooltip()
@@ -149,7 +163,9 @@ function SystemModule:LeaveFunction()
   local db = xb.db.profile
   self.fpsText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
   self.pingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-  self.worldPingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  if xb.db.profile.modules.system.showWorld then
+	self.worldPingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  end
   if xb.db.profile.modules.system.showTooltip then
     GameTooltip:Hide()
   end

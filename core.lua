@@ -198,6 +198,10 @@ function XIVBar:CreateMainBar()
         self:RegisterFrame('bar', CreateFrame("FRAME", "XIV_Databar", UIParent))
         self.frames.bgTexture = self.frames.bgTexture or self.frames.bar:CreateTexture(nil, "BACKGROUND")
     end
+	if IsAddOnLoaded("ElvUI") or IsAddOnLoaded("Tukui") then
+		MinimapCluster:ClearAllPoints()
+		MinimapCluster:SetAllPoints(Minimap)	
+	end
 end
 
 function XIVBar:HideBarEvent()
