@@ -92,6 +92,17 @@ function round(number)
     local int = math.floor(number)
     return number-int <=0.5 and int or int+1
 end
+
+function xb_tContains(table, item)
+    local index = 1;
+    while table[index] do
+        if ( item == table[index] ) then
+            return index;
+        end
+        index = index + 1;
+    end
+    return nil;
+end
 ----------------------------------------------------------------------------------------------------------
 -- Private functions
 ----------------------------------------------------------------------------------------------------------
