@@ -7,10 +7,10 @@ local Mm = XB:RegisterModule("MicroMenu")
 ----------------------------------------------------------------------------------------------------------
 local ccR,ccG,ccB = GetClassColor(XB.playerClass)
 local libTT
-local mb_config
+local mm_config
 local groupFrame, moduleFrames, moduleIcons
 local Bar, BarFrame
-local microMenuElements, microMenuElementsTexts
+local microMenuElements, microMenuElementsTexts, microMenuElementsFunctions
 
 moduleFrames, moduleIcons = {}, {}
 microMenuElements = {"character","spellbook","talents","achievements","quests","lfg","pvp","collections","adventure","shop","help"}
@@ -29,7 +29,7 @@ local function tooltip(element)
     end
     local tooltip = libTT:Acquire("MicroMenuTip"..element, 1, "LEFT")
     tooltip:SmartAnchorTo(moduleFrames[element])
-	tooltip:SetAutoHideDelay(.1, moduleFrames[element])
+	  tooltip:SetAutoHideDelay(.1, moduleFrames[element])
     local text = ""
     
 	for index,val in ipairs(microMenuElements) do
@@ -43,24 +43,80 @@ local function tooltip(element)
     XB:SkinTooltip(tooltip,"MicroMenuTip"..element)
     tooltip:Show()
 end
+
+-- Because the following unit functions might change 
+local function characterClick()
+  ToggleFrame(CharacterFrame);
+end
+
+local function spellbookClick()
+  ToggleFrame(SpellBookFrame);
+end
+
+local function talentsClick()
+  ToggleTalentFrame(1);
+end
+
+local function achievementsClick()
+  ToggleAchievementFrame();
+end
+
+local function adventureClick()
+  ToggleEncounterJournal();
+end
+
+local function questsClick()
+  ToggleQuestLog();
+end
+
+local function lfgClick()
+  ToggleLFDParentFrame();
+end
+
+local function pvpClick()
+  TogglePVPUI();
+end
+
+local function collectionsClick()
+  ToggleCollectionsJournal(Mm.settings.collectionsTab)
+end
+
+local function storeClick()
+  ToggleStoreUI();
+end
+
+local function helpClick()
+  ToggleHelpFrame();
+end
+
+-- Have to move this initialization here, otherwhise functions not defined
+microMenuElementsFunctions = {characterClick,spellbookClick,talentsClick,achievementsClick,questsClick,lfgClick,pvpClick,collectionsClick,adventureClick,storeClick,helpClick}
+
+local function clickFunction(element) 
+  local index = xb_tContains(microMenuElements,element);
+  if index then
+    microMenuElementsFunctions[index]();
+  end
+end
+
 ----------------------------------------------------------------------------------------------------------
 -- Options
 ----------------------------------------------------------------------------------------------------------
 local mm_default = {
     profile = {
         enable = {
-            group = false,
-            character = false,
-            spellbook = false,
-            talents = false,
-            achievements = false,
-            quests = false,
-            lfg = false,
-            pvp = false,
-            collections = false,
-            adventure = false,
-            shop = false,
-            help = false
+            group = true,
+            character = true,
+            spellbook = true,
+            talents = true,
+            achievements = true,
+            quests = true,
+            lfg = true,
+            pvp = true,
+            collections = true,
+            adventure = true,
+            shop = true,
+            help = true
         },
         lock = true,
         x = {
@@ -178,12 +234,14 @@ local mm_default = {
             help = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75}
         },
         hoverCC = not (XB.playerClass == "PRIEST"),
+        collectionsTab = 1
     }
 }
 
 mm_config ={
 
 }
+
 ----------------------------------------------------------------------------------------------------------
 -- Module functions
 ----------------------------------------------------------------------------------------------------------
@@ -251,250 +309,28 @@ function Mm:CreateElementFrame(element)
 	
 	local x,y,w,h,a,color,hover = self.settings.x[element],self.settings.y[element],self.settings.w[element],self.settings.h[element],self.settings.anchor[element],self.settings.color[element],self.settings.hover[element]
 	moduleFrames[element] = moduleFrames[element] or CreateFrame("Frame", element.."Frame",groupFrame)
-	moduleFrames[element]:SetSize(w, h)
-	moduleFrames[element]:SetPoint(a,x,y)
-	moduleFrames[element]:Show()
+  local frame = moduleFrames[element];
+	frame:SetSize(w, h)
+	frame:SetPoint(a,x,y)
+	frame:EnableMouse(true)
+	frame:Show()
 	
-	moduleIcons[element] = moduleIcons[element] or moduleFrames[element]:CreateTexture(nil,"OVERLAY",nil,7)
-	moduleIcons[element]:SetSize(w,h)
-	moduleIcons[element]:SetPoint("CENTER")
-	moduleIcons[element]:SetTexture(XB.menuIcons[element])
-	moduleIcons[element]:SetVertexColor(unpack(color))
+	moduleIcons[element] = moduleIcons[element] or frame:CreateTexture(nil,"OVERLAY",nil,7)
+  local icon = moduleIcons[element];
+	icon:SetSize(w,h)
+	icon:SetPoint("CENTER")
+	icon:SetTexture(XB.menuIcons[element])
+	icon:SetVertexColor(unpack(color))
 	
-	moduleFrames[element]:SetScript("OnEnter",function() 
-		moduleIcons[element]:SetVertexColor(unpack(hover))
+	frame:SetScript("OnEnter",function() 
+		icon:SetVertexColor(unpack(hover))
 		if self.settings.tooltip[element] then
 			tooltip(element);
 		end
 	end);
-	moduleFrames[element]:SetScript("OnLeave",function() moduleIcons[element]:SetVertexColor(unpack(color)) end);
-end
+	frame:SetScript("OnLeave",function() icon:SetVertexColor(unpack(color)) end);
 
-
---[[function MenuModule:GetName()
-  return L['Micromenu'];
-end
-
-function MenuModule:OnInitialize()
-  self.LTip=LibStub('LibQTip-1.0')
-  self.mediaFolder = xb.constants.mediaPath..'microbar\\'
-  self.socialIconPath = "Interface\\FriendsFrame\\"
-  self.icons = {}
-  self.modifiers={SHIFT_KEY_TEXT,ALT_KEY_TEXT,CTRL_KEY_TEXT}
-  self.frames = {}
-  self.text = {}
-  self.bgTexture = {}
-  self.functions = {}
-  self.menuWidth = 0
-  self.iconSize = xb:GetHeight();
-  self:CreateClickFunctions()
-end
-
-function MenuModule:OnEnable()
-  if not xb.db.profile.modules.microMenu.enabled then return; end
-  if self.microMenuFrame == nil then
-    self.microMenuFrame = CreateFrame("FRAME", L['Micromenu'], xb:GetFrame('bar'))
-    xb:RegisterFrame('microMenuFrame', self.microMenuFrame)
-  end
-
-  self.microMenuFrame:Show()
-
-  if not self.frames.menu then
-	self:CreateFrames()
-	self:RegisterFrameEvents()
-	self:CreateIcons()
-  end
-  xb:Refresh()
-end
-
-function MenuModule:OnDisable()
-  self.microMenuFrame:Hide()
-  self:UnregisterFrameEvents()
-  xb:Refresh()
-end
-
-function MenuModule:Refresh()
-  if not xb.db.profile.modules.microMenu.enabled then self:Disable(); return; end
+  if frame:HasScript("OnMouseUp") and frame:GetScript("OnMouseUp") == clickFunction then return; end
   
-  if self.frames.menu == nil then return; end
-
-  if InCombatLockdown() then
-    self:RegisterEvent('PLAYER_REGEN_ENABLED', function()
-      self:Refresh()
-      self:UnregisterEvent('PLAYER_REGEN_ENABLED')
-    end)
-    return
-  end
-
-  self.modifier=self.modifiers[xb.db.profile.modules.microMenu.modifierTooltip];
-
-  self.iconSize = xb:GetHeight();
-
-  local colors = xb.db.profile.color
-  local totalWidth = 0;
-  for name, frame in pairs(self.frames) do
-    self:IconDefaults(name)
-    if name == 'menu' then
-      frame:SetPoint("LEFT", xb.db.profile.modules.microMenu.iconSpacing, 0)
-      totalWidth = totalWidth + frame:GetWidth() + xb.db.profile.modules.microMenu.iconSpacing
-    elseif frame:GetParent():GetName() == 'menu' then
-      frame:SetPoint("LEFT", frame:GetParent(), "RIGHT", xb.db.profile.modules.microMenu.mainMenuSpacing, 0)
-      totalWidth = totalWidth + frame:GetWidth() + xb.db.profile.modules.microMenu.mainMenuSpacing
-    else
-      frame:SetPoint("LEFT", frame:GetParent(), "RIGHT", xb.db.profile.modules.microMenu.iconSpacing, 0)
-      totalWidth = totalWidth + frame:GetWidth() + xb.db.profile.modules.microMenu.iconSpacing
-    end
-  end
-  self.microMenuFrame:SetPoint("LEFT", xb.db.profile.general.barPadding, 0)
-  self.microMenuFrame:SetSize(totalWidth, xb:GetHeight())
-
-  for name, frame in pairs(self.text) do
-    frame:SetFont(xb:GetFont(xb.db.profile.text.smallFontSize))
-    frame:SetPoint('CENTER', self.frames[name], xb.miniTextPosition)
-    self.bgTexture[name]:SetColorTexture(xb.db.profile.color.barColor.r, xb.db.profile.color.barColor.g, xb.db.profile.color.barColor.b, xb.db.profile.color.barColor.a)
-    self.bgTexture[name]:SetPoint('CENTER', frame, 'CENTER')
-    if xb.db.profile.modules.microMenu.hideSocialText then
-      frame:Hide()
-	else
-	  frame:Show()
-    end
-  end
-
-  self:UpdateFriendText()
-  self:UpdateGuildText()
+    frame:SetScript("OnMouseUp",function() clickFunction(element) end);
 end
-
-function MenuModule:UpdateMenu()
-	for _,frame in pairs(self.frames) do
-		frame:Hide()
-	end
-	self:UnregisterFrameEvents()
-	self:CreateFrames()
-	self:CreateIcons()
-	self:RegisterFrameEvents()
-end
-
-
-function MenuModule:CreateClickFunctions()
-  if self.functions.menu ~= nil then return; end
-
-  self.functions.menu = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-      ToggleFrame(GameMenuFrame)
-    elseif button == "RightButton" then
-      if IsShiftKeyDown() then
-        ReloadUI()
-      else
-        ToggleFrame(AddonList)
-      end
-    end
-  end; --menu
-
-  self.functions.chat = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-      if ChatMenu:IsVisible() then
-		ChatMenu:Hide()
-	  else
-	    ChatFrame_OpenMenu()
-	  end
-    end
-  end; --chat
-
-  self.functions.guild = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-      ToggleGuildFrame()
-      if IsInGuild() then
-        GuildFrameTab2:Click()
-      end
-    end
-  end; --guild
-
-  self.functions.social = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-      ToggleFriendsFrame()
-    end
-  end; --social
-
-  self.functions.char = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-      ToggleCharacter("PaperDollFrame")
-    end
-  end; --char
-
-  self.functions.spell = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-  		ToggleFrame(SpellBookFrame)
-  	end
-  end; --spell
-
-  self.functions.talent = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-  		ToggleTalentFrame()
-  	end
-  end; --talent
-
-  self.functions.journal = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-  		ToggleEncounterJournal()
-  	end
-  end; --journal
-
-  self.functions.lfg = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-  		ToggleLFDParentFrame()
-  	end
-  end; --lfg
-
-  self.functions.pet = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-  		ToggleCollectionsJournal()
-  	end
-  end; --pet
-
-  self.functions.ach = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-  		ToggleAchievementFrame()
-  	end
-  end; --ach
-
-  self.functions.quest = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-  		ToggleQuestLog()
-  	end
-  end; --quest
-
-  self.functions.pvp = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-  		TogglePVPUI()
-  	end
-  end; --pvp
-
-  self.functions.shop = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-  		ToggleStoreUI()
-  	end
-  end; --shop
-
-  self.functions.help = function(self, button, down)
-    if InCombatLockdown() then return; end
-    if button == "LeftButton" then
-  		ToggleHelpFrame()
-  	end
-  end; --help
-end
-
-]]
