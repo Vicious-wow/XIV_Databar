@@ -25,15 +25,6 @@ local durabilityList = {
     { id = GetInventorySlotInfo("SecondaryHandSlot"), cur = 0, max = 0, text = SECONDARYHANDSLOT}
   }
 
-
-
-
-
-
-
-
-
-
 ----------------------------------------------------------------------------------------------------------
 -- Private functions
 ----------------------------------------------------------------------------------------------------------
@@ -84,7 +75,8 @@ function tooltip()
   
   tooltip:AddLine("Estimated repair",repairCost())
   if Arm.settings.showIlvl then
-    tooltip:AddLine("Item level",equippedilvl.."/"..overallilvl)
+    ilvlString = string.format("Item level %."..Arm.settings.floatPrecision.."f/%."..Arm.settings.floatPrecision.."f",equippedilvl,overallilvl)
+    tooltip:AddLine(ilvlString)
   end
   tooltip:AddLine(" ")
 
@@ -124,7 +116,8 @@ local arm_default ={
     thresh = 70,
     showIlvl = true,
     alwaysDurability = true,
-    replaceDurWithIlvl = false
+    replaceDurWithIlvl = false,
+    floatPrecision = 2
   }
 }
 ----------------------------------------------------------------------------------------------------------
@@ -148,7 +141,8 @@ function Arm:OnEnable()
 end
 
 function Arm:OnDisable()
-  
+  armorFrame:Hide()
+  armorText:Hide()
 end
 
 function Arm:CreateFrames()
@@ -240,7 +234,7 @@ function Arm:CreateFrames()
       end
 
       if self.settings.alwaysDurability then
-        armorText:SetText(avgDurability.."%")
+        armorText:SetText(string.format("%."..self.settings.floatPrecision.."f%%",avgDurability))
       elseif self.settings.replaceDurWithIlvl then
         armorText:SetText(equippedilvl)
       else

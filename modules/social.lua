@@ -429,6 +429,7 @@ local function socialTooltip()
 	tooltip:AddLine("|cffffff00<SHIFT+Left-Click>|r", '|cffffffff'..CALENDAR_INVITELIST_INVITETORAID..'|r')
 	tooltip:AddLine("|cffffff00<Right-Click>|r", '|cffffffffWhisper Character|r')
 	-----------------------
+	XB:SkinTooltip(tooltip,"SocialTooltip")
 	tooltip:Show()
 end
 
