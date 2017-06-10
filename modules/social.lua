@@ -303,6 +303,17 @@ local function ClassColourCode(class,table)
 	end
 end
 
+local function concatTable( ... )
+	local args = {...}
+	local res = {}
+	for i = 1,#args do
+		for key,val in ipairs(args[i]) do
+			table.insert(res,val)
+		end
+	end
+	return res
+end
+
 local function socialTooltip()
 	--TODO: better rendering of the tooltip content + add zone and level to BTag toon
 	if libTT:IsAcquired("SocialTooltip") then
@@ -319,13 +330,49 @@ local function socialTooltip()
 	tooltip:AddLine(" ")
 	--------------------------
 	local onlineBnetFriends = false
+
+	--Grouping contacts
+	local appContacts, wowContacts, diabloContacts, sc2Contacts, hsContacts, hotsContacts, owContacts = {},{},{},{},{},{},{}
 	for j = 1, BNGetNumFriends() do
+		local client = select(7,BNGetFriendInfo(j))
+
+		if client == BNET_CLIENT_APP then 
+			table.insert(appContacts,j)
+		elseif client == BNET_CLIENT_D3 then
+			table.insert(diabloContacts,j)
+		elseif client == BNET_CLIENT_HEROES then
+			table.insert(hotsContacts,j)
+		elseif client == BNET_CLIENT_S2 then
+			table.insert(sc2Contacts,j)
+		elseif client == BNET_CLIENT_WOW then
+			table.insert(wowContacts,j)
+		elseif client == BNET_CLIENT_WTCG then
+			table.insert(hsContacts,j)
+		elseif client == BNET_CLIENT_OVERWATCH then
+			table.insert(owContacts,j)
+		end
+	end
+
+	--Selecting groups
+	local BNContacts = {}
+	if Social.settings.social.hideBnet then
+		BNContacts = CopyTable(concatTable(wowContacts, diabloContacts, sc2Contacts, hsContacts, hotsContacts, owContacts))
+	end
+	if Social.settings.social.hideNoWow then
+		BNContacts = wowContacts
+	end
+
+	if not Social.settings.social.hideBnet and not Social.settings.social.hideNoWow then
+		BNContacts = CopyTable(concatTable(wowContacts, diabloContacts, sc2Contacts, hsContacts, hotsContacts, owContacts, appContacts))
+	end
+
+	for _,j in ipairs(BNContacts) do
 		local BNid, BNname, battleTag, _, toonname, toonid, client, online, lastonline, isafk, isdnd, broadcast, note = BNGetFriendInfo(j)
+
 		toonname = BNet_GetValidatedCharacterName(toonname,battleTag,client)
 		local class = toonid and select(8, BNGetGameAccountInfo(toonid)) or ""
 		local area = toonid and select(10, BNGetGameAccountInfo(toonid)) or ""
 		local realmName = toonid and select(4,BNGetGameAccountInfo(toonid)) or ""
-		--groupe par jeu
 		
 		if ( online ) then
 			battleTag = battleTag or "[noBTag]"
@@ -562,6 +609,10 @@ local social_default = {
 				invClick = 1
 			}
 		},
+		social = {
+			hideBnet = false,
+			hideNoWow = false
+		}
 	}
 }
 

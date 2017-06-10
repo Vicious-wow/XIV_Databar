@@ -1,199 +1,193 @@
-local addon, xb = ...
+local addOnName, XB = ...;
+
+local Vol = XB:RegisterModule("Volume")
+
+----------------------------------------------------------------------------------------------------------
+-- Local variables
+----------------------------------------------------------------------------------------------------------
 local _G = _G;
-local L = xb.L;
+local ccR,ccG,ccB = GetClassColor(XB.playerClass)
+local libTT
+local volumeFrame,volumeIcon,volumeText
+local Bar,BarFrame
+local vol_config
 
-local VolumeModule = xb:NewModule("VolumeModule", 'AceEvent-3.0')
-
-function VolumeModule:GetName()
-  return "MasterVolume";
+----------------------------------------------------------------------------------------------------------
+-- Private functions
+----------------------------------------------------------------------------------------------------------
+local function refreshOptions()
+  Bar,BarFrame = XB:GetModule("Bar"),XB:GetModule("Bar"):GetFrame()
 end
 
-function VolumeModule:OnInitialize()
-self.frame = nil
-self.icon = nil
-self.text = nil
+local function tooltip()
+  if libTT:IsAcquired("VolumeTooltip") then
+	libTT:Release(libTT:Acquire("VolumeTooltip"))
+  end
+
+  local tooltip = libTT:Acquire("VolumeTooltip", 2)
+  tooltip:SmartAnchorTo(volumeFrame)
+  tooltip:SetAutoHideDelay(.3, volumeFrame)
+  tooltip:AddHeader("[|cff6699FF"..MASTER_VOLUME.."|r]")
+  tooltip:AddLine("|cffffff00<Left-Click>|r", "|cffffffff"..BINDING_NAME_MASTERVOLUMEUP.."|r")
+  tooltip:AddLine("|cffffff00<Right-Click>|r", "|cffffffff"..BINDING_NAME_MASTERVOLUMEDOWN.."|r")
+  
+  XB:SkinTooltip(tooltip,"VolumeTooltip")
+  tooltip:Show();
 end
 
-function VolumeModule:OnEnable()
-	if self.frame == nil then
-		self:CreateModuleFrame()
-		self:RegisterEvents()
-		self:MasterVolume_Update_Value()
-		self:Hooks()
-	else
-		self.frame:Show()
-		self:RegisterEvents()
-	end
-end
-
-function VolumeModule:OnDisable()
-	if self.frame then
-		self.frame:Hide()
-		self.frame:UnregisterAllEvents()
-	end
-end
-
-function VolumeModule:CreateModuleFrame()
-	self.frame=CreateFrame("BUTTON","masterVolume", xb:GetFrame('bar'))
-	xb:RegisterFrame('volumeFrame',self.frame)
-	self.frame:EnableMouse(true)
-	self.frame:RegisterForClicks("AnyDown")
-
-	local relativeAnchorPoint = 'RIGHT'
-	local xOffset = xb.db.profile.general.moduleSpacing
-	local parentFrame = xb:GetFrame('armorFrame')
-	if not xb.db.profile.modules.armor.enabled then
-		parentFrame=xb:GetFrame('microMenuFrame')
-		if not xb.db.profile.modules.microMenu.enabled then
-			parentFrame=xb:GetFrame('bar')
-			relativeAnchorPoint = 'LEFT'
-			xOffset = 0
-		end
-	end
-
-	self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
-	
-	self.icon = self.frame:CreateTexture(nil,"OVERLAY",nil,7)
-	self.icon:SetPoint("LEFT")
-	self.icon:SetTexture(xb.constants.mediaPath.."datatexts\\sound")
-	self.icon:SetVertexColor(xb:GetColor('normal'))
-	
-	self.text = self.frame:CreateFontString(nil, "OVERLAY")
-	self.text:SetFont(xb:GetFont(xb.db.profile.text.fontSize))
-	self.text:SetPoint("RIGHT", self.frame,2,0)
-	self.text:SetTextColor(xb:GetColor('inactive'))
-end
-
-function VolumeModule:RegisterEvents()
-	self.frame:SetScript("OnEnter", function()
-		if InCombatLockdown() then return end
-		self.icon:SetVertexColor(xb:GetColor('hover'))
-		self.text:SetTextColor(xb:GetColor('hover'))
-		
-		if xb.db.profile.general.barPosition == "TOP" then
-			GameTooltip:SetOwner(self.frame, "ANCHOR_BOTTOM")
-		else
-			GameTooltip:SetOwner(self.frame, "ANCHOR_TOP")
-		end
-		GameTooltip:AddLine("[|cff6699FF"..MASTER_VOLUME.."|r]")
-		GameTooltip:AddLine(" ")
-		GameTooltip:AddDoubleLine("<"..L['Left-Click']..">", "|cffffffff"..BINDING_NAME_MASTERVOLUMEUP.."|r")
-		GameTooltip:AddDoubleLine("<"..L['Right-Click']..">", "|cffffffff"..BINDING_NAME_MASTERVOLUMEDOWN.."|r")
-		GameTooltip:Show()
-	end)
-	
-	self.frame:SetScript("OnClick", function(self, button, down)
-		local volume = tonumber(GetCVar("Sound_MasterVolume"));
-		
-		if button == "LeftButton" then
-		
-		SetCVar( "Sound_MasterVolume", volume + xb.db.profile.modules.MasterVolume.step);
-
-		elseif button == "RightButton" then
-		SetCVar( "Sound_MasterVolume", volume - xb.db.profile.modules.MasterVolume.step);
-		end
-		volume = tonumber(GetCVar("Sound_MasterVolume"));
-		if volume <=0 then SetCVar( "Sound_MasterVolume", 0); end
-		if volume >=1 then SetCVar( "Sound_MasterVolume", 1); end
-	end)
-	
-	self.frame:SetScript("OnLeave", function()
-		self.icon:SetVertexColor(xb:GetColor('normal'))
-		self.text:SetTextColor(xb:GetColor('inactive'))
-		GameTooltip:Hide();
-	end)
-	
-	self.frame:RegisterEvent("PLAYER_ENTERING_WORLD");
-	self.frame:RegisterEvent("CVAR_UPDATE");
-	self.frame:SetScript("OnEvent", function(self,event, ...)
-		VolumeModule:MasterVolume_Update_Value();
-	end)
-end
-
-function VolumeModule:Refresh()
-	if not xb.db.profile.modules.MasterVolume.enabled then self:Disable(); return; end
-
-	if not self.frame and xb.db.profile.modules.MasterVolume.enabled then
-		self:Enable()
-		return;
-	end
-
-	if self.frame then
-		self.frame:Hide()
-		local relativeAnchorPoint = 'RIGHT'
-		local xOffset = xb.db.profile.general.moduleSpacing
-		local parentFrame = xb:GetFrame('armorFrame')
-		if not xb.db.profile.modules.armor.enabled then
-			parentFrame=xb:GetFrame('microMenuFrame')
-			if not xb.db.profile.modules.microMenu.enabled then
-				parentFrame=xb:GetFrame('bar')
-				relativeAnchorPoint = 'LEFT'
-				xOffset = 0
-			end
-		end
-		self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
-		self.frame:Show()
-	end
-end
-
-function VolumeModule:MasterVolume_Update_Value()
+local function masterVolume_Update_Value()
 	local volume = tonumber(GetCVar("Sound_MasterVolume"));
 	local volumePercent = (volume * 100);
-	local volumePercentTrimed = tonumber(string.format("%.1f", volumePercent));
-	if self.text and self.frame then
-		self.text:SetText(volumePercentTrimed.." %")
-		self.frame:SetSize(self.text:GetStringWidth()+18, 16)
-	end
+	local volumePercentTrimed = tonumber(string.format("%."..Vol.settings.floatPrecision.."f", volumePercent));
+
+	return volumePercentTrimed;
 end
 
-function VolumeModule:Hooks()
-	hooksecurefunc("Sound_MasterVolumeUp", VolumeModule.MasterVolume_Update_Value)
-	hooksecurefunc("Sound_MasterVolumeDown", VolumeModule.MasterVolume_Update_Value)
+local function hooks()
+	hooksecurefunc("Sound_MasterVolumeUp", masterVolume_Update_Value)
+	hooksecurefunc("Sound_MasterVolumeDown", masterVolume_Update_Value)
 
 	hooksecurefunc("SetCVar", function(cvar, value)
 		if cvar == "Sound_MasterVolume" then
-			VolumeModule:MasterVolume_Update_Value()
+			masterVolume_Update_Value()
 		end
 	end)
 end
 
-function VolumeModule:GetDefaultOptions()
-  return self:GetName(), {
-      enabled = false,
-      step = 0.1
-    }
+----------------------------------------------------------------------------------------------------------
+-- Options
+----------------------------------------------------------------------------------------------------------
+local vol_default = {
+	profile = {
+		enable = true,
+		lock = true,
+		x = 700,
+		y = 0,
+		w = 16,
+		h = 16,
+		anchor = "LEFT",
+		combatEn = false,
+		tooltip = true,
+		color = {1,1,1,.75},
+		colorCC = false,
+		hover = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
+		hoverCC = not (XB.playerClass == "PRIEST"),
+		step = 0.1,
+		floatPrecision = 1
+	}
+}
+
+----------------------------------------------------------------------------------------------------------
+-- Module functions
+----------------------------------------------------------------------------------------------------------
+function Vol:OnInitialize()
+  libTT = LibStub('LibQTip-1.0')
+  self.db = XB.db:RegisterNamespace("Volume", vol_default)
+  self.settings = self.db.profile
 end
 
-function VolumeModule:GetConfig()
-  return {
-    name = L['Master Volume'],
-    type = "group",
-    args = {
-      enable = {
-        name = ENABLE,
-        order = 0,
-        type = "toggle",
-        get = function() return xb.db.profile.modules.MasterVolume.enabled; end,
-        set = function(_, val)
-          xb.db.profile.modules.MasterVolume.enabled = val
-          if val then
-            self:Enable();
-          else
-            self:Disable();
-          end
-        end,
-        width = "full"
-      },
-	  step = {
-		name = L["Volume step"],
-		order = 1,
-		type = "range",
-		min = 1,
-		max = 50,
-		step = 1,
-		get = function() return xb.db.profile.modules.MasterVolume.step*100; end,
-		set = function(_,val) xb.db.profile.modules.MasterVolume.step = val/100.0; end
-	  }
-	  }
-  }
- end
+function Vol:OnEnable()
+  self.settings.lock = self.settings.lock or not self.settings.lock
+  refreshOptions()
+  XB.Config:Register("Volume",mm_config)
+	if self.settings.enable then
+		self:CreateFrames()
+	else
+		self:Disable()
+	end
+
+	masterVolume_Update_Value()
+	hooks()
+end
+
+function Vol:OnDisable()
+  
+end
+
+function Vol:CreateFrames()
+	if not self.settings.enable then
+	  if volumeFrame and volumeFrame:IsVisible() then
+		volumeFrame:Hide()
+	  end
+	  return
+	end
+
+	local x,y,w,h,color,hover,anchor = self.settings.x,self.settings.y,self.settings.w,self.settings.h,self.settings.color,self.settings.hover,self.settings.anchor
+
+	volumeFrame = volumeFrame or CreateFrame("Button","Volume",BarFrame)
+	volumeFrame:ClearAllPoints()
+	volumeFrame:SetPoint(anchor,x,y)
+	volumeFrame:SetMovable(true)
+	volumeFrame:SetClampedToScreen(true)
+	volumeFrame:RegisterForClicks("AnyUp")
+	volumeFrame:Show()
+
+	if not volumeFrame:IsEventRegistered("PLAYER_ENTERING_WORLD") then
+		volumeFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+		volumeFrame:RegisterEvent("CVAR_UPDATE")
+	end
+
+	volumeIcon = volumeIcon or volumeFrame:CreateTexture(nil,"OVERLAY",nil,7)
+	volumeIcon:ClearAllPoints()
+	volumeIcon:SetPoint("LEFT")
+	volumeIcon:SetSize(w,h)
+	volumeIcon:SetTexture(XB.mediaFold.."datatexts\\sound")
+	volumeIcon:SetVertexColor(unpack(color))
+
+	volumeText = volumeFrame:CreateFontString(nil, "OVERLAY")
+	volumeText:SetPoint("RIGHT", volumeFrame,2,0)
+	volumeText:SetFont(XB.mediaFold.."font\\homizio_bold.ttf", 12)
+	volumeText:SetTextColor(unpack(color))
+
+	volumeText:SetText(masterVolume_Update_Value().." %")
+	volumeFrame:SetSize(volumeText:GetStringWidth()+2+w, h)
+
+	XB:AddOverlay(self,volumeFrame,anchor)
+
+	-- Event handling
+	if not volumeFrame:GetScript("OnEvent") then
+		volumeFrame:SetScript("OnEvent", function()
+			masterVolume_Update_Value();
+		end)
+
+		volumeFrame:SetScript("OnEnter", function()
+			if InCombatLockdown() and not self.settings.combatEn then return end
+				volumeIcon:SetVertexColor(unpack(hover))
+			if Vol.settings.tooltip then
+				tooltip()
+			end
+		end)
+		
+		volumeFrame:SetScript("OnClick", function(_, button, down)
+			local volume = tonumber(GetCVar("Sound_MasterVolume"));
+			
+			if button == "LeftButton" then
+				SetCVar( "Sound_MasterVolume", volume + self.settings.step);
+			elseif button == "RightButton" then
+				SetCVar( "Sound_MasterVolume", volume - self.settings.step);
+			end
+
+			volume = tonumber(GetCVar("Sound_MasterVolume"));
+			if volume <=0 then SetCVar( "Sound_MasterVolume", 0); end
+			if volume >=1 then SetCVar( "Sound_MasterVolume", 1); end
+
+			volumeText:SetText(masterVolume_Update_Value().." %")
+			volumeFrame:SetSize(volumeText:GetStringWidth()+2+w, h)
+		end)
+		
+		volumeFrame:SetScript("OnLeave", function()
+			if libTT:IsAcquired("VolumeTooltip") then
+				libTT:Release(libTT:Acquire("VolumeTooltip"))
+			end
+			volumeIcon:SetVertexColor(unpack(color))
+		end)
+	end
+
+	if not self.settings.lock then
+		volumeFrame.overlay:Show()
+		volumeFrame.overlay.anchor:Show()
+	else
+		volumeFrame.overlay:Hide()
+		volumeFrame.overlay.anchor:Hide()
+	end
+end
