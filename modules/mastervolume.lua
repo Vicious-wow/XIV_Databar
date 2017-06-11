@@ -5,7 +5,6 @@ local Vol = XB:RegisterModule("Volume")
 ----------------------------------------------------------------------------------------------------------
 -- Local variables
 ----------------------------------------------------------------------------------------------------------
-local _G = _G;
 local ccR,ccG,ccB = GetClassColor(XB.playerClass)
 local libTT
 local volumeFrame,volumeIcon,volumeText
@@ -89,7 +88,7 @@ end
 function Vol:OnEnable()
   self.settings.lock = self.settings.lock or not self.settings.lock
   refreshOptions()
-  XB.Config:Register("Volume",mm_config)
+  XB.Config:Register("Volume",vol_config)
 	if self.settings.enable then
 		self:CreateFrames()
 	else
@@ -134,7 +133,7 @@ function Vol:CreateFrames()
 	volumeIcon:SetTexture(XB.mediaFold.."datatexts\\sound")
 	volumeIcon:SetVertexColor(unpack(color))
 
-	volumeText = volumeFrame:CreateFontString(nil, "OVERLAY")
+	volumeText = volumeText or volumeFrame:CreateFontString(nil, "OVERLAY")
 	volumeText:SetPoint("RIGHT", volumeFrame,2,0)
 	volumeText:SetFont(XB.mediaFold.."font\\homizio_bold.ttf", 12)
 	volumeText:SetTextColor(unpack(color))

@@ -173,7 +173,7 @@ function Arm:CreateFrames()
   armorIcon:SetSize(w,h)
   armorIcon:SetTexture(XB.icons.repair)
 
-  armorText = armorFrame:CreateFontString(nil, "OVERLAY")
+  armorText = armorText or armorFrame:CreateFontString(nil, "OVERLAY")
   armorText:SetPoint("RIGHT", armorFrame,2,0)
   armorText:SetFont(XB.mediaFold.."font\\homizio_bold.ttf", 12)
   armorText:SetTextColor(unpack(color))
