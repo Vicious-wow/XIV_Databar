@@ -198,10 +198,6 @@ function XIVBar:CreateMainBar()
         self:RegisterFrame('bar', CreateFrame("FRAME", "XIV_Databar", UIParent))
         self.frames.bgTexture = self.frames.bgTexture or self.frames.bar:CreateTexture(nil, "BACKGROUND")
     end
-	if IsAddOnLoaded("ElvUI") or IsAddOnLoaded("Tukui") then
-		MinimapCluster:ClearAllPoints()
-		MinimapCluster:SetAllPoints(Minimap)	
-	end
 end
 
 function XIVBar:HideBarEvent()
@@ -353,7 +349,8 @@ function OffsetUI()
     if (not ticketStatusFrameShown and not gmChatStatusFrameShown) then
         buffsAreaTopOffset = buffsAreaTopOffset + 13;
     end
-	if(not MinimapCluster:IsUserPlaced() and MinimapCluster:GetTop()-UIParent:GetHeight() < 1) then
+
+	if(not IsAddOnLoaded("ElvUI") and not MinimapCluster:IsUserPlaced() and MinimapCluster:GetTop()-UIParent:GetHeight() < 1) then
 		MinimapCluster:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0 - buffsAreaTopOffset);
 	end
 		
