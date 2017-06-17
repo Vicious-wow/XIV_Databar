@@ -52,12 +52,14 @@ end
 function TradeskillModule:UpdateProfValues()
   if self.prof1 then
     local _, _, skill, cap, _ = GetProfessionInfo(self.prof1)
+    if not GetProfessionInfo(self.prof1) then return end
     self.firstProfBar:SetMinMaxValues(1, cap)
     self.firstProfBar:SetValue(skill)
   end
 
   if self.prof2 then
     local _, _, skill, cap, _ = GetProfessionInfo(self.prof2)
+    if not GetProfessionInfo(self.prof2) then return end
     self.secondProfBar:SetMinMaxValues(1, cap)
     self.secondProfBar:SetValue(skill)
   end
@@ -111,6 +113,7 @@ function TradeskillModule:StyleTradeskillFrame(framePrefix, profIndex)
   local db = xb.db.profile
   local iconSize = db.text.fontSize + db.general.barPadding
   local name, _, skill, cap, _, spellOffset, skillLine, _ = GetProfessionInfo(profIndex)
+  if not name then return end
   local icon = xb.constants.mediaPath..'profession\\'..self.profIcons[skillLine]
 
   local textHeight = floor((xb:GetHeight() - 4) / 2)
