@@ -168,16 +168,14 @@ function ArmorModule:UpdateDurabilityText()
   end
   self.durabilityAverage = floor((total / maxTotal) * 100)
 
-  if (self.durabilityAverage >= db.durabilityMax) or db.alwaysShowIlvl then
-    local _, equippedIlvl = GetAverageItemLevel()
-    text = floor(equippedIlvl)..' ilvl'
-  end
-
   if self.durabilityAverage <= db.durabilityMax then
-    text = text..' '..self.durabilityAverage..'%'
+    text = text..self.durabilityAverage..'%'
   end
 
-
+  if (self.durabilityAverage > db.durabilityMax) or db.alwaysShowIlvl then
+    local _, equippedIlvl = GetAverageItemLevel()
+    text = text..' '..floor(equippedIlvl)..' ilvl'
+  end
 
   self.armorText:SetText(text)
 end
@@ -236,8 +234,7 @@ function ArmorModule:GetConfig()
         max = 100,
         step = 5,
         get = function() return xb.db.profile.modules.armor.durabilityMax; end,
-        set = function(info, val) xb.db.profile.modules.armor.durabilityMax = val; self:Refresh(); end,
-        disabled = function() return xb.db.profile.modules.armor.alwaysShowIlvl; end
+        set = function(info, val) xb.db.profile.modules.armor.durabilityMax = val; self:Refresh(); end
       }
     }
   }
