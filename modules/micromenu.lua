@@ -403,7 +403,7 @@ end
 
 function MenuModule:DefaultHover(name)
   return function()
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if self.icons[name] ~= nil then
       self.icons[name]:SetVertexColor(unpack(xb:HoverColors()))
 	  self.tipHover=(name=="social")
@@ -414,7 +414,7 @@ end
 
 function MenuModule:DefaultLeave(name)
   return function()
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if self.icons[name] ~= nil then
       self.icons[name]:SetVertexColor(xb.db.profile.color.normal.r, xb.db.profile.color.normal.g, xb.db.profile.color.normal.b, xb.db.profile.color.normal.a)
     end
@@ -639,7 +639,7 @@ function MenuModule:CreateClickFunctions()
   if self.functions.menu ~= nil then return; end
 
   self.functions.menu = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
       ToggleFrame(GameMenuFrame)
     elseif button == "RightButton" then
@@ -652,7 +652,7 @@ function MenuModule:CreateClickFunctions()
   end; --menu
 
   self.functions.chat = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
       if ChatMenu:IsVisible() then
 		ChatMenu:Hide()
@@ -663,7 +663,7 @@ function MenuModule:CreateClickFunctions()
   end; --chat
 
   self.functions.guild = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
       ToggleGuildFrame()
       if IsInGuild() then
@@ -673,84 +673,84 @@ function MenuModule:CreateClickFunctions()
   end; --guild
 
   self.functions.social = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
       ToggleFriendsFrame()
     end
   end; --social
 
   self.functions.char = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
       ToggleCharacter("PaperDollFrame")
     end
   end; --char
 
   self.functions.spell = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
   		ToggleFrame(SpellBookFrame)
   	end
   end; --spell
 
   self.functions.talent = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
   		ToggleTalentFrame()
   	end
   end; --talent
 
   self.functions.journal = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
   		ToggleEncounterJournal()
   	end
   end; --journal
 
   self.functions.lfg = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
   		ToggleLFDParentFrame()
   	end
   end; --lfg
 
   self.functions.pet = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
   		ToggleCollectionsJournal()
   	end
   end; --pet
 
   self.functions.ach = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
   		ToggleAchievementFrame()
   	end
   end; --ach
 
   self.functions.quest = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
   		ToggleQuestLog()
   	end
   end; --quest
 
   self.functions.pvp = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
   		TogglePVPUI()
   	end
   end; --pvp
 
   self.functions.shop = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
   		ToggleStoreUI()
   	end
   end; --shop
 
   self.functions.help = function(self, button, down)
-    if InCombatLockdown() then return; end
+    if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
   		ToggleHelpFrame()
   	end
@@ -761,6 +761,7 @@ function MenuModule:GetDefaultOptions()
   return 'microMenu', {
       enabled = true,
       showTooltips = true,
+      combatEn = false,
       mainMenuSpacing = 2,
       iconSpacing = 2,
       hideSocialText = false,
@@ -813,14 +814,20 @@ function MenuModule:GetConfig()
       hideSocialText = {
         name = L['Hide Social Text'],
         order = 2,
-		width = "double",
         type = "toggle",
         get = function() return xb.db.profile.modules.microMenu.hideSocialText; end,
         set = function(_, val) xb.db.profile.modules.microMenu.hideSocialText = val; self:Refresh(); end
       },
+      combatEn = {
+        name = 'Enable in combat',
+        order = 3,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.microMenu.combatEn; end,
+        set = function(_, val) xb.db.profile.modules.microMenu.combatEn = val; self:Refresh(); end
+      },
       mainMenuSpacing = {
         name = L['Main Menu Icon Right Spacing'],
-        order = 3,
+        order = 4,
         type="range",
         min = 2,
         max = 20,
@@ -830,7 +837,7 @@ function MenuModule:GetConfig()
       },
       iconSpacing = {
         name = L['Icon Spacing'],
-        order = 4,
+        order = 5,
         type="range",
         min = 2,
         max = 20,
@@ -841,13 +848,13 @@ function MenuModule:GetConfig()
 	  showGMOTD = {
 		name = L["GMOTD in Tooltip"],
 		type = "toggle",
-		order = 5,
+		order = 6,
 		get = function() return xb.db.profile.modules.microMenu.showGMOTD end,
 		set = function(_,val) xb.db.profile.modules.microMenu.showGMOTD = val; self:Refresh(); end
 	  },
 	  modifierTooltip = {
 		name = L["Modifier for friend invite"],
-		order = 6,
+		order = 7,
 		type = "select",
 		values = {SHIFT_KEY_TEXT,ALT_KEY_TEXT,CTRL_KEY_TEXT},
 		style = "dropdown",
@@ -858,7 +865,7 @@ function MenuModule:GetConfig()
       buttons = {
         type = 'group',
         name = L['Show/Hide Buttons'],
-        order = 7,
+        order = 8,
         inline = true,
         args = {
           menu = {
