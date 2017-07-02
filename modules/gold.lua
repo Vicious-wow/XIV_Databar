@@ -5,15 +5,66 @@ local L = XIVBar.L;
 
 local GoldModule = xb:NewModule("GoldModule", 'AceEvent-3.0')
 
+local isSessionNegative = false
+local positiveSign = "|cff00ff00+ "
+local negativeSign = "|cffff0000- "
+
+local function moneyWithTexture(amount,session)
+  local copper, silver = 0,0;
+  local showSC = xb.db.profile.modules.gold.showSmallCoins
+
+  amount, copper = math.modf(amount/100.0)
+  amount, silver = math.modf(amount/100.0)
+
+  silver = silver * 100
+  copper = copper * 100
+
+  if silver < 10 then
+    silver = "0"..silver
+  end
+  if copper < 10 then
+    copper = "0"..copper
+  end
+
+  if not showSC then
+    silver,copper = "00","00"
+  end
+  if not session then
+    return GetCoinTextureString(amount..""..silver..""..copper)
+  else
+    return isSessionNegative and negativeSign..GetCoinTextureString(amount..""..silver..""..copper) or GetCoinTextureString(amount..""..silver..""..copper)
+  end
+end
+
+local function ConvertDateToNumber(month, day, year)
+  month = gsub(month, "(%d)(%d?)", function(d1, d2) return d2 == "" and "0"..d1 or d1..d2 end) -- converts M to MM
+  day = gsub(day, "(%d)(%d?)", function(d1, d2) return d2 == "" and "0"..d1 or d1..d2 end) -- converts D to DD
+
+  return tonumber(year..month..day)
+end
+
 function GoldModule:GetName()
   return BONUS_ROLL_REWARD_MONEY;
 end
 
 function GoldModule:OnInitialize()
-  if xb.db.factionrealm[xb.constants.playerName] == nil then
-    xb.db.factionrealm[xb.constants.playerName] = { currentMoney = 0 }
+  if not xb.db.factionrealm[xb.constants.playerName] then
+    xb.db.factionrealm[xb.constants.playerName] = { currentMoney = 0, sessionMoney = 0 }
   end
-  xb.db.factionrealm[xb.constants.playerName].sessionMoney = 0
+  
+  local playerData = xb.db.factionrealm[xb.constants.playerName]
+
+  local weekday, month, day, year = CalendarGetDate()
+  local today = ConvertDateToNumber(month, day, year)
+  
+  if playerData.lastLoginDate then
+      if playerData.lastLoginDate < today then -- is true, if last time player logged in was the day before or even earlier
+          playerData.lastLoginDate = today
+          playerData.sessionMoney = 0
+      end
+  else
+    playerData.lastLoginDate = today
+  end
 end
 
 function GoldModule:OnEnable()
@@ -22,13 +73,12 @@ function GoldModule:OnEnable()
     xb:RegisterFrame('goldFrame', self.goldFrame)
   end
   self.goldFrame:Show()
-  if xb.db.factionrealm[xb.constants.playerName].currentMoney == 0 then
-    xb.db.factionrealm[xb.constants.playerName].currentMoney = GetMoney()
-  end
+  xb.db.factionrealm[xb.constants.playerName].currentMoney = GetMoney()
 
   self:CreateFrames()
   self:RegisterFrameEvents()
   self:Refresh()
+  listAllCharactersByFactionRealm()
 end
 
 function GoldModule:OnDisable()
@@ -122,14 +172,17 @@ function GoldModule:RegisterFrameEvents()
 
     GameTooltip:SetOwner(GoldModule.goldFrame, 'ANCHOR_'..xb.miniTextPosition)
     GameTooltip:AddLine("[|cff6699FF"..BONUS_ROLL_REWARD_MONEY.."|r - |cff82c5ff"..xb.constants.playerFactionLocal.." "..xb.constants.playerRealm.."|r]")
+    if not xb.db.profile.modules.gold.showSmallCoins then
+      GameTooltip:AddLine("Gold rounded values")
+    end
     GameTooltip:AddLine(" ")
 
-    GameTooltip:AddDoubleLine(L['Session Total'], GoldModule:FormatCoinText(xb.db.factionrealm[xb.constants.playerName].sessionMoney), 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine(L['Session Total'], moneyWithTexture(math.abs(xb.db.factionrealm[xb.constants.playerName].sessionMoney),true), 1, 1, 0, 1, 1, 1)
     GameTooltip:AddLine(" ")
 
     local totalGold = 0
     for charName, goldData in pairs(xb.db.factionrealm) do
-      GameTooltip:AddDoubleLine(charName, GoldModule:FormatCoinText(goldData.currentMoney), 1, 1, 0, 1, 1, 1)
+      GameTooltip:AddDoubleLine(charName, moneyWithTexture(goldData.currentMoney), 1, 1, 0, 1, 1, 1)
       totalGold = totalGold + goldData.currentMoney
     end
     GameTooltip:AddLine(" ")
@@ -169,15 +222,9 @@ function GoldModule:PLAYER_MONEY()
   local curMoney = gdb.currentMoney
   local tmpMoney = GetMoney()
   local moneyDiff = tmpMoney - curMoney
+  
   gdb.sessionMoney = gdb.sessionMoney + moneyDiff
-
-  --[[local weekday, month, day, year = CalendarGetDate()
-
-  if gdb.curDay == nil or (gdb.curMonth == month and gdb.curDay < day) or (gdb.curMonth < month) or gdb.curYear < year then
-    if gdb.curDay then
-      gdb.
-    end
-  end]]--
+  isSessionNegative = gdb.sessionMoney < 0
   gdb.currentMoney = tmpMoney
   self:Refresh()
 end
@@ -213,6 +260,32 @@ end
 function GoldModule:SeparateCoins(money)
   local gold, silver, copper = floor(abs(money / 10000)), floor(abs(mod(money / 100, 100))), floor(abs(mod(money, 100)))
   return gold, silver, copper
+end
+
+function listAllCharactersByFactionRealm()
+  local optTable = {
+    header = {
+      name = "|cff82c5ff"..xb.constants.playerFactionLocal.." "..xb.constants.playerRealm.."|r",
+      type = "header",
+      order = 0
+    },
+    footer = {
+      name = "All the characters listed above are currently registered in the gold database. To delete one or several character, plase uncheck the box correponding to the character(s) to delete.\nThe boxes will remain unchecked for the deleted character(s), untill you reload or logout/login",
+      type = "description",
+      order = -1
+    }
+  }
+
+  for k,v in pairs(xb.db.factionrealm) do
+    optTable[k]={
+      name = k,
+      width = "full",
+      type = "toggle",
+      get = function() return xb.db.factionrealm[k] ~= nil; end,
+      set = function(_,val) if not val and xb.db.factionrealm[k] ~= nil then xb.db.factionrealm[k] = nil; end end
+    }
+  end
+  return optTable;
 end
 
 function GoldModule:GetDefaultOptions()
@@ -264,6 +337,12 @@ function GoldModule:GetConfig()
         type = "toggle",
         get = function() return xb.db.profile.modules.gold.shortThousands; end,
         set = function(_, val) xb.db.profile.modules.gold.shortThousands = val; self:Refresh(); end
+      },
+      listPlayers = {
+        name = "Registered characters",
+        type = "group",
+        order = 1,
+        args = listAllCharactersByFactionRealm()
       }
     }
   }
