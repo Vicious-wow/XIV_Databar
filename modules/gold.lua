@@ -5,7 +5,7 @@ local L = XIVBar.L;
 
 local GoldModule = xb:NewModule("GoldModule", 'AceEvent-3.0')
 
-local isSessionNegative = false
+local isSessionNegative, isDailyNegative = false, false
 local positiveSign = "|cff00ff00+ "
 local negativeSign = "|cffff0000- "
 
@@ -49,7 +49,11 @@ end
 
 function GoldModule:OnInitialize()
   if not xb.db.factionrealm[xb.constants.playerName] then
-    xb.db.factionrealm[xb.constants.playerName] = { currentMoney = 0, sessionMoney = 0 }
+    xb.db.factionrealm[xb.constants.playerName] = { currentMoney = 0, sessionMoney = 0, dailyMoney = 0 }
+  else
+    if not xb.db.factionrealm[xb.constants.playerName].dailyMoney then
+      xb.db.factionrealm[xb.constants.playerName].dailyMoney = 0
+    end
   end
   
   local playerData = xb.db.factionrealm[xb.constants.playerName]
@@ -60,7 +64,7 @@ function GoldModule:OnInitialize()
   if playerData.lastLoginDate then
       if playerData.lastLoginDate < today then -- is true, if last time player logged in was the day before or even earlier
           playerData.lastLoginDate = today
-          playerData.sessionMoney = 0
+          playerData.daily = 0
       end
   else
     playerData.lastLoginDate = today
@@ -73,6 +77,8 @@ function GoldModule:OnEnable()
     xb:RegisterFrame('goldFrame', self.goldFrame)
   end
   self.goldFrame:Show()
+
+  xb.db.factionrealm[xb.constants.playerName].sessionMoney = 0
   xb.db.factionrealm[xb.constants.playerName].currentMoney = GetMoney()
 
   self:CreateFrames()
@@ -178,6 +184,7 @@ function GoldModule:RegisterFrameEvents()
     GameTooltip:AddLine(" ")
 
     GameTooltip:AddDoubleLine(L['Session Total'], moneyWithTexture(math.abs(xb.db.factionrealm[xb.constants.playerName].sessionMoney),true), 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine('Daily Total', moneyWithTexture(math.abs(xb.db.factionrealm[xb.constants.playerName].dailyMoney),true), 1, 1, 0, 1, 1, 1)
     GameTooltip:AddLine(" ")
 
     local totalGold = 0
@@ -224,7 +231,10 @@ function GoldModule:PLAYER_MONEY()
   local moneyDiff = tmpMoney - curMoney
   
   gdb.sessionMoney = gdb.sessionMoney + moneyDiff
+  gdb.dailyMoney = gdb.dailyMoney + moneyDiff
+
   isSessionNegative = gdb.sessionMoney < 0
+  isDailyNegative = gdb.dailyMoney < 0
   gdb.currentMoney = tmpMoney
   self:Refresh()
 end
