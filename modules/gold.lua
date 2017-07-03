@@ -12,6 +12,7 @@ local negativeSign = "|cffff0000- "
 local function moneyWithTexture(amount,session)
   local copper, silver = 0,0;
   local showSC = xb.db.profile.modules.gold.showSmallCoins
+  local shortThousands = xb.db.profile.modules.gold.shortThousands --TODO something with it in coin strings
 
   amount, copper = math.modf(amount/100.0)
   amount, silver = math.modf(amount/100.0)
@@ -19,12 +20,10 @@ local function moneyWithTexture(amount,session)
   silver = silver * 100
   copper = copper * 100
 
-  if silver < 10 then
-    silver = "0"..silver
-  end
-  if copper < 10 then
-    copper = "0"..copper
-  end
+  silver = string.format("%02d",silver)
+  copper = string.format("%02d",copper)
+
+  amount = string.format("%.0f",amount)
 
   if not showSC then
     silver,copper = "00","00"
