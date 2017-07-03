@@ -104,6 +104,8 @@ L['Always Show Silver and Copper'] = true;
 L['Shorten Gold'] = true;
 L['Toggle Bags'] = true;
 L['Session Total'] = true;
+L['Daily Total'] = true;
+L['Gold rounded values'] = true;
 
 L['Show XP Bar Below Max Level'] = true;
 L['Use Class Colors for XP Bar'] = true;

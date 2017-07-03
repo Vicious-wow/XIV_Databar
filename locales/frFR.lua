@@ -104,6 +104,8 @@ L['Always Show Silver and Copper'] = "Toujours montrer l'argent et le cuivre";
 L['Shorten Gold'] = "Raccourcir le montant d'or";
 L['Toggle Bags'] = "Ouvrir/Fermer les sacs";
 L['Session Total'] = "Total sur la session";
+L['Daily Total'] = true;
+L['Gold rounded values'] = true;
 
 L['Show XP Bar Below Max Level'] = "Montrer la barre d'XP quand le niveau max n'est pas atteint";
 L['Use Class Colors for XP Bar'] = "Utiliser la couleur de classe pour la barre d'XP";

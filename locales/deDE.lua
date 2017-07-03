@@ -104,6 +104,8 @@ L['Always Show Silver and Copper'] = "Silber und Kupfer immer anzeigen";
 L['Shorten Gold'] = "Gold verkürzen";
 L['Toggle Bags'] = "Taschen anzeigen";
 L['Session Total'] = "Sitzung total";
+L['Daily Total'] = "Täglich total";
+L['Gold rounded values'] = "Gold gerundete Werte";
 
 L['Show XP Bar Below Max Level'] = "Erfahrungsleiste unter Levelcap anzeigen";
 L['Use Class Colors for XP Bar'] = "Klassenfarbe für Erfahrungsleiste benutzen";
