@@ -104,6 +104,8 @@ L['Always Show Silver and Copper'] = "Всегда показывать сере
 L['Shorten Gold'] = "Сокращать число золота";
 L['Toggle Bags'] = "Переключить видимость сумок";
 L['Session Total'] = "Всего за сессию";
+L['Daily Total'] = true;
+L['Gold rounded values'] = true;
 
 L['Show XP Bar Below Max Level'] = "Показывать полоску опыта персонажам, не достигшим максимального уровня";
 L['Use Class Colors for XP Bar'] = "Использовать цвет класса для полоски опыта";

@@ -179,12 +179,12 @@ function GoldModule:RegisterFrameEvents()
     GameTooltip:SetOwner(GoldModule.goldFrame, 'ANCHOR_'..xb.miniTextPosition)
     GameTooltip:AddLine("[|cff6699FF"..BONUS_ROLL_REWARD_MONEY.."|r - |cff82c5ff"..xb.constants.playerFactionLocal.." "..xb.constants.playerRealm.."|r]")
     if not xb.db.profile.modules.gold.showSmallCoins then
-      GameTooltip:AddLine("Gold rounded values")
+      GameTooltip:AddLine(L["Gold rounded values"])
     end
     GameTooltip:AddLine(" ")
 
     GameTooltip:AddDoubleLine(L['Session Total'], moneyWithTexture(math.abs(xb.db.factionrealm[xb.constants.playerName].sessionMoney),true), 1, 1, 0, 1, 1, 1)
-    GameTooltip:AddDoubleLine('Daily Total', moneyWithTexture(math.abs(xb.db.factionrealm[xb.constants.playerName].dailyMoney),true), 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine(L['Daily Total'], moneyWithTexture(math.abs(xb.db.factionrealm[xb.constants.playerName].dailyMoney),true), 1, 1, 0, 1, 1, 1)
     GameTooltip:AddLine(" ")
 
     local totalGold = 0

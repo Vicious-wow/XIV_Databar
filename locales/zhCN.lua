@@ -104,6 +104,8 @@ L['Always Show Silver and Copper'] = "始终显示银币和铜币";
 L['Shorten Gold'] = "金钱缩写";
 L['Toggle Bags'] = "切换背包";
 L['Session Total'] = "汇总";
+L['Daily Total'] = true;
+L['Gold rounded values'] = true;
 
 L['Show XP Bar Below Max Level'] = "未满级时显示经验条";
 L['Use Class Colors for XP Bar'] = "经验条使用职业颜色";
