@@ -184,8 +184,12 @@ end
 
 function TalentModule:UpdateArtifactBar(artifactId)
   local _, artifactData = self.LAD:GetArtifactInfo(artifactId)
-  self.specBar:SetMinMaxValues(0, artifactData.maxPower)
-  self.specBar:SetValue(artifactData.power)
+  if artifactData and self.specBar:IsVisible() then
+    self.specBar:SetMinMaxValues(0, artifactData.maxPower)
+    self.specBar:SetValue(artifactData.power)
+  elseif not self.specBar:IsVisible() then
+    C_Timer.After(1,function()self:Refresh()end)
+  end
 end
 
 function TalentModule:CreateFrames()

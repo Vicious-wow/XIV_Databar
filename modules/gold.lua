@@ -9,10 +9,23 @@ local isSessionNegative, isDailyNegative = false, false
 local positiveSign = "|cff00ff00+ "
 local negativeSign = "|cffff0000- "
 
+local function shortenNumber(num)
+  if num < 1000 then
+    return tostring(num)
+  elseif num < 1000000 then
+    return format("%.1f"..L['k'],num/1000)
+  elseif num < 1000000000 then
+    return format("%.2f"..L['M'],num/1000000)
+  else
+    return format("%.3f"..L['B'],num/1000000000)
+  end
+end
+
 local function moneyWithTexture(amount,session)
   local copper, silver = 0,0;
   local showSC = xb.db.profile.modules.gold.showSmallCoins
-  local shortThousands = xb.db.profile.modules.gold.shortThousands --TODO something with it in coin strings
+  local shortThousands = xb.db.profile.modules.gold.shortThousands
+  local shortGold = ""
 
   amount, copper = math.modf(amount/100.0)
   amount, silver = math.modf(amount/100.0)
@@ -24,14 +37,22 @@ local function moneyWithTexture(amount,session)
   copper = string.format("%02d",copper)
 
   amount = string.format("%.0f",amount)
-
+  
   if not showSC then
     silver,copper = "00","00"
   end
+
+  amountStringTexture = GetCoinTextureString(amount..""..silver..""..copper)
+
+  if shortThousands then
+    shortGold = shortenNumber(tonumber(amount))
+    amountStringTexture = amountStringTexture:gsub(amount.."|T",shortGold.."|T")
+  end
+
   if not session then
-    return GetCoinTextureString(amount..""..silver..""..copper)
+    return amountStringTexture
   else
-    return isSessionNegative and negativeSign..GetCoinTextureString(amount..""..silver..""..copper) or GetCoinTextureString(amount..""..silver..""..copper)
+    return isSessionNegative and negativeSign..amountStringTexture or amountStringTexture
   end
 end
 
@@ -236,18 +257,6 @@ function GoldModule:PLAYER_MONEY()
   isDailyNegative = gdb.dailyMoney < 0
   gdb.currentMoney = tmpMoney
   self:Refresh()
-end
-
-local function shortenNumber(num)
-	if num < 1000 then
-		return tostring(num)
-	elseif num < 1000000 then
-		return format("%.1f"..L['k'],num/1000)
-	elseif num < 1000000000 then
-		return format("%.2f"..L['M'],num/1000000)
-	else
-		return format("%.3f"..L['B'],num/1000000000)
-	end
 end
 
 function GoldModule:FormatCoinText(money)
