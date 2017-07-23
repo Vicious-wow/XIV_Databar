@@ -1,4 +1,4 @@
-local MAJOR, MINOR = "LibArtifactData-1.0", 16
+local MAJOR, MINOR = "LibArtifactData-1.0", 17
 
 assert(_G.LibStub, MAJOR .. " requires LibStub")
 local lib = _G.LibStub:NewLibrary(MAJOR, MINOR)
@@ -351,7 +351,6 @@ function private.ARTIFACT_UPDATE(event, newItem)
 
 		for i = 1, #newRelics do
 			local newRelic = newRelics[i]
-			-- TODO: test third slot unlock
 			if newRelic.isLocked ~= oldRelics[i].isLocked or newRelic.itemID ~= oldRelics[i].itemID then
 				oldRelics[i] = newRelic
 				Debug("ARTIFACT_RELIC_CHANGED", viewedID, i, newRelic)
@@ -368,7 +367,7 @@ end
 function private.ARTIFACT_XP_UPDATE(event)
 	-- at the forge the player can purchase traits even for unequipped artifacts
 	local GetInfo = IsAtForge() and GetArtifactInfo or GetEquippedArtifactInfo
-	local itemID, _, _, _, unspentPower, numRanksPurchased, _, _, _, _, _, _, tier = GetInfo() -- NOTE: 7.2 compat
+	local itemID, _, _, _, unspentPower, numRanksPurchased, _, _, _, _, _, _, tier = GetInfo()
 	local numRanksPurchasable, power, maxPower = GetNumPurchasableTraits(numRanksPurchased, unspentPower, tier)
 
 	local artifact = artifacts[itemID]
@@ -438,7 +437,7 @@ function lib.GetActiveArtifactID()
 end
 
 function lib.GetArtifactInfo(_, artifactID)
-	artifactID = artifactID or equippedID
+	artifactID = tonumber(artifactID) or equippedID
 	return artifactID, CopyTable(artifacts[artifactID])
 end
 
@@ -457,31 +456,40 @@ function lib.GetNumObtainedArtifacts()
 	return numArtifacts
 end
 
-function lib.GetArtifactTraits(_, artifactID)
+function lib.GetArtifactTraitInfo(_, id, artifactID)
 	artifactID = artifactID or equippedID
-	for itemID, data in pairs(artifacts) do
-		if itemID == artifactID then
-			return artifactID, CopyTable(data.traits)
+	local artifact = artifacts[artifactID]
+	if id and artifact then
+		local traits = artifact.traits
+		for i = 1, #traits do
+			local info = traits[i]
+			if id == info.traitID or id == info.spellID then
+				return CopyTable(info)
+			end
 		end
 	end
+end
+
+function lib.GetArtifactTraits(_, artifactID)
+	artifactID = tonumber(artifactID) or equippedID
+	local artifact = artifacts[artifactID]
+	if not artifact then return end
+	return artifactID, CopyTable(artifact.traits)
 end
 
 function lib.GetArtifactRelics(_, artifactID)
-	artifactID = artifactID or equippedID
-	for itemID, data in pairs(artifacts) do
-		if itemID == artifactID then
-			return artifactID, CopyTable(data.relics)
-		end
-	end
+	artifactID = tonumber(artifactID) or equippedID
+	local artifact = artifacts[artifactID]
+	if not artifact then return end
+	return artifactID, CopyTable(artifact.relics)
 end
 
 function lib.GetArtifactPower(_, artifactID)
-	artifactID = artifactID or equippedID
-	for itemID, data in pairs(artifacts) do
-		if itemID == artifactID then
-			return artifactID, data.unspentPower, data.power, data.maxPower, data.powerForNextRank, data.numRanksPurchased, data.numRanksPurchasable
-		end
-	end
+	artifactID = tonumber(artifactID) or equippedID
+	local artifact = artifacts[artifactID]
+	if not artifact then return end
+	return artifactID, artifact.unspentPower, artifact.power, artifact.maxPower,
+	       artifact.powerForNextRank, artifact.numRanksPurchased, artifact.numRanksPurchasable
 end
 
 function lib.GetArtifactKnowledge()
