@@ -12,7 +12,6 @@ end
 function MenuModule:OnInitialize()
   self.LTip=LibStub('LibQTip-1.0')
   self.mediaFolder = xb.constants.mediaPath..'microbar\\'
-  self.socialIconPath = "Interface\\FriendsFrame\\"
   self.icons = {}
   self.modifiers={SHIFT_KEY_TEXT,ALT_KEY_TEXT,CTRL_KEY_TEXT}
   self.frames = {}
@@ -23,33 +22,35 @@ function MenuModule:OnInitialize()
   self.iconSize = xb:GetHeight();
   self:CreateClickFunctions()
   self.socialIcons = {
+    BSAp = {
+      text = BNET_CLIENT_APP
+    },
     App = {
-      icon = self.socialIconPath..'Battlenet-Battleneticon.blp',
       text = BNET_CLIENT_APP
     },
     D3 = {
-      icon = self.socialIconPath..'Battlenet-D3icon.blp',
       text = 'Diablo 3'
     },
+    S1 = {
+      text = 'Starcraft Remastered'
+    },
     S2 = {
-      icon = self.socialIconPath..'Battlenet-Sc2icon.blp',
       text = 'Starcraft 2'
     },
     WTCG = {
-      icon = self.socialIconPath..'Battlenet-WTCGicon.blp',
       text = 'Hearthstone'
     },
     Hero = {
-      icon = self.socialIconPath..'Battlenet-HotSicon.blp',
       text = 'Heroes of the Storm'
     },
     Pro = {
-      icon = self.socialIconPath..'Battlenet-OVERWATCHicon.blp',
       text = 'Overwatch'
     },
     WoW = {
-      icon = self.socialIconPath..'Battlenet-WoWicon.blp',
       text = 'World of Warcraft'
+    },
+    DST2 = {
+      text = 'Destiny 2'
     }
   }
 end
@@ -465,7 +466,7 @@ function MenuModule:SocialHover(hoverFunc)
           local _, _, _, realmName, _ = BNGetGameAccountInfo(gameAccount)
           local status = FRIENDS_LIST_ONLINE
           local statusIcon = FRIENDS_TEXTURE_ONLINE
-          local socialIcon = MenuModule.socialIcons[gameClient].icon
+          local socialIcon = BNet_GetClientTexture(gameClient)
           local gameName = MenuModule.socialIcons[gameClient].text
 
           if isAfk then

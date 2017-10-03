@@ -3,6 +3,13 @@ local _G = _G;
 local pairs, unpack, select = pairs, unpack, select
 LibStub("AceAddon-3.0"):NewAddon(XIVBar, AddOnName, "AceConsole-3.0", "AceEvent-3.0");
 local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true);
+local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject(AddOnName, {
+    type = "launcher",
+    icon = "Interface\\Icons\\Spell_Nature_StormReach",
+    OnClick = function(clickedframe, button)
+        XIVBar:ToggleConfig()
+    end,
+})
 
 XIVBar.L = L
 
@@ -25,7 +32,8 @@ XIVBar.defaults = {
             barFullscreen = true,
             barWidth = GetScreenWidth(),
             barHoriz = 'CENTER',
-			barCombatHide = false
+			barCombatHide = false,
+            barFlightHide = false
         },
         color = {
             barColor = {
@@ -202,11 +210,34 @@ end
 
 function XIVBar:HideBarEvent()
 	local bar = self:GetFrame("bar")
-	bar:UnregisterAllEvents()
+	local vehiculeIsFlight = false;
+
+    bar:UnregisterAllEvents()
 	bar.OnEvent = nil
 	bar:RegisterEvent("PET_BATTLE_OPENING_START")
 	bar:RegisterEvent("PET_BATTLE_CLOSE")
+    bar:RegisterEvent("TAXIMAP_CLOSED")
+    bar:RegisterEvent("VEHICLE_POWER_SHOW")
+
 	bar:SetScript("OnEvent", function(_, event, ...)
+        if self.db.profile.general.barFlightHide then
+            if event == "VEHICLE_POWER_SHOW" then
+                if not XIV_Databar:IsVisible() then
+                    XIV_Databar:Show()
+                end
+                if vehiculeIsFlight and XIV_Databar:IsVisible() then
+                    XIV_Databar:Hide()
+                end
+            end
+
+            if event == "TAXIMAP_CLOSED" then
+                vehiculeIsFlight = true
+                C_Timer.After(1,function()
+                    vehiculeIsFlight = false
+                end)
+            end
+        end
+
 		if event=="PET_BATTLE_OPENING_START" and XIV_Databar:IsVisible() then
 			XIV_Databar:Hide()
 		end
@@ -382,7 +413,7 @@ function XIVBar:GetGeneralOptions()
 					barLocation = {
 						name = L['Bar Position'],
 						type = "select",
-						order = 1,
+						order = 2,
 						width = "full",
 						values = {TOP = L['Top'], BOTTOM = L['Bottom']},
 						style = "dropdown",
@@ -396,15 +427,22 @@ function XIVBar:GetGeneralOptions()
 					ohHide = {
 						name = L['Hide order hall bar'],
 						type = "toggle",
-						order = 2,
+						order = 3,
 						hidden = function() return self.db.profile.general.barPosition == "BOTTOM" end,
 						get = function() return self.db.profile.general.ohHide end,
 						set = function(_,val) self.db.profile.general.ohHide = val; if val then LoadAddOn("Blizzard_OrderHallUI"); local b = OrderHallCommandBar; b:Hide(); end self:Refresh(); end
 					},
+                    flightHide = {
+                        name = "Hide when in flight",
+                        type = "toggle",
+                        order = 1,
+                        get = function() return self.db.profile.general.barFlightHide end,
+                        set = function(_,val) self.db.profile.general.barFlightHide = val; self:Refresh(); end
+                    },
 					fullScreen = {
 						name = VIDEO_OPTIONS_FULLSCREEN,
 						type = "toggle",
-						order = 3,
+						order = 4,
 						get = function() return self.db.profile.general.barFullscreen; end,
 						set = function(info, value) self.db.profile.general.barFullscreen = value; self:Refresh(); end,
 					},
@@ -412,7 +450,7 @@ function XIVBar:GetGeneralOptions()
 						name = L['Horizontal Position'],
 						type = "select",
 						hidden = function() return self.db.profile.general.barFullscreen; end,
-						order = 4,
+						order = 5,
 						values = {LEFT = L['Left'], CENTER = L['Center'], RIGHT = L['Right']},
 						style = "dropdown",
 						get = function() return self.db.profile.general.barHoriz; end,
@@ -422,7 +460,7 @@ function XIVBar:GetGeneralOptions()
 					barWidth = {
 						name = L['Bar Width'],
 						type = 'range',
-						order = 5,
+						order = 6,
 						hidden = function() return self.db.profile.general.barFullscreen; end,
 						min = 200,
 						max = GetScreenWidth(),
