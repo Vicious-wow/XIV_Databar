@@ -6,33 +6,9 @@ local L = XIVBar.L;
 local ClockModule = xb:NewModule("ClockModule", 'AceEvent-3.0')
 
 local function GetServerTimeString(optFormat)
-	local realmTime = nil
-	local hour, minute = GetGameTime()
-	if optFormat:find("twoFour") then
-		realmTime = GameTime_GetFormattedTime(hour, minute, false)
-		if optFormat == "twoFour" then
-			if hour < 10 then
-				realmTime = "0"..realmTime
-			end
-		end
-	else
-		realmTime = GameTime_GetFormattedTime(hour, minute, true)
-		if optFormat:find("NoAm") then
-			if optFormat == "twelveNoAm" then
-				if hour < 10 then
-					realmTime = "0"..realmTime
-				end
-			end
-			realmTime = string.sub(realmTime,1,string.len(realmTime)-3)
-		else
-			if optFormat == "twelveAmPm" then
-				if hour < 10 then
-					realmTime = "0"..realmTime
-				end
-			end
-		end
-	end
-	return realmTime
+  local hour, minute = GetGameTime()
+  local constructedServerTime = time({year=1970, month=1, day=2, hour=hour, min=minute, sec=0})  
+  return date(ClockModule.timeFormats[optFormat], constructedServerTime)
 end
 
 function ClockModule:GetName()
@@ -46,8 +22,8 @@ function ClockModule:OnInitialize()
       twelveNoAm = '%I:%M',
       twelveAmNoZero = '%#I:%M %p',
       twelveNoAmNoZero = '%#I:%M',
-      twoFour = '%#H:%M',
-      twoFourNoZero = '%H:%M',
+      twoFour = '%H:%M',
+      twoFourNoZero = '%#H:%M',
     }
   else
     self.timeFormats = {
