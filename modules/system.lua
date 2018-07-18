@@ -33,7 +33,7 @@ end
 function SystemModule:Refresh()
   local db = xb.db.profile
   if self.systemFrame == nil then return; end
-  if true then self:Disable(); return; end --not db.modules.system.enabled
+  if not db.modules.system.enabled then self:Disable(); return; end 
 
   if InCombatLockdown() then
     self:UpdateTexts()

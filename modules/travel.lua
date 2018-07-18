@@ -366,7 +366,7 @@ end
 function TravelModule:Refresh()
   if self.hearthFrame == nil then return; end
 
-  if not true then self:Disable(); return; end --xb.db.profile.modules.travel.enabled
+  if not xb.db.profile.modules.travel.enabled then self:Disable(); return; end 
   if InCombatLockdown() then
     self.hearthText:SetText(GetBindLocation())
     self.portText:SetText(xb.db.char.portItem.text)
