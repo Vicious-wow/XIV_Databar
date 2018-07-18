@@ -44,7 +44,7 @@ local function chatClick(self, button)
 		if ChatMenu:IsVisible() then
 			ChatMenu:Hide()
 		else
-			ChatFrame_OpenMenu()
+			ChatMenu:Show()
 		end
 	end
 end
