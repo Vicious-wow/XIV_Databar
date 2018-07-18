@@ -78,8 +78,8 @@ function GoldModule:OnInitialize()
   
   local playerData = xb.db.factionrealm[xb.constants.playerName]
 
-  local weekday, month, day, year = CalendarGetDate()
-  local today = ConvertDateToNumber(month, day, year)
+  local curDate = C_Calendar.GetDate()
+  local today = ConvertDateToNumber(curDate.month, curDate.monthDay, curDate.year)
   
   if playerData.lastLoginDate then
       if playerData.lastLoginDate < today then -- is true, if last time player logged in was the day before or even earlier
@@ -168,7 +168,7 @@ function GoldModule:Refresh()
   local relativeAnchorPoint = 'LEFT'
   local xOffset = db.general.moduleSpacing
   local parentFrame = xb:GetFrame('travelFrame')
-  if not xb.db.profile.modules.travel.enabled then
+  if not true then --xb.db.profile.modules.travel.enabled
     parentFrame = self.goldFrame:GetParent()
     relativeAnchorPoint = 'RIGHT'
     xOffset = 0

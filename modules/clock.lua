@@ -113,7 +113,7 @@ function ClockModule:RegisterFrameEvents()
       ClockModule.clockText:SetText(dateString)
 
       if not xb.db.profile.modules.clock.hideEventText then
-        local eventInvites = CalendarGetNumPendingInvites()
+        local eventInvites = C_Calendar.GetNumPendingInvites()
         if eventInvites > 0 then
           ClockModule.eventText:SetText(string.format("%s  (|cffffff00%i|r)", L['New Event!'], eventInvites))
         end

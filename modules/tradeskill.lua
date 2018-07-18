@@ -44,7 +44,7 @@ end
 
 function TradeskillModule:OnDisable()
   self.tradeskillFrame:Hide()
-  self:UnregisterEvent('TRADE_SKILL_UPDATE')
+  self:UnregisterEvent('TRADE_SKILL_DETAILS_UPDATE')
   self:UnregisterEvent('SPELLS_CHANGED')
   self:UnregisterEvent('UNIT_SPELLCAST_STOP')
 end
@@ -173,7 +173,7 @@ end
 
 function TradeskillModule:RegisterFrameEvents()
 
-  self:RegisterEvent('TRADE_SKILL_UPDATE', 'Refresh')
+  self:RegisterEvent('TRADE_SKILL_DETAILS_UPDATE', 'Refresh')
   self:RegisterEvent('SPELLS_CHANGED', 'Refresh')
   self.tradeskillFrame:RegisterUnitEvent('UNIT_SPELLCAST_STOP', 'player')
   self.tradeskillFrame:SetScript('OnEvent', function(_, event)
