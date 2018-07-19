@@ -543,7 +543,7 @@ function TalentModule:ShowTooltip()
       tooltip:AddLine("|cFFFFFF00"..L['Artifact Knowledge']..':|r', "|cFFFFFFFF"..string.format('%d (x%d)', knowLevel, ((knowMult) - 1 * 100)).."|r")
       tooltip:AddLine(" ")
     end
-    tooltip:AddLine("|cFFFFFF00"..ARTIFACT_POWER..':|r', "|cFFFFFFFF"..string.format('%.0f / %.0f (%d%%)', artifactData.power, artifactData.maxPower, floor((artifactData.power / artifactData.maxPower) * 100)).."|r")
+    tooltip:AddLine("|cFFFFFF00"..ARTIFACT_POWER..':|r', "|cFFFFFFFF"..string.format('%.0f / %.0f (%d%%)', artifactData.power, artifactData.maxPower == 0 and 1 or artifactData.maxPower, floor((artifactData.power / (artifactData.maxPower == 0 and 1 or artifactData.maxPower)) * 100)).."|r")
     tooltip:AddLine("|cFFFFFF00"..L['Remaining']..':|r', "|cFFFFFFFF"..string.format('%.0f (%d%%)', artifactData.powerForNextRank, floor((artifactData.powerForNextRank / artifactData.maxPower) * 100)).."|r")
     if artifactData.numRanksPurchasable > 0 then
       tooltip:AddLine("|cFFFFFF00"..L['Available Ranks']..':|r', "|cFFFFFFFF"..string.format('%d', artifactData.numRanksPurchasable).."|r")
