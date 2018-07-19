@@ -48,11 +48,11 @@ local function clickFunctions(self,button,down)
 	local clickR = Mb.settings.clickReload == 1 and "LeftButton" or "RightButton"
 	if type(modifierR)=="function" then
 		if modifierR() and button == clickR then
-			ChatFrame_OpenChat("/reload"); return -- For now 7.2 does not allow ReloadUI() func call
+			ReloadUI()--ChatFrame_OpenChat("/reload"); return -- For now 7.2 does not allow ReloadUI() func call
 		end
 	else
 		if not IsModifierKeyDown() and button == clickR then
-			ChatFrame_OpenChat("/reload"); return
+			ReloadUI()--ChatFrame_OpenChat("/reload"); return
 		end
 	end
 
