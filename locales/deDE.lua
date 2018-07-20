@@ -4,8 +4,8 @@ local L = AceLocale:NewLocale(AddOnName, "deDE", false, false);
 if not L then return end
 
 L['Modules'] = "Module";
-L['Left-Click'] = "Links-Klick";
-L['Right-Click'] = "Rechts-Klick";
+L['Left-Click'] = "Linksklick";
+L['Right-Click'] = "Rechtsklick";
 L['k'] = true; -- short for 1000
 L['M'] = true; -- short for 1000000
 L['B'] = true; -- short for 1000000000
