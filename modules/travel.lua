@@ -141,7 +141,7 @@ function TravelModule:UpdatePortOptions()
     self.portOptions[128353] = {portId = 128353, text = compassName} -- admiral's compass
   end
   if IsUsableItem(140192) and not self.portOptions[140192] then
-    self.portOptions[140192] = {portId = 140192, text = C_Map.GetMapInfo(1014)} -- dalaran hearthstone
+    self.portOptions[140192] = {portId = 140192, text = GetItemInfo(140192)} -- dalaran hearthstone
   end
   if IsUsableItem(self.garrisonHearth) and not self.portOptions[self.garrisonHearth] then
     self.portOptions[self.garrisonHearth] = {portId = self.garrisonHearth, text = GARRISON_LOCATION_TOOLTIP} -- needs to be var for default options
@@ -154,7 +154,7 @@ function TravelModule:UpdatePortOptions()
       end
     else
       if not self.portOptions[18960] then
-        self.portOptions[18690] = {portId = 18960, text = C_Map.GetMapInfo(241)}
+        self.portOptions[18960] = {portId = 18960, text = C_Map.GetMapInfo(241)}
       end
     end
   end

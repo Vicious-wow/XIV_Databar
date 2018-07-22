@@ -121,9 +121,9 @@ function CurrencyModule:Refresh()
   local xOffset = db.general.moduleSpacing
   local anchorFrame = xb:GetFrame('tradeskillFrame')
   if not anchorFrame:IsVisible() then
-    if xb:GetFrame('clockFrame'):IsVisible() then
+    if xb:GetFrame('clockFrame') and xb:GetFrame('clockFrame'):IsVisible() then
       anchorFrame = xb:GetFrame('clockFrame')
-    elseif xb:GetFrame('talentFrame'):IsVisible() then
+    elseif xb:GetFrame('talentFrame') and xb:GetFrame('talentFrame'):IsVisible() then
       anchorFrame = xb:GetFrame('talentFrame')
     else
       relativeAnchorPoint = 'LEFT'
