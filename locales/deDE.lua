@@ -4,8 +4,8 @@ local L = AceLocale:NewLocale(AddOnName, "deDE", false, false);
 if not L then return end
 
 L['Modules'] = "Module";
-L['Left-Click'] = "Links-Klick";
-L['Right-Click'] = "Rechts-Klick";
+L['Left-Click'] = "Linksklick";
+L['Right-Click'] = "Rechtsklick";
 L['k'] = true; -- short for 1000
 L['M'] = true; -- short for 1000000
 L['B'] = true; -- short for 1000000000
@@ -22,7 +22,7 @@ L['Use Class Color for Bar'] = "Benutze Klassenfarbe für Leiste";
 L["Miscellaneous"] = "Verschiedenes";
 L['Hide Bar in combat'] = "Verstecke die Leiste im Kampf";
 L['Bar Padding'] = "Leistenabstand";
-L['Module Spacing'] = "Modulabstand";
+L['Module Spacing'] = "Abstand zwischen Modulen";
 L['Hide order hall bar'] = "Verstecke Klassenhallenleiste";
 
 -- Positioning Options
@@ -44,7 +44,7 @@ L['Text Colors'] = "Textfarbe";
 L['Normal'] = "Normal";
 L['Inactive'] = "Inaktiv";
 L["Use Class Color for Text"] = "Benutze Klassenfarben für Texte";
-L["Only the alpha can be set with the color picker"] = "Nur der Alphakanal kann mit dem Farbwerkzeug gesetzt werden";
+L["Only the alpha can be set with the color picker"] = "Nur die Transparenz kann mit dem Farbwerkzeug gesetzt werden";
 L['Use Class Colors for Hover'] = "Benutze Klassenfarbe für Mouseover";
 L['Hover'] = "Mouseover";
 
@@ -56,7 +56,7 @@ L['Main Menu Icon Right Spacing'] = "Hauptmenü Icon Abstand Rechts";
 L['Icon Spacing'] = "Icon-Abstand";
 L['Open Guild Page'] = "Öffne Gildenfenster";
 L['No Tag'] = "Keine Markierung";
-L['Whisper BNet'] = "BNet anflüstern";
+L['Whisper BNet'] = "über BNet anflüstern";
 L['Whisper Character'] = "Charakter anflüstern";
 L['Hide Social Text'] = "Social Text verstecken";
 L["GMOTD in Tooltip"] = "Nachricht des Tages im Tooltip";
@@ -65,7 +65,7 @@ L['Show/Hide Buttons'] = "Zeige/Verstecke Tasten";
 L['Show Menu Button'] = "Zeige Menü Taste";
 L['Show Chat Button'] = "Zeige Chat Taste";
 L['Show Guild Button'] = "Zeige Gilden Taste";
-L['Show Social Button'] = "Zeige ";
+L['Show Social Button'] = "Zeige Freunde Taste";
 L['Show Character Button'] = "Zeige Charakter Taste";
 L['Show Spellbook Button'] = "Zeige Zauberbuch Taste";
 L['Show Talents Button'] = "Zeige Talent Taste";
@@ -78,9 +78,9 @@ L['Show Pets Button'] = "Zeige Haustier Taste";
 L['Show Shop Button'] = "Zeige Shop Taste";
 L['Show Help Button'] = "Zeige Hilfe Taste";
 
-L['Always Show Item Level'] = "Rüstungslevel immer anzeigen";
+L['Always Show Item Level'] = "Gegenstandsstufe immer anzeigen";
 L['Minimum Durability to Become Active'] = "Minimale Haltbarkeit für Anzeige";
-L['Maximum Durability to Show Item Level'] = "Maximale Haltbarkeit für Rüstungslevel-Anzeige";
+L['Maximum Durability to Show Item Level'] = "Maximale Haltbarkeit für Gegenstandsstufe-Anzeige";
 
 L['Master Volume'] = "Haupt-Lautstärke";
 L["Volume step"] = "Lautstärken-Schritte";
@@ -95,17 +95,17 @@ L['Open Clock'] = "Stoppuhr öffnen";
 L['Hide Event Text'] = "Event-Text verstecken";
 
 L['Travel'] = "Reise";
-L['Port Options'] = "Port Optionen";
+L['Port Options'] = "Teleport-Optionen";
 L['Ready'] = "Bereit";
 L['Travel Cooldowns'] = "Reise-Abklingzeiten";
-L['Change Port Option'] = "Port Optionen ändern";
+L['Change Port Option'] = "Teleport-Optionen ändern";
 
 L['Always Show Silver and Copper'] = "Silber und Kupfer immer anzeigen";
-L['Shorten Gold'] = "Gold verkürzen";
+L['Shorten Gold'] = "Gold abkürzen";
 L['Toggle Bags'] = "Taschen anzeigen";
 L['Session Total'] = "Sitzung total";
-L['Daily Total'] = "Täglich total";
-L['Gold rounded values'] = "Gold gerundete Werte";
+L['Daily Total'] = "Heute total";
+L['Gold rounded values'] = "Gold runden";
 
 L['Show XP Bar Below Max Level'] = "Erfahrungsleiste unter Levelcap anzeigen";
 L['Use Class Colors for XP Bar'] = "Klassenfarbe für Erfahrungsleiste benutzen";
@@ -122,8 +122,8 @@ L['Number of Addons To Show'] = "Maximale Anzahl für Addon-Anzeige";
 L['Addons to Show in Tooltip'] = "Addons die im Tooltip angezeigt werden";
 L['Show All Addons in Tooltip with Shift'] = "Alle Addons im Tooltip anzeigen via Shift";
 L['Memory Usage'] = "Speichernutzung";
-L['Garbage Collect'] = "Müll sammeln";
-L['Cleaned'] = "Aufgeräumt";
+L['Garbage Collect'] = "Speicher säubern"; -- The expression "garbage collecor" only works in english
+L['Cleaned'] = "Gesäubert";
 
 L['Use Class Colors'] = "Klassenfarben benutzen";
 L['Cooldowns'] = "Abklingzeiten";
