@@ -306,11 +306,7 @@ function CurrencyModule:GetCurrencyOptions()
     local _, isHeader, _, isUnused = GetCurrencyListInfo(i)
     if not isHeader and not isUnused then
       local cL = GetCurrencyListLink(i)
-      local colon, _ = strfind(cL, ':', 1, true)
-      local pipeS, _ = strfind(cL, '|h', colon, true)
-      local itemId = strsub(cL, colon + 1, pipeS - 1)
-      local name, _ = GetCurrencyInfo(itemId)
-      curOpts[tostring(itemId)] = name
+      curOpts[tostring(C_CurrencyInfo.GetCurrencyIDFromLink(cL))] = C_CurrencyInfo.GetBasicCurrencyInfo(C_CurrencyInfo.GetCurrencyIDFromLink(cL)).name
     end
   end
   return curOpts
