@@ -441,7 +441,7 @@ function TravelModule:Refresh()
 end
 
 function TravelModule:FindFirstOption()
-  local firstItem = {portId = 140192, text = C_Map.GetMapInfo(1014).name}
+  local firstItem = {portId = 140192, text = GetItemInfo(140192)}
   if self.portOptions then
     for k,v in pairs(self.portOptions) do
       if self:IsUsable(v.portId) then
