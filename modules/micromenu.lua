@@ -455,7 +455,7 @@ function MenuModule:SocialHover(hoverFunc)
     end
 
     if totalBNOnlineFriends then
-
+      local clientsList = {BNET_CLIENT_WOW,BNET_CLIENT_SC2,BNET_CLIENT_D3,BNET_CLIENT_WTCG,BNET_CLIENT_HEROES,BNET_CLIENT_OVERWATCH,BNET_CLIENT_SC,BNET_CLIENT_DESTINY2,BNET_CLIENT_COD}
       for i = 1, BNGetNumFriends() do
         local battleID, battleName, battleTag, _, charName, gameAccount, gameClient, isOnline, _, isAfk, isDnd, _, note = BNGetFriendInfo(i)
         if isOnline then
@@ -488,26 +488,28 @@ function MenuModule:SocialHover(hoverFunc)
             note = "(|cffecd672"..note.."|r)"
           end
 
-          local lineLeft = string.format("|T%s:16|t|cff82c5ff %s|r %s", statusIcon, battleName, note)
-          local lineRight = string.format("%s %s |T%s:16|t", charNameFormat, gameName, socialIcon)
-          tooltip:AddLine(lineLeft, lineRight)
-		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true;end)
-		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false; end)
-		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
-		    if button == "LeftButton" then
-				if modifierFunc() then
-					if CanGroupWithAccount(battleID) then
-						InviteToGroup(charName.."-"..realmName)
-					end
-				else
-					ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..battleName.." ")
-				end
-			elseif button == "RightButton" then
-				if charName then
-					ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..charName.."-"..realmName.." ")
-				end
-			end
-		  end)
+          if tContains(clientsList,gameClient) or not xb.db.profile.modules.microMenu.hideAppContact then
+            local lineLeft = string.format("|T%s:16|t|cff82c5ff %s|r %s", statusIcon, battleName, note)
+            local lineRight = string.format("%s %s |T%s:16|t", charNameFormat, gameName, socialIcon)
+            tooltip:AddLine(lineLeft, lineRight)
+      		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true;end)
+      		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false; end)
+      		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
+  		    if button == "LeftButton" then
+  				if modifierFunc() then
+  					if CanGroupWithAccount(battleID) then
+  						InviteToGroup(charName.."-"..realmName)
+  					end
+  				else
+  					ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..battleName.." ")
+  				end
+  			elseif button == "RightButton" then
+  				if charName then
+  					ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..charName.."-"..realmName.." ")
+  				end
+  			end
+  		  end)
+            end --optApp
         end -- isOnline
       end -- for in BNGetNumFriends
     end -- totalBNOnlineFriends
@@ -782,7 +784,8 @@ function MenuModule:GetDefaultOptions()
       pvp = true,
       pet = true,
       shop = true,
-      help = true
+      help = true,
+      hideAppContact = false
     }
 end
 
@@ -863,10 +866,17 @@ function MenuModule:GetConfig()
 		set = function(info, val) xb.db.profile.modules.microMenu.modifierTooltip = val; self:Refresh(); end,
 		disabled = function() return not xb.db.profile.modules.microMenu.guild and not xb.db.profile.modules.microMenu.social end
 	  },
+    appFriendsHide = {
+    name = L["Hide BNet App Friends"],
+    type = "toggle",
+    order = 8,
+    get = function() return xb.db.profile.modules.microMenu.hideAppContact end,
+    set = function(_,val) xb.db.profile.modules.microMenu.hideAppContact = val; self:Refresh(); end
+    },
       buttons = {
         type = 'group',
         name = L['Show/Hide Buttons'],
-        order = 8,
+        order = 9,
         inline = true,
         args = {
           menu = {

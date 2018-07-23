@@ -54,6 +54,7 @@ L['Micromenu'] = "Mikromenü";
 L['Show Social Tooltips'] = "Social Tooltips anzeigen";
 L['Main Menu Icon Right Spacing'] = "Hauptmenü Icon Abstand Rechts";
 L['Icon Spacing'] = "Icon-Abstand";
+L["Hide BNet App Friends"] = true;
 L['Open Guild Page'] = "Öffne Gildenfenster";
 L['No Tag'] = "Keine Markierung";
 L['Whisper BNet'] = "über BNet anflüstern";

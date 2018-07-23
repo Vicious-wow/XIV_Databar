@@ -54,6 +54,7 @@ L['Micromenu'] = "Микроменю";
 L['Show Social Tooltips'] = "Показывать подсказки гильдии и друзей";
 L['Main Menu Icon Right Spacing'] = "Расстояние от кнопки меню до других кнопок";
 L['Icon Spacing'] = "Расстояние между кнопками";
+L["Hide BNet App Friends"] = true;
 L['Open Guild Page'] = "Открыть страницу гильдии";
 L['No Tag'] = "Нет Battletag";
 L['Whisper BNet'] = "Шепнуть по Battle.Net";

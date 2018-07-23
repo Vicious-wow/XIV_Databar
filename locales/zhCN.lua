@@ -54,6 +54,7 @@ L['Micromenu'] = "微型菜单";
 L['Show Social Tooltips'] = "显示社交提示";
 L['Main Menu Icon Right Spacing'] = "主菜单图标右间距";
 L['Icon Spacing'] = "图标间距";
+L["Hide BNet App Friends"] = true;
 L['Open Guild Page'] = "打开工会页面";
 L['No Tag'] = "无标签";
 L['Whisper BNet'] = "密语战网";

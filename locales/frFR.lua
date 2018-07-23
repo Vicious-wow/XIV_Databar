@@ -54,6 +54,7 @@ L['Micromenu'] = "Micro menu";
 L['Show Social Tooltips'] = "Montrer les bulles de contacts";
 L['Main Menu Icon Right Spacing'] = "Décalage à droite du micro menu";
 L['Icon Spacing'] = "Espacement des icônes";
+L["Hide BNet App Friends"] = "Masquer amis BNet applications";
 L['Open Guild Page'] = "Ouvrir la page de guilde";
 L['No Tag'] = "Aucun Tag";
 L['Whisper BNet'] = "Chuchoter BNet";

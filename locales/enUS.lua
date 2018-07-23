@@ -54,6 +54,7 @@ L['Micromenu'] = true;
 L['Show Social Tooltips'] = true;
 L['Main Menu Icon Right Spacing'] = true;
 L['Icon Spacing'] = true;
+L["Hide BNet App Friends"] = true;
 L['Open Guild Page'] = true;
 L['No Tag'] = true;
 L['Whisper BNet'] = true;
