@@ -5,6 +5,12 @@ local L = XIVBar.L;
 
 local ClockModule = xb:NewModule("ClockModule", 'AceEvent-3.0')
 
+local function GetServerTimeString(optFormat)
+  local hour, minute = GetGameTime()
+  local constructedServerTime = time({year=1970, month=1, day=2, hour=hour, min=minute, sec=0})  
+  return date(ClockModule.timeFormats[optFormat], constructedServerTime)
+end
+
 function ClockModule:GetName()
   return TIMEMANAGER_TITLE;
 end
@@ -16,8 +22,8 @@ function ClockModule:OnInitialize()
       twelveNoAm = '%I:%M',
       twelveAmNoZero = '%#I:%M %p',
       twelveNoAmNoZero = '%#I:%M',
-      twoFour = '%#H:%M',
-      twoFourNoZero = '%H:%M',
+      twoFour = '%H:%M',
+      twoFourNoZero = '%#H:%M',
     }
   else
     self.timeFormats = {
@@ -103,13 +109,13 @@ function ClockModule:RegisterFrameEvents()
   self.clockFrame:SetScript("OnUpdate", function(self, elapsed)
     ClockModule.elapsed = ClockModule.elapsed + elapsed
     if ClockModule.elapsed >= 1 then
-      local clockTime = nil
+      local dateString = nil
       if xb.db.profile.modules.clock.serverTime then
-        clockTime = GetServerTime()
+        dateString = GetServerTimeString(xb.db.profile.modules.clock.timeFormat)
       else
-        clockTime = time()
+        local clockTime = time()
+        dateString = date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime)
       end
-      local dateString = date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime)
       ClockModule.clockText:SetText(dateString)
 
       if not xb.db.profile.modules.clock.hideEventText then
@@ -137,33 +143,7 @@ function ClockModule:RegisterFrameEvents()
       clockTime = GetServerTime()
     end
 
-	local optFormat = xb.db.profile.modules.clock.timeFormat
-	local hour, minute = GetGameTime()
-	local realmTime = ""
-	if optFormat:find("twoFour") then
-		realmTime = GameTime_GetFormattedTime(hour, minute, false)
-		if optFormat == "twoFour" then
-			if hour < 10 then
-				realmTime = "0"..realmTime
-			end
-		end
-	else
-		realmTime = GameTime_GetFormattedTime(hour, minute, true)
-		if optFormat:find("NoAm") then
-			if optFormat == "twelveNoAm" then
-				if hour < 10 then
-					realmTime = "0"..realmTime
-				end
-			end
-			realmTime = string.sub(realmTime,1,string.len(realmTime)-3)
-		else
-			if optFormat == "twelveAmPm" then
-				if hour < 10 then
-					realmTime = "0"..realmTime
-				end
-			end
-		end
-	end
+    local realmTime = GetServerTimeString(xb.db.profile.modules.clock.timeFormat)
 
     GameTooltip:AddDoubleLine(L['Local Time'], date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime), 1, 1, 0, 1, 1, 1)
     GameTooltip:AddDoubleLine(L['Realm Time'], realmTime, 1, 1, 0, 1, 1, 1)
