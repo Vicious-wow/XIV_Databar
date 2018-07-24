@@ -658,10 +658,10 @@ function MenuModule:CreateClickFunctions()
     if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
       if ChatMenu:IsVisible() then
-		ChatMenu:Hide()
-	  else
-	    ChatFrame_OpenMenu()
-	  end
+		    ChatMenu:Hide()
+  	  else
+  	    ChatFrame_ToggleMenu()
+  	  end
     end
   end; --chat
 
