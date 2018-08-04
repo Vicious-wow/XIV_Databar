@@ -1,0 +1,21 @@
+------------------------------------------------------------------------
+r188 | Torhal | 2018-07-21 06:14:41 +0000 (Sat, 21 Jul 2018) | 1 line
+Changed paths:
+   M /trunk/LibQTip-1.0.toc
+
+Updating ToC Interface to 80000
+------------------------------------------------------------------------
+r187 | Torhal | 2018-07-21 06:13:54 +0000 (Sat, 21 Jul 2018) | 1 line
+Changed paths:
+   A /trunk/LibStub
+   A /trunk/LibStub/LibStub.lua
+
+Hard-embed LibStub, to stop the WoW 8.x client from complaining about being unable to load it under a dev environment.
+------------------------------------------------------------------------
+r186 | Torhal | 2018-07-21 06:13:15 +0000 (Sat, 21 Jul 2018) | 1 line
+Changed paths:
+   M /trunk/.pkgmeta
+
+Hard-embed LibStub, to stop the WoW 8.x client from complaining about being unable to load it under a dev environment.
+------------------------------------------------------------------------
+

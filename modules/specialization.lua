@@ -27,6 +27,9 @@ local function refreshOptions()
 end
 
 local function tooltip()
+	if not lootSpecId then
+		Spec:InitVars()
+	end
 	if libTT:IsAcquired("SpecializationTooltip") then
 		libTT:Release(libTT:Acquire("SpecializationTooltip"))
 	end
@@ -72,6 +75,13 @@ function Spec:OnInitialize()
   self.settings = self.db.profile
 end
 
+function Spec:InitVars()
+	print("On initVars")
+	specId, lootSpecId = GetSpecialization(), GetLootSpecialization()
+	libAD:ForceUpdate()
+	artifactId = libAD:GetActiveArtifactID() or 0
+end
+
 function Spec:OnEnable()
   self.settings.lock = self.settings.lock or not self.settings.lock
   refreshOptions()
@@ -87,12 +97,6 @@ end
 
 function Spec:OnDisable()
   specFrame:UnregisterAllEvents()
-end
-
-function Spec:InitVars()
-	specId, lootSpecId = GetSpecialization(), GetLootSpecialization()
-	libAD:ForceUpdate()
-	artifactId = libAD:GetActiveArtifactID() or 0
 end
 
 function Spec:CreateFrames()
@@ -121,8 +125,8 @@ function Spec:CreateFrames()
 		specFrame:RegisterEvent('ARTIFACT_CLOSE')
 		-- specFrame:RegisterEvent('UNIT_INVENTORY_CHANGED')
 		-- specFrame:RegisterEvent('INSPECT_READY')
-		libAD:RegisterCallback('ARTIFACT_EQUIPPED_CHANGED',Spec.CreateFrames)
-		libAD:RegisterCallback('ARTIFACT_KNOWLEDGE_CHANGED',Spec.CreateFrames)
+		libAD:RegisterCallback('ARTIFACT_EQUIPPED_CHANGED',Spec.CreateFrames)--has to cchange
+		libAD:RegisterCallback('ARTIFACT_KNOWLEDGE_CHANGED',Spec.CreateFrames)--has to cchange
 		libAD:RegisterCallback('ARTIFACT_POWER_CHANGED', function()
 		Spec:UpdateArtifactBar(artifactId)
 		end)

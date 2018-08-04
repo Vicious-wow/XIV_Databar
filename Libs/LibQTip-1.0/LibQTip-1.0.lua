@@ -1,44 +1,52 @@
 local MAJOR = "LibQTip-1.0"
-local MINOR = 44 -- Should be manually increased
+local MINOR = 46 -- Should be manually increased
+local LibStub = _G.LibStub
+
 assert(LibStub, MAJOR .. " requires LibStub")
 
-local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
-if not lib then return end -- No upgrade needed
+local lib, oldMinor = LibStub:NewLibrary(MAJOR, MINOR)
+
+if not lib then
+	return
+end -- No upgrade needed
 
 ------------------------------------------------------------------------------
 -- Upvalued globals
 ------------------------------------------------------------------------------
-local _G = getfenv(0)
+local table = _G.table
+local tinsert = table.insert
+local tremove = table.remove
+local wipe = table.wipe
 
-local type = type
-local select = select
 local error = error
-local pairs, ipairs = pairs, ipairs
-local tonumber, tostring = tonumber, tostring
-local strfind = string.find
 local math = math
-local next = next
 local min, max = math.min, math.max
+local next = next
+local pairs, ipairs = pairs, ipairs
+local select = select
 local setmetatable = setmetatable
-local tinsert, tremove = tinsert, tremove
-local wipe = wipe
+local tonumber, tostring = tonumber, tostring
+local type = type
 
-local CreateFrame = CreateFrame
-local UIParent = UIParent
+local CreateFrame = _G.CreateFrame
+local GameTooltip = _G.GameTooltip
+local UIParent = _G.UIParent
+
+local geterrorhandler = _G.geterrorhandler
 
 ------------------------------------------------------------------------------
 -- Tables and locals
 ------------------------------------------------------------------------------
-lib.frameMetatable = lib.frameMetatable or { __index = CreateFrame("Frame") }
+lib.frameMetatable = lib.frameMetatable or {__index = CreateFrame("Frame")}
 
 lib.tipPrototype = lib.tipPrototype or setmetatable({}, lib.frameMetatable)
-lib.tipMetatable = lib.tipMetatable or { __index = lib.tipPrototype }
+lib.tipMetatable = lib.tipMetatable or {__index = lib.tipPrototype}
 
 lib.providerPrototype = lib.providerPrototype or {}
-lib.providerMetatable = lib.providerMetatable or { __index = lib.providerPrototype }
+lib.providerMetatable = lib.providerMetatable or {__index = lib.providerPrototype}
 
 lib.cellPrototype = lib.cellPrototype or setmetatable({}, lib.frameMetatable)
-lib.cellMetatable = lib.cellMetatable or { __index = lib.cellPrototype }
+lib.cellMetatable = lib.cellMetatable or {__index = lib.cellPrototype}
 
 lib.activeTooltips = lib.activeTooltips or {}
 
@@ -110,6 +118,7 @@ function lib:Acquire(key, ...)
 	if key == nil then
 		error("attempt to use a nil key", 2)
 	end
+
 	local tooltip = activeTooltips[key]
 
 	if not tooltip then
@@ -118,7 +127,7 @@ function lib:Acquire(key, ...)
 		activeTooltips[key] = tooltip
 	end
 
-	if select('#', ...) > 0 then
+	if select("#", ...) > 0 then
 		-- Here we catch any error to properly report it for the calling code
 		local ok, msg = pcall(tooltip.SetColumnLayout, tooltip, ...)
 
@@ -126,6 +135,7 @@ function lib:Acquire(key, ...)
 			error(msg, 2)
 		end
 	end
+
 	return tooltip
 end
 
@@ -135,6 +145,7 @@ function lib:Release(tooltip)
 	if not key or activeTooltips[key] ~= tooltip then
 		return
 	end
+
 	ReleaseTooltip(tooltip)
 	activeTooltips[key] = nil
 end
@@ -143,7 +154,8 @@ function lib:IsAcquired(key)
 	if key == nil then
 		error("attempt to use a nil key", 2)
 	end
-	return not not activeTooltips[key]
+
+	return not (not activeTooltips[key])
 end
 
 function lib:IterateTooltips()
@@ -169,7 +181,9 @@ local function ReleaseFrame(frame)
 	frame:SetParent(nil)
 	frame:ClearAllPoints()
 	frame:SetBackdrop(nil)
+
 	ClearFrameScripts(frame)
+
 	tinsert(frameHeap, frame)
 	--[===[@debug@
 	usedFrames = usedFrames - 1
@@ -179,7 +193,7 @@ end
 ------------------------------------------------------------------------------
 -- Dirty layout handler
 ------------------------------------------------------------------------------
-lib.layoutCleaner = lib.layoutCleaner or CreateFrame('Frame')
+lib.layoutCleaner = lib.layoutCleaner or CreateFrame("Frame")
 
 local layoutCleaner = lib.layoutCleaner
 layoutCleaner.registry = layoutCleaner.registry or {}
@@ -191,34 +205,44 @@ end
 
 function layoutCleaner:CleanupLayouts()
 	self:Hide()
+
 	for tooltip in pairs(self.registry) do
 		FixCellSizes(tooltip)
 	end
+
 	wipe(self.registry)
 end
 
-layoutCleaner:SetScript('OnUpdate', layoutCleaner.CleanupLayouts)
+layoutCleaner:SetScript("OnUpdate", layoutCleaner.CleanupLayouts)
 
 ------------------------------------------------------------------------------
 -- CellProvider and Cell
 ------------------------------------------------------------------------------
 function providerPrototype:AcquireCell()
 	local cell = tremove(self.heap)
+
 	if not cell then
 		cell = setmetatable(CreateFrame("Frame", nil, UIParent), self.cellMetatable)
-		if type(cell.InitializeCell) == 'function' then
+
+		if type(cell.InitializeCell) == "function" then
 			cell:InitializeCell()
 		end
 	end
+
 	self.cells[cell] = true
+
 	return cell
 end
 
 function providerPrototype:ReleaseCell(cell)
-	if not self.cells[cell] then return end
-	if type(cell.ReleaseCell) == 'function' then
+	if not self.cells[cell] then
+		return
+	end
+
+	if type(cell.ReleaseCell) == "function" then
 		cell:ReleaseCell()
 	end
+
 	self.cells[cell] = nil
 	tinsert(self.heap, cell)
 end
@@ -233,18 +257,22 @@ end
 
 function lib:CreateCellProvider(baseProvider)
 	local cellBaseMetatable, cellBasePrototype
+
 	if baseProvider and baseProvider.GetCellPrototype then
 		cellBasePrototype, cellBaseMetatable = baseProvider:GetCellPrototype()
 	else
 		cellBaseMetatable = cellMetatable
 	end
-	local cellPrototype = setmetatable({}, cellBaseMetatable)
-	local cellProvider = setmetatable({}, providerMetatable)
-	cellProvider.heap = {}
-	cellProvider.cells = {}
-	cellProvider.cellPrototype = cellPrototype
-	cellProvider.cellMetatable = { __index = cellPrototype }
-	return cellProvider, cellPrototype, cellBasePrototype
+
+	local newCellPrototype = setmetatable({}, cellBaseMetatable)
+	local newCellProvider = setmetatable({}, providerMetatable)
+
+	newCellProvider.heap = {}
+	newCellProvider.cells = {}
+	newCellProvider.cellPrototype = newCellPrototype
+	newCellProvider.cellMetatable = {__index = newCellPrototype}
+
+	return newCellProvider, newCellPrototype, cellBasePrototype
 end
 
 ------------------------------------------------------------------------------
@@ -262,61 +290,66 @@ function labelPrototype:InitializeCell()
 	self.fontString:SetFontObject(_G.GameTooltipText)
 end
 
-function labelPrototype:SetupCell(tooltip, value, justification, font, l_pad, r_pad, max_width, min_width, ...)
-	local fs = self.fontString
+function labelPrototype:SetupCell(tooltip, value, justification, font, leftPadding, rightPadding, maxWidth, minWidth, ...)
+	local fontString = self.fontString
 	local line = tooltip.lines[self._line]
 
 	-- detatch fs from cell for size calculations
-	fs:ClearAllPoints()
-	fs:SetFontObject(font or (line.is_header and tooltip:GetHeaderFont() or tooltip:GetFont()))
-	fs:SetJustifyH(justification)
-	fs:SetText(tostring(value))
+	fontString:ClearAllPoints()
+	fontString:SetFontObject(font or (line.is_header and tooltip:GetHeaderFont() or tooltip:GetFont()))
+	fontString:SetJustifyH(justification)
+	fontString:SetText(tostring(value))
 
-	l_pad = l_pad or 0
-	r_pad = r_pad or 0
+	leftPadding = leftPadding or 0
+	rightPadding = rightPadding or 0
 
-	local width = fs:GetStringWidth() + l_pad + r_pad
+	local width = fontString:GetStringWidth() + leftPadding + rightPadding
 
-	if max_width and min_width and (max_width < min_width) then
-		error("maximum width cannot be lower than minimum width: " .. tostring(max_width) .. " < " .. tostring(min_width), 2)
+	if maxWidth and minWidth and (maxWidth < minWidth) then
+		error("maximum width cannot be lower than minimum width: " .. tostring(maxWidth) .. " < " .. tostring(minWidth), 2)
 	end
 
-	if max_width and (max_width < (l_pad + r_pad)) then
-		error("maximum width cannot be lower than the sum of paddings: " .. tostring(max_width) .. " < " .. tostring(l_pad) .. " + " .. tostring(r_pad), 2)
+	if maxWidth and (maxWidth < (leftPadding + rightPadding)) then
+		error("maximum width cannot be lower than the sum of paddings: " .. tostring(maxWidth) .. " < " .. tostring(leftPadding) .. " + " .. tostring(rightPadding), 2)
 	end
 
-	if min_width and width < min_width then
-		width = min_width
+	if minWidth and width < minWidth then
+		width = minWidth
 	end
 
-	if max_width and max_width < width then
-		width = max_width
+	if maxWidth and maxWidth < width then
+		width = maxWidth
 	end
-	fs:SetWidth(width - (l_pad + r_pad))
+
+	fontString:SetWidth(width - (leftPadding + rightPadding))
 	-- Use GetHeight() instead of GetStringHeight() so lines which are longer than width will wrap.
-	local height = fs:GetHeight()
+	local height = fontString:GetHeight()
 
 	-- reanchor fs to cell
-	fs:SetWidth(0)
-	fs:SetPoint("TOPLEFT", self, "TOPLEFT", l_pad, 0)
-	fs:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -r_pad, 0)
+	fontString:SetWidth(0)
+	fontString:SetPoint("TOPLEFT", self, "TOPLEFT", leftPadding, 0)
+	fontString:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -rightPadding, 0)
 	--~ 	fs:SetPoint("TOPRIGHT", self, "TOPRIGHT", -r_pad, 0)
 
-	self._paddingL = l_pad
-	self._paddingR = r_pad
+	self._paddingL = leftPadding
+	self._paddingR = rightPadding
 
 	return width, height
 end
 
 function labelPrototype:getContentHeight()
-	local fs = self.fontString
-	fs:SetWidth(self:GetWidth() - (self._paddingL + self._paddingR))
+	local fontString = self.fontString
+	fontString:SetWidth(self:GetWidth() - (self._paddingL + self._paddingR))
+
 	local height = self.fontString:GetHeight()
-	fs:SetWidth(0)
+	fontString:SetWidth(0)
+
 	return height
 end
 
-function labelPrototype:GetPosition() return self._line, self._column end
+function labelPrototype:GetPosition()
+	return self._line, self._column
+end
 
 ------------------------------------------------------------------------------
 -- Tooltip cache
@@ -340,8 +373,10 @@ function AcquireTooltip()
 		local scrollChild = CreateFrame("Frame", nil, tooltip.scrollFrame)
 		scrollFrame:SetScrollChild(scrollChild)
 		tooltip.scrollChild = scrollChild
+
 		setmetatable(tooltip, tipMetatable)
 	end
+
 	--[===[@debug@
 	usedTooltips = usedTooltips + 1
 	--@end-debug@]===]
@@ -353,15 +388,17 @@ function ReleaseTooltip(tooltip)
 	if tooltip.releasing then
 		return
 	end
-	tooltip.releasing = true
 
+	tooltip.releasing = true
 	tooltip:Hide()
 
 	local releaseHandler = lib.onReleaseHandlers[tooltip]
+
 	if releaseHandler then
 		lib.onReleaseHandlers[tooltip] = nil
 
 		local success, errorMessage = pcall(releaseHandler, tooltip)
+
 		if not success then
 			geterrorhandler()(errorMessage)
 		end
@@ -370,6 +407,7 @@ function ReleaseTooltip(tooltip)
 		if not success then
 			geterrorhandler()(errorMessage)
 		end
+
 		tooltip.OnRelease = nil
 	end
 
@@ -393,6 +431,7 @@ function ReleaseTooltip(tooltip)
 	for i, column in ipairs(tooltip.columns) do
 		tooltip.columns[i] = ReleaseFrame(column)
 	end
+
 	tooltip.columns = ReleaseTable(tooltip.columns)
 	tooltip.lines = ReleaseTable(tooltip.lines)
 	tooltip.colspans = ReleaseTable(tooltip.colspans)
@@ -418,18 +457,16 @@ function AcquireCell(tooltip, provider)
 	cell:SetParent(tooltip.scrollChild)
 	cell:SetFrameLevel(tooltip.scrollChild:GetFrameLevel() + 3)
 	cell._provider = provider
+
 	return cell
 end
 
 -- Cleans the cell hands it to its provider for storing
 function ReleaseCell(cell)
-	if cell.fontString then
-		cell.fontString:SetFontObject(cell._font)
-
-		if cell.r then
-			cell.fontString:SetTextColor(cell.r, cell.g, cell.b)
-		end
+	if cell.fontString and cell.r then
+		cell.fontString:SetTextColor(cell.r, cell.g, cell.b, cell.a)
 	end
+
 	cell._font = nil
 	cell._justification = nil
 	cell._colSpan = nil
@@ -440,6 +477,7 @@ function ReleaseCell(cell)
 	cell:ClearAllPoints()
 	cell:SetParent(nil)
 	cell:SetBackdrop(nil)
+
 	ClearFrameScripts(cell)
 
 	cell._provider:ReleaseCell(cell)
@@ -461,9 +499,9 @@ function AcquireTable()
 end
 
 -- Cleans the table and stores it in the cache
-function ReleaseTable(table)
-	wipe(table)
-	tinsert(tableHeap, table)
+function ReleaseTable(tableInstance)
+	wipe(tableInstance)
+	tinsert(tableHeap, tableInstance)
 	--[===[@debug@
 	usedTables = usedTables - 1
 	--@end-debug@]===]
@@ -484,6 +522,7 @@ function InitializeTooltip(tooltip, key)
 		tooltip:SetBackdropColor(GameTooltip:GetBackdropColor())
 		tooltip:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
 	end
+
 	tooltip:SetScale(GameTooltip:GetScale())
 	tooltip:SetAlpha(1)
 	tooltip:SetFrameStrata("TOOLTIP")
@@ -497,8 +536,8 @@ function InitializeTooltip(tooltip, key)
 	tooltip.columns = tooltip.columns or AcquireTable()
 	tooltip.lines = tooltip.lines or AcquireTable()
 	tooltip.colspans = tooltip.colspans or AcquireTable()
-	tooltip.regularFont = GameTooltipText
-	tooltip.headerFont = GameTooltipHeaderText
+	tooltip.regularFont = _G.GameTooltipText
+	tooltip.headerFont = _G.GameTooltipHeaderText
 	tooltip.labelProvider = labelProvider
 	tooltip.cell_margin_h = tooltip.cell_margin_h or CELL_MARGIN_H
 	tooltip.cell_margin_v = tooltip.cell_margin_v or CELL_MARGIN_V
@@ -515,6 +554,7 @@ function tipPrototype:SetDefaultProvider(myProvider)
 	if not myProvider then
 		return
 	end
+
 	self.labelProvider = myProvider
 end
 
@@ -529,6 +569,7 @@ local function checkJustification(justification, level, silent)
 		end
 		error("invalid justification, must one of LEFT, CENTER or RIGHT, not: " .. tostring(justification), level + 1)
 	end
+
 	return true
 end
 
@@ -556,6 +597,7 @@ function tipPrototype:AddColumn(justification)
 
 	local colNum = #self.columns + 1
 	local column = self.columns[colNum] or AcquireFrame(self.scrollChild)
+
 	column:SetFrameLevel(self.scrollChild:GetFrameLevel() + 1)
 	column.justification = justification
 	column.width = 0
@@ -571,8 +613,10 @@ function tipPrototype:AddColumn(justification)
 	else
 		column:SetPoint("LEFT", self.scrollChild)
 	end
+
 	column:Show()
 	self.columns[colNum] = column
+
 	return colNum
 end
 
@@ -590,7 +634,6 @@ end
 ------------------------------------------------------------------------------
 -- Script hooks
 ------------------------------------------------------------------------------
-
 local RawSetScript = lib.frameMetatable.__index.SetScript
 
 function ClearTooltipScripts(tooltip)
@@ -598,16 +641,19 @@ function ClearTooltipScripts(tooltip)
 		for scriptType in pairs(tooltip.scripts) do
 			RawSetScript(tooltip, scriptType, nil)
 		end
+
 		tooltip.scripts = ReleaseTable(tooltip.scripts)
 	end
 end
 
 function tipPrototype:SetScript(scriptType, handler)
 	RawSetScript(self, scriptType, handler)
+
 	if handler then
 		if not self.scripts then
 			self.scripts = AcquireTable()
 		end
+
 		self.scripts[scriptType] = true
 	elseif self.scripts then
 		self.scripts[scriptType] = nil
@@ -624,17 +670,17 @@ end
 -- Scrollbar data and functions
 ------------------------------------------------------------------------------
 local sliderBackdrop = {
-	["bgFile"] = [[Interface\Buttons\UI-SliderBar-Background]],
-	["edgeFile"] = [[Interface\Buttons\UI-SliderBar-Border]],
-	["tile"] = true,
-	["edgeSize"] = 8,
-	["tileSize"] = 8,
-	["insets"] = {
-		["left"] = 3,
-		["right"] = 3,
-		["top"] = 3,
-		["bottom"] = 3,
-	},
+	bgFile = [[Interface\Buttons\UI-SliderBar-Background]],
+	edgeFile = [[Interface\Buttons\UI-SliderBar-Border]],
+	tile = true,
+	edgeSize = 8,
+	tileSize = 8,
+	insets = {
+		left = 3,
+		right = 3,
+		top = 3,
+		bottom = 3
+	}
 }
 
 local function slider_OnValueChanged(self)
@@ -680,14 +726,14 @@ function tipPrototype:UpdateScrolling(maxheight)
 		if maxheight and tipsize - shrink > maxheight then
 			shrink = tipsize - maxheight
 		end
+
 		self:SetHeight(2 * TOOLTIP_PADDING + self.height - shrink)
 		self:SetWidth(2 * TOOLTIP_PADDING + self.width + 20)
 		self.scrollFrame:SetPoint("RIGHT", self, "RIGHT", -(TOOLTIP_PADDING + 20), 0)
 
 		if not self.slider then
 			local slider = CreateFrame("Slider", nil, self)
-
-			self.slider = slider
+			slider.scrollFrame = self.scrollFrame
 
 			slider:SetOrientation("VERTICAL")
 			slider:SetPoint("TOPRIGHT", self, "TOPRIGHT", -TOOLTIP_PADDING, -TOOLTIP_PADDING)
@@ -697,22 +743,27 @@ function tipPrototype:UpdateScrolling(maxheight)
 			slider:SetMinMaxValues(0, 1)
 			slider:SetValueStep(1)
 			slider:SetWidth(12)
-			slider.scrollFrame = self.scrollFrame
 			slider:SetScript("OnValueChanged", slider_OnValueChanged)
 			slider:SetValue(0)
+
+			self.slider = slider
 		end
+
 		self.slider:SetMinMaxValues(0, shrink)
 		self.slider:Show()
+
 		self:EnableMouseWheel(true)
 		self:SetScript("OnMouseWheel", tooltip_OnMouseWheel)
 	else
 		self:SetHeight(2 * TOOLTIP_PADDING + self.height)
 		self:SetWidth(2 * TOOLTIP_PADDING + self.width)
+
 		self.scrollFrame:SetPoint("RIGHT", self, "RIGHT", -TOOLTIP_PADDING, 0)
 
 		if self.slider then
 			self.slider:SetValue(0)
 			self.slider:Hide()
+
 			self:EnableMouseWheel(false)
 			self:SetScript("OnMouseWheel", nil)
 		end
@@ -724,25 +775,32 @@ end
 ------------------------------------------------------------------------------
 function tipPrototype:Clear()
 	for i, line in ipairs(self.lines) do
-		for j, cell in pairs(line.cells) do
+		for _, cell in pairs(line.cells) do
 			if cell then
 				ReleaseCell(cell)
 			end
 		end
+
 		ReleaseTable(line.cells)
+
 		line.cells = nil
 		line.is_header = nil
+
 		ReleaseFrame(line)
+
 		self.lines[i] = nil
 	end
 
-	for i, column in ipairs(self.columns) do
+	for _, column in ipairs(self.columns) do
 		column.width = 0
 		column:SetWidth(1)
 	end
+
 	wipe(self.colspans)
+
 	self.cell_margin_h = nil
 	self.cell_margin_v = nil
+
 	ResetTooltipSize(self)
 end
 
@@ -754,6 +812,7 @@ function tipPrototype:SetCellMarginH(size)
 	if not size or type(size) ~= "number" or size < 0 then
 		error("Margin size must be a positive number or zero.", 2)
 	end
+
 	self.cell_margin_h = size
 end
 
@@ -765,17 +824,19 @@ function tipPrototype:SetCellMarginV(size)
 	if not size or type(size) ~= "number" or size < 0 then
 		error("Margin size must be a positive number or zero.", 2)
 	end
+
 	self.cell_margin_v = size
 end
 
 function SetTooltipSize(tooltip, width, height)
-	tooltip:SetHeight(2 * TOOLTIP_PADDING + height)
-	tooltip.scrollChild:SetHeight(height)
 	tooltip.height = height
-
-	tooltip:SetWidth(2 * TOOLTIP_PADDING + width)
-	tooltip.scrollChild:SetWidth(width)
 	tooltip.width = width
+
+	tooltip:SetHeight(2 * TOOLTIP_PADDING + height)
+	tooltip:SetWidth(2 * TOOLTIP_PADDING + width)
+
+	tooltip.scrollChild:SetHeight(height)
+	tooltip.scrollChild:SetWidth(width)
 end
 
 -- Add 2 pixels to height so dangling letters (g, y, p, j, etc) are not clipped.
@@ -805,9 +866,9 @@ function FixCellSizes(tooltip)
 	local columns = tooltip.columns
 	local colspans = tooltip.colspans
 	local lines = tooltip.lines
+	local h_margin = tooltip.cell_margin_h or CELL_MARGIN_H
 
 	-- resize columns to make room for the colspans
-	local h_margin = tooltip.cell_margin_h or CELL_MARGIN_H
 	while next(colspans) do
 		local maxNeedCols
 		local maxNeedWidthPerCol = 0
@@ -815,29 +876,35 @@ function FixCellSizes(tooltip)
 		-- calculate the colspan with the highest additional width need per column
 		for colRange, width in pairs(colspans) do
 			local left, right = colRange:match("^(%d+)%-(%d+)$")
+
 			left, right = tonumber(left), tonumber(right)
 
 			for col = left, right - 1 do
 				width = width - columns[col].width - h_margin
 			end
+
 			width = width - columns[right].width
 
 			if width <= 0 then
 				colspans[colRange] = nil
 			else
 				width = width / (right - left + 1)
+
 				if width > maxNeedWidthPerCol then
 					maxNeedCols = colRange
 					maxNeedWidthPerCol = width
 				end
 			end
 		end
+
 		-- resize all columns for that colspan
 		if maxNeedCols then
 			local left, right = maxNeedCols:match("^(%d+)%-(%d+)$")
+
 			for col = left, right do
 				EnlargeColumn(tooltip, columns[col], columns[col].width + maxNeedWidthPerCol)
 			end
+
 			colspans[maxNeedCols] = nil
 		end
 	end
@@ -846,11 +913,13 @@ function FixCellSizes(tooltip)
 	for _, line in ipairs(lines) do
 		if #(line.cells) > 0 then
 			local lineheight = 0
+
 			for _, cell in pairs(line.cells) do
 				if cell then
 					lineheight = max(lineheight, cell:getContentHeight())
 				end
 			end
+
 			if lineheight > 0 then
 				ResizeLine(tooltip, line, lineheight)
 			end
@@ -870,10 +939,13 @@ local function _SetCell(tooltip, lineNum, colNum, value, font, justification, co
 			for i = colNum, colNum + cell._colSpan - 1 do
 				cells[i] = nil
 			end
+
 			ReleaseCell(cell)
 		end
+
 		return lineNum, colNum
 	end
+
 	font = font or (line.is_header and tooltip.headerFont or tooltip.regularFont)
 
 	-- Check previous cell
@@ -906,6 +978,7 @@ local function _SetCell(tooltip, lineNum, colNum, value, font, justification, co
 	else
 		error("overlapping cells at column " .. colNum, 3)
 	end
+
 	local tooltipWidth = #tooltip.columns
 	local rightColNum
 
@@ -924,13 +997,14 @@ local function _SetCell(tooltip, lineNum, colNum, value, font, justification, co
 
 	-- Cleanup colspans
 	for i = colNum + 1, rightColNum do
-		local cell = cells[i]
+		local columnCell = cells[i]
 
-		if cell then
-			ReleaseCell(cell)
-		elseif cell == false then
+		if columnCell then
+			ReleaseCell(columnCell)
+		elseif columnCell == false then
 			error("overlapping cells at column " .. i, 3)
 		end
+
 		cells[i] = false
 	end
 
@@ -985,22 +1059,25 @@ do
 		if #tooltip.columns == 0 then
 			error("column layout should be defined before adding line", 3)
 		end
+
 		local lineNum = #tooltip.lines + 1
 		local line = tooltip.lines[lineNum] or AcquireFrame(tooltip.scrollChild)
 
 		line:SetFrameLevel(tooltip.scrollChild:GetFrameLevel() + 2)
-		line:SetPoint('LEFT', tooltip.scrollChild)
-		line:SetPoint('RIGHT', tooltip.scrollChild)
+		line:SetPoint("LEFT", tooltip.scrollChild)
+		line:SetPoint("RIGHT", tooltip.scrollChild)
 
 		if lineNum > 1 then
 			local v_margin = tooltip.cell_margin_v or CELL_MARGIN_V
 
-			line:SetPoint('TOP', tooltip.lines[lineNum - 1], 'BOTTOM', 0, -v_margin)
+			line:SetPoint("TOP", tooltip.lines[lineNum - 1], "BOTTOM", 0, -v_margin)
 			SetTooltipSize(tooltip, tooltip.width, tooltip.height + v_margin)
 		else
-			line:SetPoint('TOP', tooltip.scrollChild)
+			line:SetPoint("TOP", tooltip.scrollChild)
 		end
+
 		tooltip.lines[lineNum] = line
+
 		line.cells = line.cells or AcquireTable()
 		line.height = 0
 		line:SetHeight(1)
@@ -1015,6 +1092,7 @@ do
 				lineNum, colNum = _SetCell(tooltip, lineNum, i, value, font, nil, 1, tooltip.labelProvider)
 			end
 		end
+
 		return lineNum, colNum
 	end
 
@@ -1026,12 +1104,13 @@ do
 		local line, col = CreateLine(self, self.headerFont, ...)
 
 		self.lines[line].is_header = true
+
 		return line, col
 	end
 end -- do-block
 
 local GenericBackdrop = {
-	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background"
 }
 
 function tipPrototype:AddSeparator(height, r, g, b, a)
@@ -1040,11 +1119,14 @@ function tipPrototype:AddSeparator(height, r, g, b, a)
 	local color = _G.NORMAL_FONT_COLOR
 
 	height = height or 1
+
 	SetTooltipSize(self, self.width, self.height + height)
+
 	line.height = height
 	line:SetHeight(height)
 	line:SetBackdrop(GenericBackdrop)
 	line:SetBackdropColor(r or color.r, g or color.g, b or color.b, a or 1)
+
 	return lineNum, colNum
 end
 
@@ -1053,6 +1135,7 @@ function tipPrototype:SetCellColor(lineNum, colNum, r, g, b, a)
 
 	if cell then
 		local sr, sg, sb, sa = self:GetBackdropColor()
+
 		cell:SetBackdrop(GenericBackdrop)
 		cell:SetBackdropColor(r or sr, g or sg, b or sb, a or sa)
 	end
@@ -1073,6 +1156,7 @@ function tipPrototype:SetLineColor(lineNum, r, g, b, a)
 
 	if line then
 		local sr, sg, sb, sa = self:GetBackdropColor()
+
 		line:SetBackdrop(GenericBackdrop)
 		line:SetBackdropColor(r or sr, g or sg, b or sb, a or sa)
 	end
@@ -1085,6 +1169,7 @@ function tipPrototype:SetCellTextColor(lineNum, colNum, r, g, b, a)
 	if not line or not column then
 		return
 	end
+
 	local cell = self.lines[lineNum].cells[colNum]
 
 	if cell then
@@ -1093,11 +1178,10 @@ function tipPrototype:SetCellTextColor(lineNum, colNum, r, g, b, a)
 		end
 
 		if not cell.r then
-			cell.r, cell.g, cell.b = cell.fontString:GetTextColor()
+			cell.r, cell.g, cell.b, cell.a = cell.fontString:GetTextColor()
 		end
-		local font = (line.is_header and self.headerFont or self.regularFont)
-		local sr, sg, sb, sa = font:GetTextColor()
-		cell.fontString:SetTextColor(r or sr, g or sg, b or sb, a or sa)
+
+		cell.fontString:SetTextColor(r or cell.r, g or cell.g, b or cell.b, a or cell.a)
 	end
 end
 
@@ -1106,8 +1190,8 @@ function tipPrototype:SetColumnTextColor(colNum, r, g, b, a)
 		return
 	end
 
-	for line_index = 1, #self.lines do
-		self:SetCellTextColor(line_index, colNum, r, g, b, a)
+	for lineIndex = 1, #self.lines do
+		self:SetCellTextColor(lineIndex, colNum, r, g, b, a)
 	end
 end
 
@@ -1118,8 +1202,8 @@ function tipPrototype:SetLineTextColor(lineNum, r, g, b, a)
 		return
 	end
 
-	for cell_index = 1, #line.cells do
-		self:SetCellTextColor(lineNum, line.cells[cell_index]._column, r, g, b, a)
+	for cellIndex = 1, #line.cells do
+		self:SetCellTextColor(lineNum, line.cells[cellIndex]._column, r, g, b, a)
 	end
 end
 
@@ -1140,10 +1224,10 @@ do
 		elseif type(font) == "string" then
 			local ref = _G[font]
 
-			if not ref or type(ref) ~= 'table' or type(ref.IsObjectType) ~= 'function' or not ref:IsObjectType("Font") then
+			if not ref or type(ref) ~= "table" or type(ref.IsObjectType) ~= "function" or not ref:IsObjectType("Font") then
 				bad = true
 			end
-		elseif type(font) ~= 'table' or type(font.IsObjectType) ~= 'function' or not font:IsObjectType("Font") then
+		elseif type(font) ~= "table" or type(font.IsObjectType) ~= "function" or not font:IsObjectType("Font") then
 			bad = true
 		end
 
@@ -1151,6 +1235,7 @@ do
 			if silent then
 				return false
 			end
+
 			error("font must be a Font instance or a string matching the name of a global Font instance, not: " .. tostring(font), level + 1)
 		end
 		return true
@@ -1195,11 +1280,11 @@ do
 			i, justification, arg = i + 1, select(i, ...)
 		end
 
-		if arg == nil or type(arg) == 'number' then
+		if arg == nil or type(arg) == "number" then
 			i, colSpan, arg = i + 1, select(i, ...)
 		end
 
-		if arg == nil or type(arg) == 'table' and type(arg.AcquireCell) == 'function' then
+		if arg == nil or type(arg) == "table" and type(arg.AcquireCell) == "function" then
 			i, provider = i + 1, arg
 		end
 
@@ -1215,10 +1300,13 @@ function tipPrototype:GetHeaderFont()
 	return self.headerFont
 end
 
-function tipPrototype:GetLineCount() return #self.lines end
+function tipPrototype:GetLineCount()
+	return #self.lines
+end
 
-function tipPrototype:GetColumnCount() return #self.columns end
-
+function tipPrototype:GetColumnCount()
+	return #self.columns
+end
 
 ------------------------------------------------------------------------------
 -- Frame Scripts
@@ -1250,13 +1338,14 @@ local scripts = {
 	end,
 	OnReceiveDrag = function(frame, ...)
 		frame:_OnReceiveDrag_func(frame._OnReceiveDrag_arg, ...)
-	end,
+	end
 }
 
 function SetFrameScript(frame, script, func, arg)
 	if not scripts[script] then
 		return
 	end
+
 	frame["_" .. script .. "_func"] = func
 	frame["_" .. script .. "_arg"] = arg
 
@@ -1283,18 +1372,23 @@ end
 function ClearFrameScripts(frame)
 	if frame._OnEnter_func or frame._OnLeave_func or frame._OnMouseDown_func or frame._OnMouseUp_func or frame._OnReceiveDrag_func then
 		frame:EnableMouse(false)
+
 		frame:SetScript("OnEnter", nil)
 		frame._OnEnter_func = nil
 		frame._OnEnter_arg = nil
+
 		frame:SetScript("OnLeave", nil)
 		frame._OnLeave_func = nil
 		frame._OnLeave_arg = nil
+
 		frame:SetScript("OnReceiveDrag", nil)
 		frame._OnReceiveDrag_func = nil
 		frame._OnReceiveDrag_arg = nil
+
 		frame:SetScript("OnMouseDown", nil)
 		frame._OnMouseDown_func = nil
 		frame._OnMouseDown_arg = nil
+
 		frame:SetScript("OnMouseUp", nil)
 		frame._OnMouseUp_func = nil
 		frame._OnMouseUp_arg = nil
@@ -1311,6 +1405,7 @@ end
 
 function tipPrototype:SetCellScript(lineNum, colNum, script, func, arg)
 	local cell = self.lines[lineNum].cells[colNum]
+
 	if cell then
 		SetFrameScript(cell, script, func, arg)
 	end
@@ -1323,15 +1418,18 @@ end
 -- Script of the auto-hiding child frame
 local function AutoHideTimerFrame_OnUpdate(self, elapsed)
 	self.checkElapsed = self.checkElapsed + elapsed
+
 	if self.checkElapsed > 0.1 then
 		if self.parent:IsMouseOver() or (self.alternateFrame and self.alternateFrame:IsMouseOver()) then
 			self.elapsed = 0
 		else
 			self.elapsed = self.elapsed + self.checkElapsed
+
 			if self.elapsed >= self.delay then
 				lib:Release(self.parent)
 			end
 		end
+
 		self.checkElapsed = 0
 	end
 end
@@ -1348,6 +1446,7 @@ function tipPrototype:SetAutoHideDelay(delay, alternateFrame, releaseHandler)
 		if type(releaseHandler) ~= "function" then
 			error("releaseHandler must be a function", 2)
 		end
+
 		lib.onReleaseHandlers[self] = releaseHandler
 	end
 
@@ -1355,8 +1454,10 @@ function tipPrototype:SetAutoHideDelay(delay, alternateFrame, releaseHandler)
 		if not timerFrame then
 			timerFrame = AcquireFrame(self)
 			timerFrame:SetScript("OnUpdate", AutoHideTimerFrame_OnUpdate)
+
 			self.autoHideTimerFrame = timerFrame
 		end
+
 		timerFrame.parent = self
 		timerFrame.checkElapsed = 0
 		timerFrame.elapsed = 0
@@ -1365,8 +1466,10 @@ function tipPrototype:SetAutoHideDelay(delay, alternateFrame, releaseHandler)
 		timerFrame:Show()
 	elseif timerFrame then
 		self.autoHideTimerFrame = nil
+
 		timerFrame.alternateFrame = nil
 		timerFrame:SetScript("OnUpdate", nil)
+
 		ReleaseFrame(timerFrame)
 	end
 end
@@ -1376,9 +1479,14 @@ end
 ------------------------------------------------------------------------------
 local function GetTipAnchor(frame)
 	local x, y = frame:GetCenter()
-	if not x or not y then return "TOPLEFT", "BOTTOMLEFT" end
+
+	if not x or not y then
+		return "TOPLEFT", "BOTTOMLEFT"
+	end
+
 	local hhalf = (x > UIParent:GetWidth() * 2 / 3) and "RIGHT" or (x < UIParent:GetWidth() / 3) and "LEFT" or ""
 	local vhalf = (y > UIParent:GetHeight() / 2) and "TOP" or "BOTTOM"
+
 	return vhalf .. hhalf, frame, (vhalf == "TOP" and "BOTTOM" or "TOP") .. hhalf
 end
 
@@ -1386,6 +1494,7 @@ function tipPrototype:SmartAnchorTo(frame)
 	if not frame then
 		error("Invalid frame provided.", 2)
 	end
+
 	self:ClearAllPoints()
 	self:SetClampedToScreen(true)
 	self:SetPoint(GetTipAnchor(frame))
@@ -1406,7 +1515,7 @@ local function PrintStats()
 	print("Frames used: " .. usedFrames .. ", Cached: " .. frameCache .. ", Total: " .. frameCache + usedFrames)
 	print("Tables used: " .. usedTables .. ", Cached: " .. tableCache .. ", Total: " .. tableCache + usedTables)
 
-	for k, v in pairs(activeTooltips) do
+	for k in pairs(activeTooltips) do
 		if not header then
 			print("Active tooltips:")
 			header = true
@@ -1416,5 +1525,5 @@ local function PrintStats()
 end
 
 SLASH_LibQTip1 = "/qtip"
-SlashCmdList["LibQTip"] = PrintStats
+_G.SlashCmdList["LibQTip"] = PrintStats
 --@end-debug@
