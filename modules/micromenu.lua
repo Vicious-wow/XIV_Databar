@@ -669,9 +669,6 @@ function MenuModule:CreateClickFunctions()
     if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if button == "LeftButton" then
       ToggleGuildFrame()
-      if IsInGuild() then
-        GuildFrameTab2:Click()
-      end
     end
   end; --guild
 
