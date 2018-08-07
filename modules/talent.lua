@@ -538,11 +538,11 @@ function TalentModule:ShowTooltip()
   if self.curArtifactId > 0 then
     tooltip:AddLine(" ")
     local _, artifactData = self.LAD:GetArtifactInfo(self.curArtifactId)
-    local knowLevel, knowMult = self.LAD:GetArtifactKnowledge()
+   --[[ local knowLevel, knowMult = self.LAD:GetArtifactKnowledge()
     if knowLevel and knowLevel > 0 then
       tooltip:AddLine("|cFFFFFF00"..L['Artifact Knowledge']..':|r', "|cFFFFFFFF"..string.format('%d (x%d)', knowLevel, ((knowMult) - 1 * 100)).."|r")
       tooltip:AddLine(" ")
-    end
+    end--]]
     tooltip:AddLine("|cFFFFFF00"..ARTIFACT_POWER..':|r', "|cFFFFFFFF"..string.format('%.0f / %.0f (%d%%)', artifactData.power, artifactData.maxPower == 0 and artifactData.power or artifactData.maxPower, floor((artifactData.power / (artifactData.maxPower == 0 and artifactData.power or artifactData.maxPower)) * 100)).."|r")
     tooltip:AddLine("|cFFFFFF00"..L['Remaining']..':|r', "|cFFFFFFFF"..string.format('%.0f (%d%%)', artifactData.powerForNextRank, floor((artifactData.powerForNextRank / (artifactData.maxPower == 0 and artifactData.power or artifactData.maxPower)) * 100)).."|r")
     if artifactData.numRanksPurchasable > 0 then
