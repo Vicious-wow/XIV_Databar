@@ -114,6 +114,9 @@ function TradeskillModule:StyleTradeskillFrame(framePrefix, profIndex)
   local iconSize = db.text.fontSize + db.general.barPadding
   local name, _, skill, cap, _, spellOffset, skillLine, _ = GetProfessionInfo(profIndex)
   if not name then return end
+  --[[if not self.profIcons[skillLine] then
+  	return
+  end]]
   local icon = xb.constants.mediaPath..'profession\\'..self.profIcons[skillLine]
 
   local textHeight = floor((xb:GetHeight() - 4) / 2)
