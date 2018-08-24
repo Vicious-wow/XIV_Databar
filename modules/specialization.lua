@@ -64,70 +64,70 @@ local function createSpecPopup()
 	local changedWidth = false
 	local lootSpecButtons = {}
 	for i = 0, GetNumSpecializations() do
-	if lootSpecButtons[i] == nil then
-		local localSpecId = i
-		local name = ''
-		if i == 0 then
-			name = SPECIALIZATION;
-			localSpecId = specId
-		else
-			_, name, _ = GetSpecializationInfo(i)
-		end
-		local button = CreateFrame('BUTTON', nil, lootSpecPopup)
-		local buttonText = button:CreateFontString(nil, 'OVERLAY')
-		local buttonIcon = button:CreateTexture(nil, 'OVERLAY')
-
-		buttonIcon:SetTexture(specIcon)
-		buttonIcon:SetTexCoord(unpack(textureCoordinates[specId]))
-		buttonIcon:SetSize(iconSize, iconSize)
-		buttonIcon:SetPoint('LEFT')
-		buttonIcon:SetVertexColor(unpack(color))
-
-		buttonText:SetFont("Fonts\\FRIZQT__.TTF",20)
-		buttonText:SetTextColor(unpack(color))
-		buttonText:SetText(name)
-		buttonText:SetPoint('LEFT', buttonIcon, 'RIGHT', 5, 0)
-		local textWidth = iconSize + 5 + buttonText:GetStringWidth()
-
-		button:SetID(i)
-		button:SetSize(textWidth, iconSize)
-		button.isSettable = true
-		button.text = buttonText
-		button.icon = buttonIcon
-
-		button:EnableMouse(true)
-		button:RegisterForClicks('AnyUp')
-
-		button:SetScript('OnEnter', function()
-		buttonText:SetTextColor(unpack(color))
-		end)
-
-		button:SetScript('OnLeave', function()
-		buttonText:SetTextColor(unpack(color))
-		end)
-
-		button:SetScript('OnClick', function(self, button)
-			if InCombatLockdown() then return; end
-			if button == 'LeftButton' then
-				local id = 0
-				local name = ''
-				if self:GetID() ~= 0 then
-					id, name = GetSpecializationInfo(self:GetID())
-				else
-					name = GetSpecializationInfo(GetSpecialization())
-				end
-				SetLootSpecialization(id)
+		if lootSpecButtons[i] == nil then
+			local localSpecId = i
+			local name = ''
+			if i == 0 then
+				name = SPECIALIZATION;
+				localSpecId = specId
+			else
+				_, name, _ = GetSpecializationInfo(i)
 			end
-			TalentModule.lootSpecPopup:Hide()
-		end)
+			local button = CreateFrame('BUTTON', nil, lootSpecPopup)
+			local buttonText = button:CreateFontString(nil, 'OVERLAY')
+			local buttonIcon = button:CreateTexture(nil, 'OVERLAY')
 
-		lootSpecButtons[i] = button
+			buttonIcon:SetTexture(specIcon)
+			buttonIcon:SetTexCoord(unpack(textureCoordinates[specId]))
+			buttonIcon:SetSize(iconSize, iconSize)
+			buttonIcon:SetPoint('LEFT')
+			buttonIcon:SetVertexColor(unpack(color))
 
-		if textWidth > popupWidth then
-		popupWidth = textWidth
-		changedWidth = true
-		end
-	end -- if nil
+			buttonText:SetFont("Fonts\\FRIZQT__.TTF",20)
+			buttonText:SetTextColor(unpack(color))
+			buttonText:SetText(name)
+			buttonText:SetPoint('LEFT', buttonIcon, 'RIGHT', 5, 0)
+			local textWidth = iconSize + 5 + buttonText:GetStringWidth()
+
+			button:SetID(i)
+			button:SetSize(textWidth, iconSize)
+			button.isSettable = true
+			button.text = buttonText
+			button.icon = buttonIcon
+
+			button:EnableMouse(true)
+			button:RegisterForClicks('AnyUp')
+
+			button:SetScript('OnEnter', function()
+			buttonText:SetTextColor(unpack(color))
+			end)
+
+			button:SetScript('OnLeave', function()
+			buttonText:SetTextColor(unpack(color))
+			end)
+
+			button:SetScript('OnClick', function(self, button)
+				if InCombatLockdown() then return; end
+				if button == 'LeftButton' then
+					local id = 0
+					local name = ''
+					if self:GetID() ~= 0 then
+						id, name = GetSpecializationInfo(self:GetID())
+					else
+						name = GetSpecializationInfo(GetSpecialization())
+					end
+					SetLootSpecialization(id)
+				end
+				TalentModule.lootSpecPopup:Hide()
+			end)
+
+			lootSpecButtons[i] = button
+
+			if textWidth > popupWidth then
+				popupWidth = textWidth
+				changedWidth = true
+			end
+		end -- if nil
 	end -- for ipairs portOptions
 	for portId, button in pairs(lootSpecButtons) do
 		if button.isSettable then
@@ -198,6 +198,7 @@ end
 
 function Spec:InitVars()
 	specId, lootSpecId = GetSpecialization(), GetLootSpecialization()
+	C_Timer.After(2,function() specId, lootSpecId = GetSpecialization(), GetLootSpecialization() end)
 	libAD:ForceUpdate()
 	artifactId = libAD:GetActiveArtifactID() or 0
 end
@@ -266,10 +267,15 @@ function Spec:CreateFrames()
 	specText:SetFont(XB.mediaFold.."font\\homizio_bold.ttf", 12)
 	specText:SetTextColor(unpack(color))
 
-	local currentSpecName = GetSpecializationInfo(specId) and select(2,GetSpecializationInfo(specId)) or ""
-
-	specText:SetText(string.upper(currentSpecName))
-	specFrame:SetSize(specText:GetStringWidth()+2+w, h)
+	local currentSpecName = select(2,GetSpecializationInfo(specId))
+	if not currentSpecName then
+		C_Timer.After(2,function()
+			currentSpecName = select(2,GetSpecializationInfo(specId))
+		end)
+	else
+		specText:SetText(string.upper(currentSpecName))
+		specFrame:SetSize(specText:GetStringWidth()+2+w, h)
+	end
 
 	--For the specPopup
 	lootSpecPopup = lootSpecPopup or CreateFrame('BUTTON', nil, specFrame)
