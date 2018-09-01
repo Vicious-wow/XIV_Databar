@@ -1449,7 +1449,7 @@ function Social:CreateGuildFrame()
 		if button == "LeftButton" then 
 			if ( IsInGuild() ) then
 				ToggleGuildFrame()
-				GuildFrameTab2:Click()
+				--GuildFrameTab2:Click()
 			else
 				ToggleGuildFrame()
 			end
