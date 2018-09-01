@@ -7,11 +7,11 @@ local Spec = XB:RegisterModule("Specialization")
 ----------------------------------------------------------------------------------------------------------
 local ccR,ccG,ccB = GetClassColor(XB.playerClass)
 local libTT,libAD
-local specFrame,specIcon,specText,lootSpecPopup,lootSpecPopupTexture
+local specFrame,specIcon,specText,specPopup,headerSpecPopup,popupSpecType,artifactBar,artifactBarBg
 local Bar,BarFrame
 local spec_config
 local specId, lootSpecId = 0,0
-local artifactId = 0
+local artifactId, azeriteItem = 0, nil
 local textureCoordinates = {
 	[1] = { 0.00, 0.25, 0, 1 },
 	[2] = { 0.25, 0.50, 0, 1 },
@@ -27,142 +27,245 @@ local function refreshOptions()
 end
 
 local function tooltip(hide)
-	if not lootSpecId then
+	if not lootSpecId or lootSpecId == 0 then
 		Spec:InitVars()
-	end
-	if libTT:IsAcquired("SpecializationTooltip") then
-		libTT:Release(libTT:Acquire("SpecializationTooltip"))
-	end
+		C_Timer.After(.3,function() tooltip(hide) end)
+		return
+	else
+		if libTT:IsAcquired("SpecializationTooltip") then
+			libTT:Release(libTT:Acquire("SpecializationTooltip"))
+		end
 
-	local tooltip = libTT:Acquire("SpecializationTooltip", 1)
-	if hide then
-		tooltip:Hide()
-	end
-	tooltip:SmartAnchorTo(specFrame)
-	tooltip:SetAutoHideDelay(.3, specFrame)
-	tooltip:AddHeader("[|cff6699FF"..SPECIALIZATION.."|r]")
-	tooltip:AddLine(string.format(ERR_LOOT_SPEC_CHANGED_S,select(2,GetSpecializationInfoByID(lootSpecId))))
+		local tooltip = libTT:Acquire("SpecializationTooltip", 1)
 
-	XB:SkinTooltip(tooltip,"SpecializationTooltip")
-	tooltip:Show();
-end
+		tooltip:SmartAnchorTo(specFrame)
+		tooltip:SetAutoHideDelay(.3, specFrame)
+		tooltip:AddHeader("[|cff6699FF"..SPECIALIZATION.."|r]")
+	  	azeriteItem = C_AzeriteItem.FindActiveAzeriteItem();
 
-local function createSpecPopup()
-	if not lootSpecPopup then return; end
-	local color,hover,anchor = Spec.settings.color,Spec.settings.hover,Spec.settings.anchor
-	--[[local db = xb.db.profile]]
-	local iconSize = 25 --db.text.fontSize + db.general.barPadding
-	local lootSpecOptionString = lootSpecOptionString or lootSpecPopup:CreateFontString(nil, 'OVERLAY')
-	lootSpecOptionString:SetFont("Fonts\\FRIZQT__.TTF",20)
-	lootSpecOptionString:SetTextColor(unpack(color))
-	lootSpecOptionString:SetText(SELECT_LOOT_SPECIALIZATION)
-	lootSpecOptionString:SetPoint('TOP', 0, -(3))
-	lootSpecOptionString:SetPoint('CENTER')
+		if artifactId > 0 then
+			tooltip:AddLine(" ")
+			local _, artifactData = libAD:GetArtifactInfo(artifactId)
+			tooltip:AddLine(ARTIFACT_POWER..':'..string.format('%d / %d (%d%%)', artifactData.power, artifactData.maxPower, floor((artifactData.power / artifactData.maxPower) * 100)), 1, 1, 0, 1, 1, 1)
+			tooltip:AddLine('Remaining:'..string.format('%d (%d%%)', artifactData.powerForNextRank, floor((artifactData.powerForNextRank / artifactData.maxPower) * 100)), 1, 1, 0, 1, 1, 1)
+		elseif azeriteItem then
+			local azeriteItem_ = Item:CreateFromItemLocation(azeriteItem); 
+			local xp, totalLevelXP = C_AzeriteItem.GetAzeriteItemXPInfo(azeriteItem)
+			local currentLevel = C_AzeriteItem.GetPowerLevel(azeriteItem); 
+			local xpToNextLevel = totalLevelXP - xp; 
+			tooltip:AddLine(" ")
+			tooltip:AddLine(AZERITE_POWER_TOOLTIP_TITLE:format(currentLevel, xpToNextLevel))
 
-	local popupWidth = lootSpecPopup:GetWidth()
-	local popupHeight = (GetNumSpecializations()+1)*20--xb.constants.popupPadding + db.text.fontSize + self.optionTextExtra
-	local changedWidth = false
-	local lootSpecButtons = {}
-	for i = 0, GetNumSpecializations() do
-		if lootSpecButtons[i] == nil then
-			local localSpecId = i
-			local name = ''
-			if i == 0 then
-				name = SPECIALIZATION;
-				localSpecId = specId
-			else
-				_, name, _ = GetSpecializationInfo(i)
-			end
-			local button = CreateFrame('BUTTON', nil, lootSpecPopup)
-			local buttonText = button:CreateFontString(nil, 'OVERLAY')
-			local buttonIcon = button:CreateTexture(nil, 'OVERLAY')
+		end
 
-			buttonIcon:SetTexture(specIcon)
-			buttonIcon:SetTexCoord(unpack(textureCoordinates[specId]))
-			buttonIcon:SetSize(iconSize, iconSize)
-			buttonIcon:SetPoint('LEFT')
-			buttonIcon:SetVertexColor(unpack(color))
+		tooltip:AddLine(string.format(ERR_LOOT_SPEC_CHANGED_S,select(2,GetSpecializationInfoByID(lootSpecId))))
 
-			buttonText:SetFont("Fonts\\FRIZQT__.TTF",20)
-			buttonText:SetTextColor(unpack(color))
-			buttonText:SetText(name)
-			buttonText:SetPoint('LEFT', buttonIcon, 'RIGHT', 5, 0)
-			local textWidth = iconSize + 5 + buttonText:GetStringWidth()
+		tooltip:AddLine(" ")
+  		tooltip:AddLine('<'..'Left-Click'..'>'.. 'Set Specialization')
+		tooltip:AddLine('<'..SHIFT_KEY_TEXT.."+"..'Left-Click'..'>'..'Set Loot Specialization')
+		if artifactId > 0 then
+			tooltip:AddHeaderLine('<'..'Right-Click'..'>'.. 'Open Artifact')
+		end
 
-			button:SetID(i)
-			button:SetSize(textWidth, iconSize)
-			button.isSettable = true
-			button.text = buttonText
-			button.icon = buttonIcon
-
-			button:EnableMouse(true)
-			button:RegisterForClicks('AnyUp')
-
-			button:SetScript('OnEnter', function()
-			buttonText:SetTextColor(unpack(color))
-			end)
-
-			button:SetScript('OnLeave', function()
-			buttonText:SetTextColor(unpack(color))
-			end)
-
-			button:SetScript('OnClick', function(self, button)
-				if InCombatLockdown() then return; end
-				if button == 'LeftButton' then
-					local id = 0
-					local name = ''
-					if self:GetID() ~= 0 then
-						id, name = GetSpecializationInfo(self:GetID())
-					else
-						name = GetSpecializationInfo(GetSpecialization())
-					end
-					SetLootSpecialization(id)
-				end
-				TalentModule.lootSpecPopup:Hide()
-			end)
-
-			lootSpecButtons[i] = button
-
-			if textWidth > popupWidth then
-				popupWidth = textWidth
-				changedWidth = true
-			end
-		end -- if nil
-	end -- for ipairs portOptions
-	for portId, button in pairs(lootSpecButtons) do
-		if button.isSettable then
-		  button:SetPoint('LEFT', 10, 0)
-		  button:SetPoint('TOP', 0, -(popupHeight + 10))
-		  button:SetPoint('RIGHT')
-		  popupHeight = popupHeight + 10 + 20
+		XB:SkinTooltip(tooltip,"SpecializationTooltip")
+		if hide then
+			tooltip:Hide()
 		else
-		  button:Hide()
+			tooltip:Show();
 		end
 	end
-	if changedWidth then
-		popupWidth = popupWidth + 5
-	end
+end
 
-	if popupWidth < specFrame:GetWidth() then
-		popupWidth = specFrame:GetWidth()
-	end
+local function createArtifactBar(color,bg)
+	artifactBar = artifactBar or CreateFrame('STATUSBAR', nil, specFrame)
+  	artifactBarBg = artifactBarBg or artifactBar:CreateTexture(nil, 'BACKGROUND')
 
-	if popupWidth < (lootSpecOptionString:GetStringWidth()  + 5) then
-		popupWidth = (lootSpecOptionString:GetStringWidth()  + 5)
-	end
-	lootSpecPopup:SetSize(popupWidth, popupHeight + 3)
+  	azeriteItem = C_AzeriteItem.FindActiveAzeriteItem();
+  	if azeriteItem then 
+		local xp, totalLevelXP = C_AzeriteItem.GetAzeriteItemXPInfo(azeriteItem)
 
-	local popupPadding = 3
-	if Bar.settings.anchor == 'TOP' then
-		popupPadding = -(popupPadding)
-	end
+		artifactBar:SetStatusBarTexture(1, 1, 1)
+		artifactBar:SetStatusBarColor(unpack(color))
+		artifactBar:SetMinMaxValues(0, totalLevelXP)
+		artifactBar:SetValue(xp)
+	elseif artifactId > 0 then
+			
+		artifactBar:SetStatusBarTexture(1, 1, 1)
+		--[[if db.modules.tradeskill.barCC then
+		  self.specBar:SetStatusBarColor(xb:GetClassColors())
+		else]]
+		  artifactBar:SetStatusBarColor(unpack(color))
+		--[[end
+		local barHeight = iconSize - textHeight - 2
+		if barHeight < 2 then 
+		  barHeight = 2
+		end]]
+		local barHeight = 2
 
-	lootSpecPopup:ClearAllPoints()
-	lootSpecPopupTexture:ClearAllPoints()
-	lootSpecPopup:SetPoint(Bar.settings.anchor, specFrame, 3, 0, popupPadding)
-	lootSpecPopupTexture:SetColorTexture(unpack(Bar.settings.color))
-	lootSpecPopupTexture:SetAllPoints()
-	lootSpecPopup:Hide()
+		--[[artifactBar:SetSize(specText:GetStringWidth(), barHeight)
+		artifactBar:SetPoint('BOTTOMLEFT', specIcon, 'BOTTOMRIGHT', 5, 0)
+
+		artifactBarBg:SetAllPoints()
+		artifactBarBg:SetColorTexture(unpack(bg))
+		--self:UpdateArtifactBar(artifactId)
+		artifactBar:Show()]]
+	else
+		if artifactBar and artifactBar:IsVisible() then
+			artifactBar:Hide()
+		end
+	end
+	artifactBar:SetSize(specText:GetStringWidth(), 2)
+	artifactBar:SetPoint('BOTTOMLEFT', specIcon, 'BOTTOMRIGHT', 5, 0)
+
+	artifactBarBg:SetAllPoints()
+	artifactBarBg:SetColorTexture(unpack(bg))
+	--self:UpdateArtifactBar(artifactId)
+	artifactBar:Show()
+	  --[[if artifactBar:IsVisible() then
+		self.specFrame:SetSize(iconSize + artifactBar:GetWidth() + 5, xb:GetHeight())
+	  else
+		self.specFrame:SetSize(iconSize + self.specText:GetWidth() + 5, xb:GetHeight())
+	  end
+	  self.specFrame:SetPoint('LEFT')
+
+	  if self.specFrame:GetWidth() < db.modules.talent.minWidth then
+		self.specFrame:SetWidth(db.modules.talent.minWidth)
+	  end
+
+	  if self.specBar:GetWidth() < db.modules.talent.minWidth then
+		self.specBar:SetWidth(db.modules.talent.minWidth)
+	  end]]
+end
+
+local function createPopupFrame(specType)
+	popupSpecType = specType
+	local color,hover,anchor = Spec.settings.color,Spec.settings.hover,Spec.settings.anchor,specPopupTexture
+
+	if specPopup then
+		headerSpecPopup:SetText(specType == "loot" and SELECT_LOOT_SPECIALIZATION or SPECIALIZATION)
+		specPopup:SetSize(headerSpecPopup:GetWidth(),specPopup:GetHeight())
+	else
+		specPopup = CreateFrame('FRAME', nil, specFrame)
+		specPopupTexture = specPopup:CreateTexture(nil, 'BACKGROUND')
+		headerSpecPopup = specPopup:CreateFontString(nil, 'OVERLAY')
+
+		headerSpecPopup:SetFont(XB.mediaFold.."font\\homizio_bold.ttf",20)
+		headerSpecPopup:SetText(specType == "loot" and SELECT_LOOT_SPECIALIZATION or SPECIALIZATION)
+		headerSpecPopup:SetTextColor(unpack(color))
+		headerSpecPopup:SetPoint('TOP', 0, -(3))
+		headerSpecPopup:SetPoint('CENTER')
+
+		--[[local db = xb.db.profile]]
+		local iconSize = 25 --db.text.fontSize + db.general.barPadding
+		
+
+		local popupWidth = specFrame:GetWidth()
+		local popupHeight = (GetNumSpecializations()+1)*10--xb.constants.popupPadding + db.text.fontSize + self.optionTextExtra
+		local changedWidth = false
+		local lootSpecButtons = {}
+		for i = 1, GetNumSpecializations() do
+			if lootSpecButtons[i] == nil then
+				local localSpecId = i
+				local	_, name, _ = GetSpecializationInfo(i)
+
+				local button = CreateFrame('BUTTON', nil, specPopup)
+				local buttonText = button:CreateFontString(nil, 'OVERLAY')
+				local buttonIcon = button:CreateTexture(nil, 'BACKGROUND')
+
+				buttonIcon:SetTexture(XB.mediaFold.."spec\\"..XB.playerClass)
+				buttonIcon:SetTexCoord(unpack(textureCoordinates[localSpecId]))
+				buttonIcon:SetSize(iconSize, iconSize)
+				buttonIcon:SetPoint('LEFT')
+				buttonIcon:SetVertexColor(unpack(color))
+
+				buttonText:SetFont(XB.mediaFold.."font\\homizio_bold.ttf",15)
+				buttonText:SetTextColor(unpack(color))
+				buttonText:SetText(string.upper(name))
+				buttonText:SetPoint('LEFT', buttonIcon, 'RIGHT', 5, 0)
+				local textWidth = iconSize + 5 + buttonText:GetStringWidth()
+
+				button:SetID(i)
+				button:SetSize(textWidth, iconSize)
+				button.isSettable = true
+				button.text = buttonText
+				button.icon = buttonIcon
+
+				button:EnableMouse(true)
+				button:RegisterForClicks('AnyUp')
+
+				button:SetScript('OnEnter', function()
+					buttonText:SetTextColor(unpack(color))
+				end)
+
+				button:SetScript('OnLeave', function()
+					buttonText:SetTextColor(unpack(color))
+				end)
+
+				button:SetScript('OnClick', function(self, button)
+					if InCombatLockdown() then return; end
+					if button == 'LeftButton' then
+						local id = 0
+						local name = ''
+						if self:GetID() ~= 0 then
+							id, name = GetSpecializationInfo(self:GetID())
+						else
+							name = GetSpecializationInfo(GetSpecialization())
+						end
+
+						if popupSpecType == "loot" then
+							SetLootSpecialization(id)
+						else
+							SetSpecialization(self:GetID())
+						end
+					end
+					specPopup:Hide()
+				end)
+
+				lootSpecButtons[i] = button
+
+				if textWidth > popupWidth then
+					popupWidth = textWidth
+					changedWidth = true
+				end
+			end 
+		end 
+
+		for _, button in pairs(lootSpecButtons) do
+			if button.isSettable then
+			  button:SetPoint('LEFT', 10, 0)
+			  button:SetPoint('TOP', 0, -(popupHeight + 10))
+			  button:SetPoint('RIGHT')
+			  popupHeight = popupHeight + 10 + 20
+			else
+			  button:Hide()
+			end
+		end
+		if changedWidth then
+			popupWidth = popupWidth + 5
+		end
+
+		if popupWidth < specFrame:GetWidth() then
+			popupWidth = specFrame:GetWidth()
+		end
+
+		if popupWidth < (headerSpecPopup:GetStringWidth()  + 5) then
+			popupWidth = (headerSpecPopup:GetStringWidth()  + 5)
+		end
+		specPopup:SetSize(popupWidth, popupHeight + 3)
+		--specPopupTexture:SetSize(popupWidth, popupHeight + 3)
+
+		local popupPadding = Bar.settings.h+2
+		if Bar.settings.anchor == 'TOP' then
+			popupPadding = -(popupPadding)
+		end
+
+		specPopup:ClearAllPoints()
+		specPopupTexture:ClearAllPoints()
+		specPopup:SetPoint(Bar.settings.anchor, specFrame, Bar.settings.anchor, 0, popupPadding)
+		specPopupTexture:SetColorTexture(unpack(Bar.settings.color))
+		specPopupTexture:SetAllPoints()
+		specPopup:Hide()
+	end	
 end
 
 ----------------------------------------------------------------------------------------------------------
@@ -220,6 +323,14 @@ function Spec:OnDisable()
   specFrame:UnregisterAllEvents()
 end
 
+function Spec:Refresh()
+	--Azerite neck
+	local azeriteItemLocation = C_AzeriteItem.FindActiveAzeriteItem(); 
+	local xp, totalLevelXP = C_AzeriteItem.GetAzeriteItemXPInfo(azeriteItemLocation)
+	artifactBar:SetMinMaxValues(0, totalLevelXP)
+	artifactBar:SetValue(xp)
+end
+
 function Spec:CreateFrames()
 	--dissocier la frame principale sur la barre et les frames de changement de spec
 	if not Spec.settings.enable then
@@ -245,10 +356,10 @@ function Spec:CreateFrames()
 		specFrame:RegisterEvent('ACTIVE_TALENT_GROUP_CHANGED')
 		specFrame:RegisterEvent('PLAYER_LOOT_SPEC_UPDATED')
 		specFrame:RegisterEvent('ARTIFACT_CLOSE')
-		-- specFrame:RegisterEvent('UNIT_INVENTORY_CHANGED')
+		specFrame:RegisterEvent('AZERITE_ITEM_EXPERIENCE_CHANGED')
 		-- specFrame:RegisterEvent('INSPECT_READY')
-		libAD:RegisterCallback('ARTIFACT_EQUIPPED_CHANGED',Spec.CreateFrames)--has to cchange
-		libAD:RegisterCallback('ARTIFACT_KNOWLEDGE_CHANGED',Spec.CreateFrames)--has to cchange
+		libAD:RegisterCallback('ARTIFACT_EQUIPPED_CHANGED',Spec.CreateFrames)--has to change
+		libAD:RegisterCallback('ARTIFACT_KNOWLEDGE_CHANGED',Spec.CreateFrames)--has to change
 		libAD:RegisterCallback('ARTIFACT_POWER_CHANGED', function()
 		Spec:UpdateArtifactBar(artifactId)
 		end)
@@ -277,14 +388,19 @@ function Spec:CreateFrames()
 		specFrame:SetSize(specText:GetStringWidth()+2+w, h)
 	end
 
-	--For the specPopup
-	lootSpecPopup = lootSpecPopup or CreateFrame('BUTTON', nil, specFrame)
-	lootSpecPopupTexture = lootSpecPopupTexture or lootSpecPopup:CreateTexture(nil, 'BACKGROUND')
+	createPopupFrame()
+	createArtifactBar(hover,color)
 
 	XB:AddOverlay(Spec,specFrame,anchor)
 
 	if not specFrame:GetScript("OnEvent") then
-		specFrame:SetScript("OnEvent",Spec.CreateFrames)
+		specFrame:SetScript("OnEvent",function(self,event,...)
+			if event == "AZERITE_ITEM_EXPERIENCE_CHANGED" then
+				Spec.Refresh()
+			else
+				Spec.CreateFrames()
+			end
+		end)
 		specFrame:SetScript("OnEnter",function()
 			specIcon:SetVertexColor(unpack(hover))
 			if Spec.settings.tooltip then
@@ -294,20 +410,32 @@ function Spec:CreateFrames()
 		specFrame:SetScript("OnLeave",function()
 			specIcon:SetVertexColor(unpack(color))
 		end)
-		specFrame:SetScript("OnClick",function()
-			--[[tooltip("hide")
+		specFrame:SetScript("OnMouseUp",function(_,button)
+			
 			if button == 'LeftButton' then
+				tooltip("hide")
+				if IsShiftKeyDown() then 
+					createPopupFrame("loot")
+				else
+					createPopupFrame()
+				end
+				if specPopup:IsShown() then
+					specPopup:Hide()
+				else
+					specPopup:Show()
+				end
+			end--[[
 			  if not InCombatLockdown() then
-				if IsShiftKeyDown() then
-					if lootSpecPopup:IsVisible() then
-					  lootSpecPopup:Hide()
+				 then
+					if specPopup:IsVisible() then
+					  specPopup:Hide()
 					  if Spec.settings.tooltip then
 						tooltip();
 					  end
 					else
 					  specPopup:Hide()
 					  createSpecPopup()
-					  lootSpecPopup:Show()
+					  specPopup:Show()
 					end
 				else
 					if specPopup:IsVisible() then
@@ -316,7 +444,7 @@ function Spec:CreateFrames()
 						tooltip();
 					  end
 					else
-					  lootSpecPopup:Hide()
+					  specPopup:Hide()
 					  CreateSpecPopup()
 					  specPopup:Show()
 					end
