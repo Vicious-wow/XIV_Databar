@@ -330,6 +330,10 @@ local function socialTooltip()
 	tooltip:AddLine(" ")
 	--------------------------
 	local onlineBnetFriends = false
+	local bNetClients = xb_tKeyContains(_G,"BNET_CLIENT")
+	--[[for k,v in pairs(bNetClients) do
+		print(k,v)
+	end--]]
 
 	--Grouping contacts
 	local appContacts, wowContacts, diabloContacts, sc2Contacts, hsContacts, hotsContacts, owContacts = {},{},{},{},{},{},{}

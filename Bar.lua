@@ -72,10 +72,10 @@ local function hideBarEvent()
 	barFrame:RegisterEvent("PET_BATTLE_OPENING_START")
 	barFrame:RegisterEvent("PET_BATTLE_CLOSE")
 	barFrame:SetScript("OnEvent", function(_, event, ...)
-		if event=="PET_BATTLE_OPENING_START" and XIV_Databar:IsVisible() then
+		if event=="PET_BATTLE_OPENING_START" and Bar:IsVisible() then
 			XIV_Databar:Hide()
 		end
-		if event=="PET_BATTLE_CLOSE" and not XIV_Databar:IsVisible() then
+		if event=="PET_BATTLE_CLOSE" and not Bar:IsVisible() then
 			XIV_Databar:Show()
 		end
 	end)
@@ -140,7 +140,7 @@ local bar_defaut = {
         h = 35,
 		s = 0.83,
         fs = true,
-        anchor = "BOTTOM",
+        anchor = "TOP",
 		strata = "HIGH",
         lock = true,
         ohHide = false,

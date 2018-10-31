@@ -103,6 +103,17 @@ function xb_tContains(table, item)
     end
     return nil;
 end
+
+function xb_tKeyContains(table,key)
+    local out = {}
+
+    for k,v in pairs(table) do
+        if k:find(key) then
+            out[k] = v
+        end
+    end
+    return out == {} and nil or out
+end
 ----------------------------------------------------------------------------------------------------------
 -- Private functions
 ----------------------------------------------------------------------------------------------------------

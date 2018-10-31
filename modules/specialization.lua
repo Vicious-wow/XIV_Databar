@@ -55,16 +55,18 @@ local function tooltip(hide)
 			local xpToNextLevel = totalLevelXP - xp; 
 			tooltip:AddLine(" ")
 			tooltip:AddLine(AZERITE_POWER_TOOLTIP_TITLE:format(currentLevel, xpToNextLevel))
-
+			tooltip:AddLine(("%s "..string.gsub(AZERITE_POWER_BAR,"%%s","(%%s)")):format(xp,FormatPercentage(xp / totalLevelXP, true)))
+			tooltip:AddLine(" ")
 		end
 
-		tooltip:AddLine(string.format(ERR_LOOT_SPEC_CHANGED_S,select(2,GetSpecializationInfoByID(lootSpecId))))
+		local lootSpecString = select(1,ERR_LOOT_SPEC_CHANGED_S:gsub("%%s",""))
+		tooltip:AddLine("|cffffff00"..lootSpecString.."|cffffffff"..select(2,GetSpecializationInfoByID(lootSpecId)).."|r")--
 
 		tooltip:AddLine(" ")
-  		tooltip:AddLine('<'..'Left-Click'..'>'.. 'Set Specialization')
-		tooltip:AddLine('<'..SHIFT_KEY_TEXT.."+"..'Left-Click'..'>'..'Set Loot Specialization')
+  		tooltip:AddLine('|cffffff00<'..'Left-Click'..'>|r'.. ' Set Specialization')
+		tooltip:AddLine('|cffffff00<'..SHIFT_KEY_TEXT.."+"..'Left-Click'..'>|r Set Loot Specialization')
 		if artifactId > 0 then
-			tooltip:AddHeaderLine('<'..'Right-Click'..'>'.. 'Open Artifact')
+			tooltip:AddHeaderLine('|cffffff00<'..'Right-Click'..'>|r Open Artifact')
 		end
 
 		XB:SkinTooltip(tooltip,"SpecializationTooltip")
@@ -89,26 +91,10 @@ local function createArtifactBar(color,bg)
 		artifactBar:SetMinMaxValues(0, totalLevelXP)
 		artifactBar:SetValue(xp)
 	elseif artifactId > 0 then
-			
 		artifactBar:SetStatusBarTexture(1, 1, 1)
-		--[[if db.modules.tradeskill.barCC then
-		  self.specBar:SetStatusBarColor(xb:GetClassColors())
-		else]]
-		  artifactBar:SetStatusBarColor(unpack(color))
-		--[[end
-		local barHeight = iconSize - textHeight - 2
-		if barHeight < 2 then 
-		  barHeight = 2
-		end]]
-		local barHeight = 2
-
-		--[[artifactBar:SetSize(specText:GetStringWidth(), barHeight)
-		artifactBar:SetPoint('BOTTOMLEFT', specIcon, 'BOTTOMRIGHT', 5, 0)
-
-		artifactBarBg:SetAllPoints()
-		artifactBarBg:SetColorTexture(unpack(bg))
-		--self:UpdateArtifactBar(artifactId)
-		artifactBar:Show()]]
+		artifactBar:SetStatusBarColor(unpack(color))
+		--artifactBar:SetMinMaxValues(0, totalLevelXP)
+		--artifactBar:SetValue(xp)
 	else
 		if artifactBar and artifactBar:IsVisible() then
 			artifactBar:Hide()
@@ -119,22 +105,8 @@ local function createArtifactBar(color,bg)
 
 	artifactBarBg:SetAllPoints()
 	artifactBarBg:SetColorTexture(unpack(bg))
-	--self:UpdateArtifactBar(artifactId)
 	artifactBar:Show()
-	  --[[if artifactBar:IsVisible() then
-		self.specFrame:SetSize(iconSize + artifactBar:GetWidth() + 5, xb:GetHeight())
-	  else
-		self.specFrame:SetSize(iconSize + self.specText:GetWidth() + 5, xb:GetHeight())
-	  end
-	  self.specFrame:SetPoint('LEFT')
 
-	  if self.specFrame:GetWidth() < db.modules.talent.minWidth then
-		self.specFrame:SetWidth(db.modules.talent.minWidth)
-	  end
-
-	  if self.specBar:GetWidth() < db.modules.talent.minWidth then
-		self.specBar:SetWidth(db.modules.talent.minWidth)
-	  end]]
 end
 
 local function createPopupFrame(specType)
