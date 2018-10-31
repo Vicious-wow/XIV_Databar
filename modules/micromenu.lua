@@ -47,10 +47,13 @@ function MenuModule:OnInitialize()
       text = 'Overwatch'
     },
     WoW = {
-      text = 'World of Warcraft'
+      text = CINEMATIC_NAME_1
     },
     DST2 = {
       text = 'Destiny 2'
+    },
+    VIPR = {
+      text = 'Call of Duty'
     }
   }
 end
