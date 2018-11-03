@@ -14,9 +14,9 @@ local specId, lootSpecId = 0,0
 local artifactId, azeriteItem = 0, nil
 local textureCoordinates = {
 	[1] = { 0.00, 0.25, 0, 1 },
-	[2] = { 0.25, 0.50, 0, 1 },
-	[3] = { 0.50, 0.75, 0, 1 },
-	[4] = { 0.75, 1.00, 0, 1 }
+    [2] = { 0.25, 0.50, 0, 1 },
+    [3] = { 0.50, 0.75, 0, 1 },
+    [4] = { 0.75, 1.00, 0, 1 }
 }
 
 ----------------------------------------------------------------------------------------------------------
@@ -27,54 +27,48 @@ local function refreshOptions()
 end
 
 local function tooltip(hide)
-	if not lootSpecId or lootSpecId == 0 then
-		Spec:InitVars()
-		C_Timer.After(.3,function() tooltip(hide) end)
-		return
-	else
-		if libTT:IsAcquired("SpecializationTooltip") then
-			libTT:Release(libTT:Acquire("SpecializationTooltip"))
-		end
+	if libTT:IsAcquired("SpecializationTooltip") then
+		libTT:Release(libTT:Acquire("SpecializationTooltip"))
+	end
 
-		local tooltip = libTT:Acquire("SpecializationTooltip", 1)
+	local tooltip = libTT:Acquire("SpecializationTooltip", 1)
 
-		tooltip:SmartAnchorTo(specFrame)
-		tooltip:SetAutoHideDelay(.3, specFrame)
-		tooltip:AddHeader("[|cff6699FF"..SPECIALIZATION.."|r]")
-	  	azeriteItem = C_AzeriteItem.FindActiveAzeriteItem();
+	tooltip:SmartAnchorTo(specFrame)
+	tooltip:SetAutoHideDelay(.2, specFrame)
+	tooltip:AddHeader("[|cff6699FF"..SPECIALIZATION.."|r]")
+  	azeriteItem = C_AzeriteItem.FindActiveAzeriteItem();
 
-		if artifactId > 0 then
-			tooltip:AddLine(" ")
-			local _, artifactData = libAD:GetArtifactInfo(artifactId)
-			tooltip:AddLine(ARTIFACT_POWER..':'..string.format('%d / %d (%d%%)', artifactData.power, artifactData.maxPower, floor((artifactData.power / artifactData.maxPower) * 100)), 1, 1, 0, 1, 1, 1)
-			tooltip:AddLine('Remaining:'..string.format('%d (%d%%)', artifactData.powerForNextRank, floor((artifactData.powerForNextRank / artifactData.maxPower) * 100)), 1, 1, 0, 1, 1, 1)
-		elseif azeriteItem then
-			local azeriteItem_ = Item:CreateFromItemLocation(azeriteItem); 
-			local xp, totalLevelXP = C_AzeriteItem.GetAzeriteItemXPInfo(azeriteItem)
-			local currentLevel = C_AzeriteItem.GetPowerLevel(azeriteItem); 
-			local xpToNextLevel = totalLevelXP - xp; 
-			tooltip:AddLine(" ")
-			tooltip:AddLine(AZERITE_POWER_TOOLTIP_TITLE:format(currentLevel, xpToNextLevel))
-			tooltip:AddLine(("%s "..string.gsub(AZERITE_POWER_BAR,"%%s","(%%s)")):format(xp,FormatPercentage(xp / totalLevelXP, true)))
-			tooltip:AddLine(" ")
-		end
-
-		local lootSpecString = select(1,ERR_LOOT_SPEC_CHANGED_S:gsub("%%s",""))
-		tooltip:AddLine("|cffffff00"..lootSpecString.."|cffffffff"..select(2,GetSpecializationInfoByID(lootSpecId)).."|r")--
-
+	if artifactId > 0 then
 		tooltip:AddLine(" ")
-  		tooltip:AddLine('|cffffff00<'..'Left-Click'..'>|r'.. ' Set Specialization')
-		tooltip:AddLine('|cffffff00<'..SHIFT_KEY_TEXT.."+"..'Left-Click'..'>|r Set Loot Specialization')
-		if artifactId > 0 then
-			tooltip:AddHeaderLine('|cffffff00<'..'Right-Click'..'>|r Open Artifact')
-		end
+		local _, artifactData = libAD:GetArtifactInfo(artifactId)
+		tooltip:AddLine(ARTIFACT_POWER..':'..string.format('%d / %d (%d%%)', artifactData.power, artifactData.maxPower, floor((artifactData.power / artifactData.maxPower) * 100)), 1, 1, 0, 1, 1, 1)
+		tooltip:AddLine('Remaining:'..string.format('%d (%d%%)', artifactData.powerForNextRank, floor((artifactData.powerForNextRank / artifactData.maxPower) * 100)), 1, 1, 0, 1, 1, 1)
+	elseif azeriteItem then
+		local azeriteItem_ = Item:CreateFromItemLocation(azeriteItem); 
+		local xp, totalLevelXP = C_AzeriteItem.GetAzeriteItemXPInfo(azeriteItem)
+		local currentLevel = C_AzeriteItem.GetPowerLevel(azeriteItem); 
+		local xpToNextLevel = totalLevelXP - xp; 
+		tooltip:AddLine(" ")
+		tooltip:AddLine(AZERITE_POWER_TOOLTIP_TITLE:format(currentLevel, xpToNextLevel))
+		tooltip:AddLine(("%s "..string.gsub(AZERITE_POWER_BAR,"%%s","(%%s)")):format(xp,FormatPercentage(xp / totalLevelXP, true)))
+		tooltip:AddLine(" ")
+	end
 
-		XB:SkinTooltip(tooltip,"SpecializationTooltip")
-		if hide then
-			tooltip:Hide()
-		else
-			tooltip:Show();
-		end
+	local lootSpecString = select(1,ERR_LOOT_SPEC_CHANGED_S:gsub("%%s",""))
+	tooltip:AddLine("|cffffff00"..lootSpecString.."|cffffffff"..select(2,GetSpecializationInfoByID(lootSpecId)).."|r")--
+
+	tooltip:AddLine(" ")
+		tooltip:AddLine('|cffffff00<'..'Left-Click'..'>|r'.. ' Set Specialization')
+	tooltip:AddLine('|cffffff00<'..SHIFT_KEY_TEXT.."+"..'Left-Click'..'>|r Set Loot Specialization')
+	if artifactId > 0 then
+		tooltip:AddHeaderLine('|cffffff00<'..'Right-Click'..'>|r Open Artifact')
+	end
+
+	XB:SkinTooltip(tooltip,"SpecializationTooltip")
+	if hide then
+		tooltip:Hide()
+	else
+		tooltip:Show();
 	end
 end
 
@@ -272,8 +266,7 @@ function Spec:OnInitialize()
 end
 
 function Spec:InitVars()
-	specId, lootSpecId = GetSpecialization(), GetLootSpecialization()
-	C_Timer.After(2,function() specId, lootSpecId = GetSpecialization(), GetLootSpecialization() end)
+	specId, lootSpecId = GetSpecializationInfo(GetSpecialization()), GetLootSpecialization() == 0 and GetSpecializationInfo(GetSpecialization()) or GetLootSpecialization()
 	libAD:ForceUpdate()
 	artifactId = libAD:GetActiveArtifactID() or 0
 end
@@ -284,7 +277,7 @@ function Spec:OnEnable()
   XB.Config:Register("Specialization",spec_config)
 
 	if self.settings.enable then
-		--self:InitVars()
+		self:InitVars()
 		self:CreateFrames()
 	else
 		self:Disable()
@@ -313,7 +306,8 @@ function Spec:CreateFrames()
 	end
 
 	local x,y,w,h,color,hover,anchor = Spec.settings.x,Spec.settings.y,Spec.settings.w,Spec.settings.h,Spec.settings.color,Spec.settings.hover,Spec.settings.anchor
-	specId, lootSpecId = GetSpecialization(), GetLootSpecialization()
+	local currentSpecIndex = GetSpecialization()
+	Spec:InitVars()
 
 	specFrame = specFrame or CreateFrame("Button","Specialization",BarFrame)
 	specFrame:ClearAllPoints()
@@ -342,7 +336,7 @@ function Spec:CreateFrames()
 	specIcon:SetPoint("LEFT")
 	specIcon:SetSize(w,h)
 	specIcon:SetTexture(XB.mediaFold.."spec\\"..XB.playerClass)
-	specIcon:SetTexCoord(unpack(textureCoordinates[specId]))
+	specIcon:SetTexCoord(unpack(textureCoordinates[currentSpecIndex]))
 	specIcon:SetVertexColor(unpack(color))
 
 	specText = specText or specFrame:CreateFontString(nil, "OVERLAY")
@@ -350,15 +344,9 @@ function Spec:CreateFrames()
 	specText:SetFont(XB.mediaFold.."font\\homizio_bold.ttf", 12)
 	specText:SetTextColor(unpack(color))
 
-	local currentSpecName = select(2,GetSpecializationInfo(specId))
-	if not currentSpecName then
-		C_Timer.After(2,function()
-			currentSpecName = select(2,GetSpecializationInfo(specId))
-		end)
-	else
-		specText:SetText(string.upper(currentSpecName))
-		specFrame:SetSize(specText:GetStringWidth()+2+w, h)
-	end
+	local currentSpecName = specId and select(2,GetSpecializationInfoByID(specId)) or ""
+	specText:SetText(string.upper(currentSpecName))
+	specFrame:SetSize(specText:GetStringWidth()+2+w, h)
 
 	createPopupFrame()
 	createArtifactBar(hover,color)
@@ -375,7 +363,7 @@ function Spec:CreateFrames()
 		end)
 		specFrame:SetScript("OnEnter",function()
 			specIcon:SetVertexColor(unpack(hover))
-			if Spec.settings.tooltip then
+			if self.settings.tooltip then
 				tooltip()
 			end
 		end)
