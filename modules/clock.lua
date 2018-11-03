@@ -149,6 +149,8 @@ function Clock:CreateFrames()
   clockFrame = clockFrame or CreateFrame("BUTTON","Clock",BarFrame)
   clockFrame:SetSize(w, h)
   clockFrame:SetPoint(a,x,y)
+  clockFrame:SetMovable(true)
+  clockFrame:SetClampedToScreen(true)
   clockFrame:EnableMouse(true)
   clockFrame:RegisterForClicks("AnyUp")
   clockFrame:Show()
@@ -157,6 +159,8 @@ function Clock:CreateFrames()
   clockText:SetFont(XB.mediaFold.."font\\homizio_bold.ttf", h)
   clockText:SetPoint("LEFT")
   clockText:SetTextColor(unpack(color))
+
+  XB:AddOverlay(Clock,clockFrame,a)
    
   clockFrame:SetScript("OnEnter", function()
     if InCombatLockdown() and not self.settings.combatEn then return end
@@ -183,6 +187,13 @@ function Clock:CreateFrames()
     updateTime(elapsed)
   end)
 
+  if not self.settings.lock then
+    clockFrame.overlay:Show()
+    clockFrame.overlay.anchor:Show()
+  else
+    clockFrame.overlay:Hide()
+    clockFrame.overlay.anchor:Hide()
+  end
 end
 --[[local AddOnName, XIVBar = ...;
 local _G = _G;
