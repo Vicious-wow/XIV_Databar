@@ -1,6 +1,6 @@
 local addOnName, XB = ...;
 
-local Clock = XB:RegisterModule("Clock")
+local Clock = XB:RegisterModule(TIMEMANAGER_TITLE)
 
 ----------------------------------------------------------------------------------------------------------
 -- Local variables
@@ -18,7 +18,7 @@ local e = 0
 local function updateTime(elapsed)
   e = e + elapsed
   if e >= 1 then
-    hour, minu = GetGameTime()
+    hour, minu = GetGameTime()--CF time on the current version
     if minu < 10 then minu = ("0"..minu) end
     if GetCVarBool("timeMgrUseLocalTime") then
      -- print("localTime used")
@@ -53,7 +53,7 @@ local function updateTime(elapsed)
       --calendarText:SetText("")
     end
     clockFrame:SetWidth(clockText:GetStringWidth()) --+ amText:GetStringWidth())
-    clockFrame:SetPoint("CENTER", BarFrame)
+    clockFrame:SetPoint(Clock.settings.anchor, BarFrame)
     e = 0
   end
 end
@@ -79,7 +79,7 @@ local function tooltip()
   end
   tooltip:AddLine(" ")
   tooltip:AddLine("|cffffff00<Left-click>|r ".."Open Calendar")
-  tooltip:AddLine("|cffffff00<Right-click>|r ".."Open Clock")
+  tooltip:AddLine("|cffffff00<Right-click>|r "..SHOW_CLOCK)
   tooltip:Show();
 
   XB:SkinTooltip(tooltip,"ClockTooltip")
@@ -306,4 +306,4 @@ function ClockModule:GetConfig()
     }
   }
 end
---]]
+]]--
