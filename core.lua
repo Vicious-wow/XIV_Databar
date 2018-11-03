@@ -108,8 +108,10 @@ function xb_tKeyContains(table,key)
     local out = {}
 
     for k,v in pairs(table) do
-        if k:find(key) then
-            out[k] = v
+        if not tonumber(k) then
+            if k:find(key) then
+                out[k] = v
+            end
         end
     end
     return out == {} and nil or out
