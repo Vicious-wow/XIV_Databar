@@ -1,29 +1,237 @@
-local AddOnName, XIVBar = ...;
-local _G = _G;
-local xb = XIVBar;
-local L = XIVBar.L;
+local addOnName, XB = ...;
 
-local TradeskillModule = xb:NewModule("TradeskillModule", 'AceEvent-3.0')
+local Profession = XB:RegisterModule(TRADE_SKILLS)
 
-function TradeskillModule:GetName()
-  return TRADESKILLS;
+----------------------------------------------------------------------------------------------------------
+-- Local variables
+----------------------------------------------------------------------------------------------------------
+local ccR,ccG,ccB = GetClassColor(XB.playerClass)
+local libTT
+local profession_config
+local Bar, BarFrame
+local professionsGroupFrame
+local professionFrames,professionFramesNames = {},{}
+local prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
+local learnedProfs = {prof1,prof2,archaeology,fishing,cooking}-- firstAid is since BfA tailoring specific; value should always be nil
+local profIcons = {
+    [164] = 'blacksmithing',
+    [165] = 'leatherworking',
+    [171] = 'alchemy',
+    [182] = 'herbalism',
+    [186] = 'mining',
+    [202] = 'engineering',
+    [333] = 'enchanting',
+    [755] = 'jewelcrafting',
+    [773] = 'inscription',
+    [197] = 'tailoring',
+    [393] = 'skinning'
+}
+
+----------------------------------------------------------------------------------------------------------
+-- Private functions
+----------------------------------------------------------------------------------------------------------
+
+--Remember daily or weekly CD's
+--Capability to view level of other professions in tooltip
+local function refreshOptions()
+  Bar,BarFrame = XB:GetModule("Bar"),XB:GetModule("Bar"):GetFrame()
 end
 
-function TradeskillModule:OnInitialize()
-  self.profIcons = {
-  	[164] = 'blacksmithing',
-  	[165] = 'leatherworking',
-  	[171] = 'alchemy',
-  	[182] = 'herbalism',
-  	[186] = 'mining',
-  	[202] = 'engineering',
-  	[333] = 'enchanting',
-  	[755] = 'jewelcrafting',
-  	[773] = 'inscription',
-  	[197] = 'tailoring',
-  	[393] = 'skinning'
+----------------------------------------------------------------------------------------------------------
+-- Options
+----------------------------------------------------------------------------------------------------------
+local profession_default = {
+  profile = {
+    enable = true,
+    combatEn = false,
+    lock = true,
+    x = {
+        group = 110,
+        firstProf = 0,
+        secProf = 100
+    },
+    y = {
+        group = 0,
+        firstProf = 0,
+        secProf = 0
+    },
+    w = {
+        group = 16,
+        firstProf = 32,
+        secProf = 32
+    },
+    h = {
+        group = 16,
+        firstProf = 16,
+        secProf = 16
+    },
+    anchor = {
+        group = "CENTER",
+        firstProf = "LEFT",
+        secProf = "LEFT"
+    },
+    spaceBetween2Profs = 10,
+    color = {
+        group = {1,1,1,.75},
+        firstProf = {1,1,1,.75},
+        secProf = {1,1,1,.75}
+    },
+    hover = {
+        group = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
+        firstProf = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
+        secProf = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75}
+    },
+    hoverCC = not (XB.playerClass == "PRIEST"),
+    barProfs = {prof1,prof2} 
   }
+}
+
+
+----------------------------------------------------------------------------------------------------------
+-- Module functions
+----------------------------------------------------------------------------------------------------------
+function Profession:OnInitialize()
+  libTT = LibStub('LibQTip-1.0')
+  self.db = XB.db:RegisterNamespace("Profession", profession_default)
+    self.settings = self.db.profile
 end
+
+function Profession:OnEnable()
+  Profession.settings.lock = Profession.settings.lock or not Profession.settings.lock --Locking frame if it was not locked on reload/relog
+  refreshOptions()
+  XB.Config:Register("Profession",profession_config)
+  
+  if self.settings.enable and not self:IsEnabled() then
+    self:Enable()
+  elseif not self.settings.enable and self:IsEnabled() then
+    self:Disable()
+  else
+    self:CreateFrames()
+  end
+end
+
+function Profession:OnDisable()
+  
+end
+
+
+function Profession:CreateFrames()
+  self:CreateGroupFrame()
+  for i,v in ipairs(self.settings.barProfs) do
+  	self:CreateProfessionFrame(v,i)
+  end
+end
+
+function Profession:CreateGroupFrame()
+    if not self.settings.enable then
+    if professionsGroupFrame and professionsGroupFrame:IsVisible() then
+      professionsGroupFrame:Hide()
+    end
+    return
+  end
+  
+  local w,h,x,y,a,color,hover = self.settings.w.group,self.settings.h.group,self.settings.x.group,self.settings.y.group,self.settings.anchor.group,self.settings.color.group,self.settings.hover.group
+  
+  professionsGroupFrame = professionsGroupFrame or CreateFrame("Frame",TRADE_SKILLS,BarFrame)
+  professionsGroupFrame:ClearAllPoints()
+  professionsGroupFrame:SetSize(w, h)
+  professionsGroupFrame:SetPoint(a,x,y)
+  professionsGroupFrame:EnableMouse(true)
+  professionsGroupFrame:SetMovable(true)
+  professionsGroupFrame:SetClampedToScreen(true)
+  professionsGroupFrame:Show()
+
+  XB:AddOverlay(Profession,professionsGroupFrame,a)
+
+    if not self.settings.lock then
+      professionsGroupFrame.overlay:Show()
+        professionsGroupFrame.overlay.anchor:Show()
+    else
+        professionsGroupFrame.overlay:Hide()
+        professionsGroupFrame.overlay.anchor:Hide()
+    end
+end
+
+function Profession:CreateProfessionFrame(wowProfId,index)
+	local frameSettingsName = index == 1 and "firstProf" or index == 2 and "secProf"
+	if not frameSettingsName then return end --asserts the use of 2 frames per professionFrame
+	local w,h,x,y,a,color,hover = self.settings.w[frameSettingsName],self.settings.h[frameSettingsName],self.settings.x[frameSettingsName],self.settings.y[frameSettingsName],self.settings.anchor[frameSettingsName],self.settings.color[frameSettingsName],self.settings.hover[frameSettingsName]
+
+  --print(wowProfId)
+  local profName, _, profRank, profMaxRank, _,  spellOffset, skillLine, skillModifier, specIndex, specOffset = GetProfessionInfo(wowProfId)
+  local spellName, subSpellName = GetSpellBookItemName(spellOffset + 1, BOOKTYPE_PROFESSION)
+  profName = string.upper(profName)
+  local x, y = 90,0
+
+
+  ----------------------------------------
+  --BEWARE
+  ----------------------------------------
+  --if professionFrames["Profession"..index] then return end 
+  ----------------------------------------
+  --
+  ----------------------------------------
+  professionFrames["Profession"..index] = professionFrames["Profession"..index] or CreateFrame("BUTTON","Profession"..index, tradeSkillFrame,'SecureActionButtonTemplate')
+  local profFrame = professionFrames["Profession"..index]
+  profFrame:ClearAllPoints()
+  profFrame:SetPoint("LEFT",professionsGroupFrame,"CENTER",(index-1)*x,y)
+  profFrame:EnableMouse(true)
+  profFrame:RegisterForClicks("AnyUp")
+  profFrame:SetAttribute('*type1', 'spell')
+  profFrame:SetAttribute('unit', 'player')
+  profFrame:SetAttribute('spell', spellName)
+  --[[profFrame:SetBackdrop({
+    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+    tile = true,
+    tileSize = 16,
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    edgeSize = 16,
+    insets = {left = 5, right = 3, top = 3, bottom = 5}
+  })--]]
+
+  local profIcon = profFrame:CreateTexture(nil,"OVERLAY",nil,7)
+  profIcon:SetSize(16, 16)
+  profIcon:SetPoint("LEFT")
+  profIcon:SetVertexColor(unpack(color))
+  profIcon:SetTexture(XB.mediaFold..'profession\\'..profIcons[skillLine])
+
+  local profText = profFrame:CreateFontString(nil, "OVERLAY")
+  profText:SetFont(XB.mediaFold.."font\\homizio_bold.ttf", 12)
+  profText:SetPoint("RIGHT",profFrame,2,0)
+  profText:SetTextColor(unpack(color))
+  profText:SetText(profName)
+  profFrame:SetSize(profText:GetStringWidth()+profIcon:GetWidth()+5,h)
+
+  --[[local profStatusbar = CreateFrame("StatusBar", "Profession"..index.."Status", profFrame)
+  profStatusbar:SetStatusBarTexture(1,1,1)
+  profStatusbar:SetStatusBarColor(unpack(color))
+  profStatusbar:SetPoint("TOPLEFT", profText, "BOTTOMLEFT",0,-2)
+
+  local profStatusbarBG = profStatusbar:CreateTexture(nil,"BACKGROUND",nil,7)
+  profStatusbarBG:SetPoint("TOPLEFT", profText, "BOTTOMLEFT",0,-2)
+  profStatusbarBG:SetColorTexture(unpack(color))--]]
+
+  profFrame:SetScript("OnEnter", function()
+    if InCombatLockdown() then return end
+    profText:SetTextColor(unpack(hover))
+    --profIcon:SetVertexColor(unpack(hover))
+    --profStatusbar:SetStatusBarColor(unpack(hover))
+  end)
+
+  profFrame:SetScript("OnLeave", function() 
+    --[[if prof1OnCooldown then
+     -- profIcon:SetVertexColor(unpack(color))
+      profText:SetTextColor(unpack(color))
+    else
+     -- profIcon:SetVertexColor(unpack(color))
+      profText:SetTextColor(unpack(color))
+    end--]]
+    profText:SetTextColor(unpack(color))
+    --profStatusbar:SetStatusBarColor(unpack(color))
+  end)
+end
+
+--[[
 
 function TradeskillModule:OnEnable()
   if self.tradeskillFrame == nil then
@@ -248,7 +456,6 @@ end
 
 function TradeskillModule:ShowTooltip()
   return
-  --[[
   GameTooltip:SetOwner(self.tradeskillFrame, 'ANCHOR_'..xb.miniTextPosition)
   GameTooltip:AddLine("[|cff6699FF"..L['Cooldowns'].."|r]")
   GameTooltip:AddLine(" ")
@@ -257,7 +464,7 @@ function TradeskillModule:ShowTooltip()
 
   GameTooltip:AddLine(" ")
   GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', BINDING_NAME_TOGGLECURRENCY, 1, 1, 0, 1, 1, 1)
-  GameTooltip:Show()]]--
+  GameTooltip:Show()
 end
 
 function TradeskillModule:GetDefaultOptions()
@@ -305,3 +512,4 @@ function TradeskillModule:GetConfig()
     }
   }
 end
+--]]

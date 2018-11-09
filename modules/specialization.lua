@@ -269,6 +269,9 @@ function Spec:InitVars()
 	specId, lootSpecId = GetSpecializationInfo(GetSpecialization()), GetLootSpecialization() == 0 and GetSpecializationInfo(GetSpecialization()) or GetLootSpecialization()
 	libAD:ForceUpdate()
 	artifactId = libAD:GetActiveArtifactID() or 0
+	--[[if not specId or lootSpecId then
+		C_Timer.After(.3,Spec.InitVars)
+	end--]]
 end
 
 function Spec:OnEnable()
@@ -321,7 +324,6 @@ function Spec:CreateFrames()
 		specFrame:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED')
 		specFrame:RegisterEvent('ACTIVE_TALENT_GROUP_CHANGED')
 		specFrame:RegisterEvent('PLAYER_LOOT_SPEC_UPDATED')
-		specFrame:RegisterEvent('ARTIFACT_CLOSE')
 		specFrame:RegisterEvent('AZERITE_ITEM_EXPERIENCE_CHANGED')
 		-- specFrame:RegisterEvent('INSPECT_READY')
 		libAD:RegisterCallback('ARTIFACT_EQUIPPED_CHANGED',Spec.CreateFrames)--has to change
