@@ -58,10 +58,10 @@ local function repairCost()
   totalCost, repairSilver = math.modf(totalCost/100.0)
 
   --Because sometimes repairCopper and repairSilver are not integers
-  repairCopper = math.floor(repairCopper*100)
-  repairSilver = math.floor(repairSilver*100)
+  repairCopper = string.format("%02d",math.floor(repairCopper*100))
+  repairSilver = string.format("%02d",math.floor(repairSilver*100))
 
-  return GetCoinTextureString(totalCost..repairSilver..repairCopper.."");
+  return GetCoinTextureString(totalCost..repairSilver..repairCopper);
 end
 
 local function tooltip()

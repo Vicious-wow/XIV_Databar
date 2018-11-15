@@ -61,7 +61,7 @@ local function tooltip(hide)
 		tooltip:AddLine('|cffffff00<'..'Left-Click'..'>|r'.. ' Set Specialization')
 	tooltip:AddLine('|cffffff00<'..SHIFT_KEY_TEXT.."+"..'Left-Click'..'>|r Set Loot Specialization')
 	if artifactId > 0 then
-		tooltip:AddHeaderLine('|cffffff00<'..'Right-Click'..'>|r Open Artifact')
+		tooltip:AddLine('|cffffff00<'..'Right-Click'..'>|r Open Artifact')
 	end
 
 	XB:SkinTooltip(tooltip,"SpecializationTooltip")
@@ -386,41 +386,7 @@ function Spec:CreateFrames()
 				else
 					specPopup:Show()
 				end
-			end--[[
-			  if not InCombatLockdown() then
-				 then
-					if specPopup:IsVisible() then
-					  specPopup:Hide()
-					  if Spec.settings.tooltip then
-						tooltip();
-					  end
-					else
-					  specPopup:Hide()
-					  createSpecPopup()
-					  specPopup:Show()
-					end
-				else
-					if specPopup:IsVisible() then
-					  specPopup:Hide()
-					  if Spec.settings.tooltip then
-						tooltip();
-					  end
-					else
-					  specPopup:Hide()
-					  CreateSpecPopup()
-					  specPopup:Show()
-					end
-				end
-			  end
 			end
-
-			if button == 'RightButton' then
-			  if not InCombatLockdown() then
-				if self.curArtifactId > 0 then
-					SocketInventoryItem(16)
-				end
-			  end
-			end]]
 		end)
 	end
 
