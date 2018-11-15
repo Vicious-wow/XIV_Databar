@@ -53,13 +53,15 @@ local function repairCost()
 	local repair = select(3, scanTool:SetInventoryItem("player", v.id))
 	totalCost = totalCost + repair
   end
-  --Cuz it does not not match the right amount
-  --totalCost = totalCost * 1.659073
 
   totalCost, repairCopper = math.modf(totalCost/100.0)
   totalCost, repairSilver = math.modf(totalCost/100.0)
 
-  return GetCoinTextureString(totalCost..""..(repairSilver*100)..""..(repairCopper*100));
+  --Because sometimes repairCopper and repairSilver are not integers
+  repairCopper = math.floor(repairCopper*100)
+  repairSilver = math.floor(repairSilver*100)
+
+  return GetCoinTextureString(totalCost..repairSilver..repairCopper.."");
 end
 
 local function tooltip()
