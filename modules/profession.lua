@@ -10,7 +10,7 @@ local libTT
 local profession_config
 local Bar, BarFrame
 local professionsGroupFrame
-local professionFrames,professionFramesNames = {},{}
+local professionFrames, professionFramesNames = {},{}
 local prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
 local learnedProfs = {prof1,prof2,archaeology,fishing,cooking}-- firstAid is since BfA tailoring specific; value should always be nil
 local profIcons = {
@@ -30,9 +30,27 @@ local profIcons = {
 ----------------------------------------------------------------------------------------------------------
 -- Private functions
 ----------------------------------------------------------------------------------------------------------
+local function tooltip(hoveredFrame)
+	if libTT:IsAcquired("ProfessionsTooltip") then
+		libTT:Release(libTT:Acquire("ProfessionsTooltip"))
+	end
+
+	local tooltip = libTT:Acquire("ProfessionsTooltip", 2)
+	tooltip:SmartAnchorTo(hoveredFrame)
+	tooltip:SetAutoHideDelay(.5, hoveredFrame)
+	tooltip:AddHeader("[|cff6699FF"..TRADE_SKILLS.."|r]")
+	tooltip:AddLine(" ")
+	for k,v in pairs(learnedProfs) do
+		local profName, _, profRank, profMaxRank, _,  _, _, _, _, _, _ = GetProfessionInfo(v)
+		if profRank < profMaxRank then
+			tooltip:AddLine(string.format(TRADESKILL_NAME_RANK,profName,profRank,profMaxRank))
+		end
+	end
+
+	tooltip:Show()
+end
 
 --Remember daily or weekly CD's
---Capability to view level of other professions in tooltip
 local function refreshOptions()
   Bar,BarFrame = XB:GetModule("Bar"),XB:GetModule("Bar"):GetFrame()
 end
@@ -57,8 +75,8 @@ local profession_default = {
     },
     w = {
         group = 16,
-        firstProf = 32,
-        secProf = 32
+        firstProf = 16,
+        secProf = 16
     },
     h = {
         group = 16,
@@ -91,8 +109,8 @@ local profession_default = {
 -- Module functions
 ----------------------------------------------------------------------------------------------------------
 function Profession:OnInitialize()
-  libTT = LibStub('LibQTip-1.0')
-  self.db = XB.db:RegisterNamespace("Profession", profession_default)
+	libTT = LibStub('LibQTip-1.0')
+	self.db = XB.db:RegisterNamespace("Profession", profession_default)
     self.settings = self.db.profile
 end
 
@@ -100,7 +118,6 @@ function Profession:OnEnable()
   Profession.settings.lock = Profession.settings.lock or not Profession.settings.lock --Locking frame if it was not locked on reload/relog
   refreshOptions()
   XB.Config:Register("Profession",profession_config)
-  
   if self.settings.enable and not self:IsEnabled() then
     self:Enable()
   elseif not self.settings.enable and self:IsEnabled() then
@@ -116,10 +133,10 @@ end
 
 
 function Profession:CreateFrames()
-  self:CreateGroupFrame()
-  for i,v in ipairs(self.settings.barProfs) do
-  	self:CreateProfessionFrame(v,i)
-  end
+	self:CreateGroupFrame()
+	for i,v in ipairs(self.settings.barProfs) do
+		self:CreateProfessionFrame(v,i)
+	end
 end
 
 function Profession:CreateGroupFrame()
@@ -141,7 +158,22 @@ function Profession:CreateGroupFrame()
   professionsGroupFrame:SetClampedToScreen(true)
   professionsGroupFrame:Show()
 
-  XB:AddOverlay(Profession,professionsGroupFrame,a)
+
+  professionsGroupFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+  professionsGroupFrame:RegisterEvent("SPELLS_CHANGED")
+  --professionsGroupFrame:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
+
+  professionsGroupFrame:SetScript("OnEvent",function(_,event,...)
+  	prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
+  	self.settings.barProfs = {prof1,prof2}
+	for i,v in ipairs(self.settings.barProfs) do
+		if not professionFrames["Profession"..v] then
+			self:CreateProfessionFrame(v,i)
+		end
+	end
+  end)
+
+  XB:AddOverlay(self,professionsGroupFrame,a)
 
     if not self.settings.lock then
       professionsGroupFrame.overlay:Show()
@@ -157,11 +189,10 @@ function Profession:CreateProfessionFrame(wowProfId,index)
 	if not frameSettingsName then return end --asserts the use of 2 frames per professionFrame
 	local w,h,x,y,a,color,hover = self.settings.w[frameSettingsName],self.settings.h[frameSettingsName],self.settings.x[frameSettingsName],self.settings.y[frameSettingsName],self.settings.anchor[frameSettingsName],self.settings.color[frameSettingsName],self.settings.hover[frameSettingsName]
 
-  --print(wowProfId)
-  local profName, _, profRank, profMaxRank, _,  spellOffset, skillLine, skillModifier, specIndex, specOffset = GetProfessionInfo(wowProfId)
+  local profName, _, profRank, profMaxRank, _,  spellOffset, skillLine, skillModifier, specIndex, specOffset, rankName = GetProfessionInfo(wowProfId)
   local spellName, subSpellName = GetSpellBookItemName(spellOffset + 1, BOOKTYPE_PROFESSION)
   profName = string.upper(profName)
-  local x, y = 90,0
+  --local x, y = 90,0
 
 
   ----------------------------------------
@@ -171,23 +202,16 @@ function Profession:CreateProfessionFrame(wowProfId,index)
   ----------------------------------------
   --
   ----------------------------------------
-  professionFrames["Profession"..index] = professionFrames["Profession"..index] or CreateFrame("BUTTON","Profession"..index, tradeSkillFrame,'SecureActionButtonTemplate')
-  local profFrame = professionFrames["Profession"..index]
+  professionFrames["Profession"..wowProfId] = professionFrames["Profession"..wowProfId] or CreateFrame("BUTTON","Profession"..wowProfId, professionsGroupFrame,'SecureActionButtonTemplate')
+  local profFrame = professionFrames["Profession"..wowProfId]
   profFrame:ClearAllPoints()
   profFrame:SetPoint("LEFT",professionsGroupFrame,"CENTER",(index-1)*x,y)
   profFrame:EnableMouse(true)
+  profFrame:SetSize(16,16)
   profFrame:RegisterForClicks("AnyUp")
   profFrame:SetAttribute('*type1', 'spell')
   profFrame:SetAttribute('unit', 'player')
   profFrame:SetAttribute('spell', spellName)
-  --[[profFrame:SetBackdrop({
-    bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-    tile = true,
-    tileSize = 16,
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    edgeSize = 16,
-    insets = {left = 5, right = 3, top = 3, bottom = 5}
-  })--]]
 
   local profIcon = profFrame:CreateTexture(nil,"OVERLAY",nil,7)
   profIcon:SetSize(16, 16)
@@ -202,30 +226,31 @@ function Profession:CreateProfessionFrame(wowProfId,index)
   profText:SetText(profName)
   profFrame:SetSize(profText:GetStringWidth()+profIcon:GetWidth()+5,h)
 
-  --[[local profStatusbar = CreateFrame("StatusBar", "Profession"..index.."Status", profFrame)
-  profStatusbar:SetStatusBarTexture(1,1,1)
-  profStatusbar:SetStatusBarColor(unpack(color))
-  profStatusbar:SetPoint("TOPLEFT", profText, "BOTTOMLEFT",0,-2)
+  if profRank ~= profMaxRank then 
+	local profStatusbar = CreateFrame("StatusBar", "Profession"..index.."Status", profFrame)
+	profStatusbar:SetStatusBarTexture(1,1,1)
+	profStatusbar:SetStatusBarColor(unpack(hover))
+	profStatusbar:SetPoint("TOPLEFT", profText, "BOTTOMLEFT",0,-2)
 
-  local profStatusbarBG = profStatusbar:CreateTexture(nil,"BACKGROUND",nil,7)
-  profStatusbarBG:SetPoint("TOPLEFT", profText, "BOTTOMLEFT",0,-2)
-  profStatusbarBG:SetColorTexture(unpack(color))--]]
+	local profStatusbarBG = profStatusbar:CreateTexture(nil,"BACKGROUND",nil,7)
+	profStatusbarBG:SetPoint("TOPLEFT", profText, "BOTTOMLEFT",0,-2)
+	profStatusbarBG:SetColorTexture(unpack(color))
+
+	profStatusbar:SetMinMaxValues(0, profMaxRank)
+	profStatusbar:SetValue(profRank)
+	profStatusbar:SetSize(profText:GetStringWidth(),3)
+	profStatusbarBG:SetSize(profText:GetStringWidth(),3)
+  end
 
   profFrame:SetScript("OnEnter", function()
     if InCombatLockdown() then return end
+    tooltip(profFrame)
     profText:SetTextColor(unpack(hover))
     --profIcon:SetVertexColor(unpack(hover))
     --profStatusbar:SetStatusBarColor(unpack(hover))
   end)
 
   profFrame:SetScript("OnLeave", function() 
-    --[[if prof1OnCooldown then
-     -- profIcon:SetVertexColor(unpack(color))
-      profText:SetTextColor(unpack(color))
-    else
-     -- profIcon:SetVertexColor(unpack(color))
-      profText:SetTextColor(unpack(color))
-    end--]]
     profText:SetTextColor(unpack(color))
     --profStatusbar:SetStatusBarColor(unpack(color))
   end)
