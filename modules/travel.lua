@@ -1,4 +1,217 @@
-local AddOnName, XIVBar = ...;
+local addOnName, XB = ...;
+
+local Teleports = XB:RegisterModule("Teleports")
+
+----------------------------------------------------------------------------------------------------------
+-- Local variables
+----------------------------------------------------------------------------------------------------------
+local ccR,ccG,ccB = GetClassColor(XB.playerClass)
+local libTT
+local teleports_config
+local Bar, BarFrame
+local teleportsGroupFrame, teleport_buttons = nil, {}
+
+----------------------------------------------------------------------------------------------------------
+-- Private functions
+----------------------------------------------------------------------------------------------------------
+local function tooltip(hoveredFrame)
+  if libTT:IsAcquired("Tooltip") then
+	libTT:Release(libTT:Acquire("Tooltip"))
+  end
+
+  local tooltip = libTT:Acquire("Tooltip", 2)
+  tooltip:SmartAnchorTo(hoveredFrame)
+  tooltip:SetAutoHideDelay(.5, hoveredFrame)
+  tooltip:AddHeader("[|cff6699FF".."".."|r]")
+  tooltip:AddLine(" ")
+
+  tooltip:Show()
+end
+
+--Remember daily or weekly CD's
+local function refreshOptions()
+  Bar,BarFrame = XB:GetModule("Bar"),XB:GetModule("Bar"):GetFrame()
+end
+
+local function checkItem(itemId)
+	local isItem = IsUsableItem(itemId)
+	local isToy = nil--PlayerHasToy(itemId)
+	return isItem or isToy
+end
+
+----------------------------------------------------------------------------------------------------------
+-- Options
+----------------------------------------------------------------------------------------------------------
+local teleports_default = {
+  profile = {
+	enable = true,
+	combatEn = false,
+	lock = true,
+	x = {
+		group =-4 ,
+		firstTeleport = 0,
+		secTeleport = 100
+	},
+	y = {
+		group = 0,
+		firstTeleport = 0,
+		secTeleport = 0
+	},
+	w = {
+		group = 16,
+		firstTeleport = 16,
+		secTeleport = 16
+	},
+	h = {
+		group = 16,
+		firstTeleport = 16,
+		secTeleport = 16
+	},
+	anchor = {
+		group = "RIGHT",
+		firstTeleport = "RIGHT",
+		secTeleport = "LEFT"
+	},
+	spaceBetween2Teleports = 10,
+	color = {
+		group = {1,1,1,.75},
+		firstTeleport = {1,1,1,.75},
+		secTeleport = {1,1,1,.75}
+	},
+	hover = {
+		group = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
+		firstTeleport = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
+		secTeleport = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75}
+	},
+	hoverCC = not (XB.playerClass == "PRIEST"),
+	portsSelected = {XB.portOptions.items[1],140192}
+  }
+}
+
+
+----------------------------------------------------------------------------------------------------------
+-- Module functions
+----------------------------------------------------------------------------------------------------------
+function Teleports:OnInitialize()
+  libTT = LibStub('LibQTip-1.0')
+  self.db = XB.db:RegisterNamespace("Teleports", teleports_default)
+	self.settings = self.db.profile
+end
+
+function Teleports:OnEnable()
+  self.settings.lock = self.settings.lock or not self.settings.lock --Locking frame if it was not locked on reload/relog
+  refreshOptions()
+  XB.Config:Register("Teleports",teleports_config)
+  if self.settings.enable and not self:IsEnabled() then
+	self:Enable()
+  elseif not self.settings.enable and self:IsEnabled() then
+	self:Disable()
+  else
+	self:CreateFrames()
+  end
+end
+
+function Teleports:OnDisable()
+	if teleportsGroupFrame and teleportsGroupFrame:IsVisible() then
+		teleportsGroupFrame:Hide()
+	end
+end
+
+
+function Teleports:CreateFrames()
+  self:CreateGroupFrame()--[[
+  for i,v in ipairs(self.settings.barProfs) do
+	self:CreateTeleportsFrame(v,i)
+  end--]]
+end
+
+function Teleports:CreateGroupFrame()
+	if not self.settings.enable then
+		if teleportsGroupFrame and teleportsGroupFrame:IsVisible() then
+			teleportsGroupFrame:Hide()
+		end
+		return
+	end
+	
+	local w,h,x,y,a,color,hover = self.settings.w.group,self.settings.h.group,self.settings.x.group,self.settings.y.group,self.settings.anchor.group,self.settings.color.group,self.settings.hover.group
+	
+	teleportsGroupFrame = teleportsGroupFrame or CreateFrame("Frame","Teleports",BarFrame)
+	teleportsGroupFrame:ClearAllPoints()
+	teleportsGroupFrame:SetSize(w, h)
+	teleportsGroupFrame:SetPoint(a,x,y)
+	teleportsGroupFrame:EnableMouse(true)
+	teleportsGroupFrame:SetMovable(true)
+	teleportsGroupFrame:SetClampedToScreen(true)
+	teleportsGroupFrame:Show()
+
+	self:createTeleportFrame(1)
+	self:createTeleportFrame(2)
+	for k,v in pairs(self:FindUsableTeleports()) do
+		print(k,GetItemInfo(v))
+	end
+end
+
+function Teleports:createTeleportFrame(index)
+	local frameNumber = ""
+	if index == 1 then frameNumber = "first" elseif index == 2 then frameNumber = "sec" end
+	local w,h,x,y,a,color,hover = self.settings.w[frameNumber.."Teleport"],self.settings.h[frameNumber.."Teleport"],self.settings.x[frameNumber.."Teleport"],self.settings.y[frameNumber.."Teleport"],self.settings.anchor[frameNumber.."Teleport"],self.settings.color[frameNumber.."Teleport"],self.settings.hover[frameNumber.."Teleport"]
+	local portId = self.settings.portsSelected[index]
+	teleport_buttons[index] = teleport_buttons[index] or CreateFrame("BUTTON","hsButton", teleportsGroupFrame, "SecureActionButtonTemplate")
+	local HSFrame = teleport_buttons[index]
+
+	HSFrame:SetPoint(a)
+	HSFrame:SetSize(w, h)
+	HSFrame:EnableMouse(true)
+	HSFrame:RegisterForClicks("AnyUp")
+	HSFrame:SetAttribute("type", "macro")
+
+	local HSText = HSFrame:CreateFontString(nil, "OVERLAY")
+	HSText:SetFont(XB.mediaFold.."font\\homizio_bold.ttf",12)
+	HSText:SetPoint("RIGHT")
+	HSText:SetTextColor(unpack(self.settings.color.group))
+
+	local HSIcon = HSFrame:CreateTexture(nil,"OVERLAY",nil,7)
+	HSIcon:SetSize(w, h)
+	HSIcon:SetPoint("RIGHT", HSText,"LEFT",-2,0)
+	HSIcon:SetTexture(XB.icons.hearth)
+	HSIcon:SetVertexColor(unpack(self.settings.color.group))
+
+	
+	HSFrame:SetScript("PreClick",function()
+		local spellItem = GetItemSpell(portId)
+		HSFrame:SetAttribute("macrotext", "/use "..spellItem)
+	end)
+	
+	HSText:SetText(self:GetTeleportName(portId))
+	HSFrame:SetWidth(HSText:GetStringWidth())
+	if index == 1 then
+		teleportsGroupFrame:SetWidth(HSText:GetStringWidth()+HSIcon:GetWidth())
+	else
+		teleportsGroupFrame:SetWidth(teleportsGroupFrame:GetWidth()+self.settings.spaceBetween2Teleports+HSText:GetStringWidth()+HSIcon:GetWidth())
+	end
+end
+
+function Teleports:GetTeleportName(id)
+	local text = ""
+	if id == 6948 then
+		text = GetBindLocation()
+	else
+		text = GetItemInfo(id)
+	end
+	return string.upper(text)
+end
+
+function Teleports:FindUsableTeleports()
+	local items = CopyTable(XB.portOptions.items)
+	local usableItems = {}
+	for i,portId in pairs(items) do
+		local k,v = FindInTableIf(items,checkItem)
+		table.insert(usableItems,v)
+		tremove(items,k)
+	end
+	return usableItems
+end
+--[[local AddOnName, XIVBar = ...;
 local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
@@ -13,15 +226,15 @@ function TravelModule:OnInitialize()
   self.iconPath = xb.constants.mediaPath..'datatexts\\repair'
   self.garrisonHearth = 110560
   self.hearthstones = {
-    64488, -- Innkeeper's Daughter
-    54452, -- Ethereal Portal
-    93672, -- Dark Portal
-    6948,  -- Hearthstone
-    556,   -- Astral Recall
-    28585, -- Ruby Slippers
-    37118, -- Scroll of Recall 1
-    44314, -- Scroll of Recall 2
-    44315, -- Scroll of Recall 3
+	64488, -- Innkeeper's Daughter
+	54452, -- Ethereal Portal
+	93672, -- Dark Portal
+	6948,  -- Hearthstone
+	556,   -- Astral Recall
+	28585, -- Ruby Slippers
+	37118, -- Scroll of Recall 1
+  t 44314, -- Scroll of Recall 2
+	44315, -- Scroll of Recall 3
   }
 
   self.portButtons = {}
@@ -31,8 +244,8 @@ end
 
 function TravelModule:OnEnable()
   if self.hearthFrame == nil then
-    self.hearthFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
-    xb:RegisterFrame('travelFrame', self.hearthFrame)
+	self.hearthFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
+	xb:RegisterFrame('travelFrame', self.hearthFrame)
   end
   self.hearthFrame:Show()
   self:CreateFrames()
@@ -77,117 +290,117 @@ function TravelModule:RegisterFrameEvents()
   self.portPopup:RegisterForClicks('RightButtonUp')
 
   self.portButton.portFunction = self.portButton.portFunction or function()
-    if TravelModule.portPopup:IsVisible() then
-      TravelModule.portPopup:Hide()
-    else
-      TravelModule:CreatePortPopup()
-      TravelModule.portPopup:Show()
-    end
+	if TravelModule.portPopup:IsVisible() then
+	  TravelModule.portPopup:Hide()
+	else
+	  TravelModule:CreatePortPopup()
+	  TravelModule.portPopup:Show()
+	end
   end
 
   self.portPopup:SetScript('OnClick', function(self, button)
-    if button == 'RightButton' then
-      self:Hide()
-    end
+	if button == 'RightButton' then
+	  self:Hide()
+	end
   end)
 
   self.hearthButton:SetScript('OnEnter', function()
-    TravelModule:SetHearthColor()
+	TravelModule:SetHearthColor()
   end)
 
   self.hearthButton:SetScript('OnLeave', function()
-    TravelModule:SetHearthColor()
+	TravelModule:SetHearthColor()
   end)
 
   self.portButton:SetScript('OnEnter', function()
-    TravelModule:SetPortColor()
-    if InCombatLockdown() then return; end
+	TravelModule:SetPortColor()
+	if InCombatLockdown() then return; end
 
-    GameTooltip:SetOwner(self.portButton, 'ANCHOR_'..xb.miniTextPosition)
-    GameTooltip:ClearLines()
-    GameTooltip:AddLine("[|cff6699FF"..L['Travel Cooldowns'].."|r]")
-    for i, v in pairs(self.portOptions) do
-      if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
-        if IsUsableItem(v.portId) then
-          local _, cd, _ = GetItemCooldown(v.portId)
-          local cdString = self:FormatCooldown(cd)
-          GameTooltip:AddDoubleLine(v.text, cdString, 1, 1, 0, 1, 1, 1)
-        end
-        if IsPlayerSpell(v.portId) then
-          local _, cd, _ = GetSpellCooldown(v.portId)
-          local cdString = self:FormatCooldown(cd)
-          GameTooltip:AddDoubleLine(v.text, cdString, 1, 1, 0, 1, 1, 1)
-        end
-      end
-    end
-    GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Change Port Option'], 1, 1, 0, 1, 1, 1)
-    GameTooltip:Show()
+	GameTooltip:SetOwner(self.portButton, 'ANCHOR_'..xb.miniTextPosition)
+	GameTooltip:ClearLines()
+	GameTooltip:AddLine("[|cff6699FF"..L['Travel Cooldowns'].."|r]")
+	for i, v in pairs(self.portOptions) do
+	  if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
+		if IsUsableItem(v.portId) then
+		  local _, cd, _ = GetItemCooldown(v.portId)
+		  local cdString = self:FormatCooldown(cd)
+		  GameTooltip:AddDoubleLine(v.text, cdString, 1, 1, 0, 1, 1, 1)
+		end
+		if IsPlayerSpell(v.portId) then
+		  local _, cd, _ = GetSpellCooldown(v.portId)
+		  local cdString = self:FormatCooldown(cd)
+		  GameTooltip:AddDoubleLine(v.text, cdString, 1, 1, 0, 1, 1, 1)
+		end
+	  end
+	end
+	GameTooltip:AddLine(" ")
+	GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Change Port Option'], 1, 1, 0, 1, 1, 1)
+	GameTooltip:Show()
   end)
 
   self.portButton:SetScript('OnLeave', function()
-    TravelModule:SetPortColor()
-    GameTooltip:Hide()
+	TravelModule:SetPortColor()
+	GameTooltip:Hide()
   end)
 end
 
 function TravelModule:UpdatePortOptions()
   local compassName, _ = GetItemInfo(128353)
   if not self.portOptions then
-    self.portOptions = {}
+	self.portOptions = {}
   end
   if IsUsableItem(128353) and not self.portOptions[128353] then
-    self.portOptions[128353] = {portId = 128353, text = compassName} -- admiral's compass
+	self.portOptions[128353] = {portId = 128353, text = compassName} -- admiral's compass
   end
   if IsUsableItem(140192) and not self.portOptions[140192] then
-    self.portOptions[140192] = {portId = 140192, text = GetMapNameByID(1014)} -- dalaran hearthstone
+	self.portOptions[140192] = {portId = 140192, text = GetMapNameByID(1014)} -- dalaran hearthstone
   end
   if IsUsableItem(self.garrisonHearth) and not self.portOptions[self.garrisonHearth] then
-    self.portOptions[self.garrisonHearth] = {portId = self.garrisonHearth, text = GARRISON_LOCATION_TOOLTIP} -- needs to be var for default options
+	self.portOptions[self.garrisonHearth] = {portId = self.garrisonHearth, text = GARRISON_LOCATION_TOOLTIP} -- needs to be var for default options
   end
 
   if xb.constants.playerClass == 'DRUID' then
-    if IsPlayerSpell(193753) then
-      if not self.portOptions[193753] then
-        self.portOptions[193753] = {portId = 193753, text = ORDER_HALL_DRUID}
-      end
-    else
-      if not self.portOptions[18960] then
-        self.portOptions[18690] = {portId = 18960, text = GetMapNameByID(241)}
-      end
-    end
+	if IsPlayerSpell(193753) then
+	  if not self.portOptions[193753] then
+		self.portOptions[193753] = {portId = 193753, text = ORDER_HALL_DRUID}
+	  end
+	else
+	  if not self.portOptions[18960] then
+		self.portOptions[18690] = {portId = 18960, text = GetMapNameByID(241)}
+	  end
+	end
   end
 
   if xb.constants.playerClass == 'DEATHKNIGHT' and not self.portOptions[50977] then
-    self.portOptions[50977] = {portId = 50977, text = ORDER_HALL_DEATHKNIGHT}
+	self.portOptions[50977] = {portId = 50977, text = ORDER_HALL_DEATHKNIGHT}
   end
 
   if xb.constants.playerClass == 'MAGE' and not self.portOptions[193759] then
-    self.portOptions[193759] = {portId = 193759, text = ORDER_HALL_MAGE}
+	self.portOptions[193759] = {portId = 193759, text = ORDER_HALL_MAGE}
   end
 
   if xb.constants.playerClass == 'MONK' and not self.portOptions[193759] then
-    local portText = GetMapNameByID(809)
-    if IsPlayerSpell(200617) then
-      portText = ORDER_HALL_MONK
-    end
-    self.portOptions[193759] = {portId = 193759, text = portText}
+	local portText = GetMapNameByID(809)
+	if IsPlayerSpell(200617) then
+	  portText = ORDER_HALL_MONK
+	end
+	self.portOptions[193759] = {portId = 193759, text = portText}
   end
 end
 
 function TravelModule:FormatCooldown(cdTime)
   if cdTime <= 0 then
-    return L['Ready']
+	return L['Ready']
   end
   local hours = string.format("%02.f", math.floor(cdTime / 3600))
   local minutes = string.format("%02.f", math.floor(cdTime / 60 - (hours * 60)))
   local seconds = string.format("%02.f", math.floor(cdTime - (hours * 3600) - (minutes * 60)))
   local retString = ''
   if tonumber(hours) ~= 0 then
-    retString = hours..':'
+	retString = hours..':'
   end
   if tonumber(minutes) ~= 0 or tonumber(hours) ~= 0 then
-    retString = retString..minutes..':'
+	retString = retString..minutes..':'
   end
   return retString..seconds
 end
@@ -197,34 +410,34 @@ function TravelModule:SetHearthColor()
 
   local db = xb.db.profile
   if self.hearthButton:IsMouseOver() then
-    self.hearthText:SetTextColor(unpack(xb:HoverColors()))
+	self.hearthText:SetTextColor(unpack(xb:HoverColors()))
   else
-    self.hearthIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    local hearthName = ''
-    local hearthActive = false
-    for i,v in ipairs(self.hearthstones) do
-      if (PlayerHasToy(v) or IsUsableItem(v)) then
-        if GetItemCooldown(v) == 0 then
-          hearthName, _ = GetItemInfo(v)
-          if hearthName ~= nil then
-            hearthActive = true
-            self.hearthButton:SetAttribute("macrotext", "/cast "..hearthName)
-            break
-          end
-        end
-      end -- if toy/item
-      if IsPlayerSpell(v) then
-        if GetSpellCooldown(v) == 0 then
-          hearthName, _ = GetSpellInfo(v)
-          hearthActive = true
-          self.hearthButton:SetAttribute("macrotext", "/cast "..hearthName)
-        end
-      end -- if is spell
-    end -- for hearthstones
-    if hearthActive then
-      self.hearthIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
-    end
-    self.hearthText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+	self.hearthIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+	local hearthName = ''
+	local hearthActive = false
+	for i,v in ipairs(self.hearthstones) do
+	  if (PlayerHasToy(v) or IsUsableItem(v)) then
+		if GetItemCooldown(v) == 0 then
+		  hearthName, _ = GetItemInfo(v)
+		  if hearthName ~= nil then
+			hearthActive = true
+			self.hearthButton:SetAttribute("macrotext", "/cast "..hearthName)
+			break
+		  end
+		end
+	  end -- if toy/item
+	  if IsPlayerSpell(v) then
+		if GetSpellCooldown(v) == 0 then
+		  hearthName, _ = GetSpellInfo(v)
+		  hearthActive = true
+		  self.hearthButton:SetAttribute("macrotext", "/cast "..hearthName)
+		end
+	  end -- if is spell
+	end -- for hearthstones
+	if hearthActive then
+	  self.hearthIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+	end
+	self.hearthText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
   end --else
 end
 
@@ -235,46 +448,46 @@ function TravelModule:SetPortColor()
   local v = xb.db.char.portItem.portId
 
   if not (self:IsUsable(v)) then
-    v = self:FindFirstOption()
-    v = v.portId
-    if not (self:IsUsable(v)) then
-      self.portButton:Hide()
-      return
-    end
+	v = self:FindFirstOption()
+	v = v.portId
+	if not (self:IsUsable(v)) then
+	  self.portButton:Hide()
+	  return
+	end
   end
 
 
 
   if self.portButton:IsMouseOver() then
-    self.portText:SetTextColor(unpack(xb:HoverColors()))
+	self.portText:SetTextColor(unpack(xb:HoverColors()))
   else
-    local hearthname = ''
-    local hearthActive = false
-    if (PlayerHasToy(v) or IsUsableItem(v)) then
-      if GetItemCooldown(v) == 0 then
-        hearthName, _ = GetItemInfo(v)
-        if hearthName ~= nil then
-          hearthActive = true
-          self.portButton:SetAttribute("macrotext", "/cast "..hearthName)
-        end
-      end
-    end -- if toy/item
-    if IsPlayerSpell(v) then
-      if GetSpellCooldown(v) == 0 then
-        hearthName, _ = GetSpellInfo(v)
-        if hearthName ~= nil then
-          hearthActive = true
-          self.portButton:SetAttribute("macrotext", "/cast "..hearthName)
-        end
-      end
-    end -- if is spell
+	local hearthname = ''
+	local hearthActive = false
+	if (PlayerHasToy(v) or IsUsableItem(v)) then
+	  if GetItemCooldown(v) == 0 then
+		hearthName, _ = GetItemInfo(v)
+		if hearthName ~= nil then
+		  hearthActive = true
+		  self.portButton:SetAttribute("macrotext", "/cast "..hearthName)
+		end
+	  end
+	end -- if toy/item
+	if IsPlayerSpell(v) then
+	  if GetSpellCooldown(v) == 0 then
+		hearthName, _ = GetSpellInfo(v)
+		if hearthName ~= nil then
+		  hearthActive = true
+		  self.portButton:SetAttribute("macrotext", "/cast "..hearthName)
+		end
+	  end
+	end -- if is spell
 
-    if hearthActive then
-      self.portIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
-    else
-      self.portIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    end
-    self.portText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+	if hearthActive then
+	  self.portIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+	else
+	  self.portIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+	end
+	self.portText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
   end --else
 end
 
@@ -293,71 +506,71 @@ function TravelModule:CreatePortPopup()
   local popupHeight = xb.constants.popupPadding + db.text.fontSize + self.optionTextExtra
   local changedWidth = false
   for i, v in pairs(self.portOptions) do
-    if self.portButtons[v.portId] == nil then
-      if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
-        local button = CreateFrame('BUTTON', nil, self.portPopup)
-        local buttonText = button:CreateFontString(nil, 'OVERLAY')
+	if self.portButtons[v.portId] == nil then
+	  if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
+		local button = CreateFrame('BUTTON', nil, self.portPopup)
+		local buttonText = button:CreateFontString(nil, 'OVERLAY')
 
-        buttonText:SetFont(xb:GetFont(db.text.fontSize))
-        buttonText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-        buttonText:SetText(v.text)
-        buttonText:SetPoint('LEFT')
-        local textWidth = buttonText:GetStringWidth()
+		buttonText:SetFont(xb:GetFont(db.text.fontSize))
+		buttonText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+		buttonText:SetText(v.text)
+		buttonText:SetPoint('LEFT')
+		local textWidth = buttonText:GetStringWidth()
 
-        button:SetID(v.portId)
-        button:SetSize(textWidth, db.text.fontSize)
-        button.isSettable = true
-        button.portItem = v
+		button:SetID(v.portId)
+		button:SetSize(textWidth, db.text.fontSize)
+		button.isSettable = true
+		button.portItem = v
 
-        button:EnableMouse(true)
-        button:RegisterForClicks('LeftButtonUp')
+		button:EnableMouse(true)
+		button:RegisterForClicks('LeftButtonUp')
 
-        button:SetScript('OnEnter', function()
-          buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
-        end)
+		button:SetScript('OnEnter', function()
+		  buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+		end)
 
-        button:SetScript('OnLeave', function()
-          buttonText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-        end)
+		button:SetScript('OnLeave', function()
+		  buttonText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+		end)
 
-        button:SetScript('OnClick', function(self)
-          xb.db.char.portItem = self.portItem
-          TravelModule:Refresh()
-        end)
+		button:SetScript('OnClick', function(self)
+		  xb.db.char.portItem = self.portItem
+		  TravelModule:Refresh()
+		end)
 
-        self.portButtons[v.portId] = button
+		self.portButtons[v.portId] = button
 
-        if textWidth > popupWidth then
-          popupWidth = textWidth
-          changedWidth = true
-        end
-      end -- if usable item or spell
-    else
-      if not (IsUsableItem(v.portId) or IsPlayerSpell(v.portId)) then
-        self.portButtons[v.portId].isSettable = false
-      end
-    end -- if nil
+		if textWidth > popupWidth then
+		  popupWidth = textWidth
+		  changedWidth = true
+		end
+	  end -- if usable item or spell
+	else
+	  if not (IsUsableItem(v.portId) or IsPlayerSpell(v.portId)) then
+		self.portButtons[v.portId].isSettable = false
+	  end
+	end -- if nil
   end -- for ipairs portOptions
   for portId, button in pairs(self.portButtons) do
-    if button.isSettable then
-      button:SetPoint('LEFT', xb.constants.popupPadding, 0)
-      button:SetPoint('TOP', 0, -(popupHeight + xb.constants.popupPadding))
-      button:SetPoint('RIGHT')
-      popupHeight = popupHeight + xb.constants.popupPadding + db.text.fontSize
-    else
-      button:Hide()
-    end
+	if button.isSettable then
+	  button:SetPoint('LEFT', xb.constants.popupPadding, 0)
+	  button:SetPoint('TOP', 0, -(popupHeight + xb.constants.popupPadding))
+	  button:SetPoint('RIGHT')
+	  popupHeight = popupHeight + xb.constants.popupPadding + db.text.fontSize
+	else
+	  button:Hide()
+	end
   end -- for id/button in portButtons
   if changedWidth then
-    popupWidth = popupWidth + self.extraPadding
+	popupWidth = popupWidth + self.extraPadding
   end
 
   if popupWidth < self.portButton:GetWidth() then
-    popupWidth = self.portButton:GetWidth()
+	popupWidth = self.portButton:GetWidth()
   end
 
   if popupWidth < (self.portOptionString:GetStringWidth()  + self.extraPadding) then
-    popupWidth = (self.portOptionString:GetStringWidth()  + self.extraPadding)
+	popupWidth = (self.portOptionString:GetStringWidth()  + self.extraPadding)
   end
   self.portPopup:SetSize(popupWidth, popupHeight + xb.constants.popupPadding)
 end
@@ -367,11 +580,11 @@ function TravelModule:Refresh()
 
   if not xb.db.profile.modules.travel.enabled then self:Disable(); return; end
   if InCombatLockdown() then
-    self.hearthText:SetText(GetBindLocation())
-    self.portText:SetText(xb.db.char.portItem.text)
-    self:SetHearthColor()
-    self:SetPortColor()
-    return
+	self.hearthText:SetText(GetBindLocation())
+	self.portText:SetText(xb.db.char.portItem.text)
+	self:SetHearthColor()
+	self:SetPortColor()
+	return
   end
 
   self:UpdatePortOptions()
@@ -416,9 +629,9 @@ function TravelModule:Refresh()
   local popupPoint = 'BOTTOM'
   local relPoint = 'TOP'
   if db.general.barPosition == 'TOP' then
-    popupPadding = -(popupPadding)
-    popupPoint = 'TOP'
-    relPoint = 'BOTTOM'
+	popupPadding = -(popupPadding)
+	popupPoint = 'TOP'
+	relPoint = 'BOTTOM'
   end
 
   self.portPopup:ClearAllPoints()
@@ -431,7 +644,7 @@ function TravelModule:Refresh()
 
   local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
   if self.portButton:IsVisible() then
-    totalWidth = totalWidth + self.portButton:GetWidth()
+	totalWidth = totalWidth + self.portButton:GetWidth()
   end
   self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
   self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
@@ -440,12 +653,12 @@ end
 function TravelModule:FindFirstOption()
   local firstItem = {portId = 140192, text = GetMapNameByID(1014)}
   if self.portOptions then
-    for k,v in pairs(self.portOptions) do
-      if self:IsUsable(v.portId) then
-        firstItem = v
-        break
-      end
-    end
+	for k,v in pairs(self.portOptions) do
+	  if self:IsUsable(v.portId) then
+		firstItem = v
+		break
+	  end
+	end
   end
   return firstItem
 end
@@ -458,30 +671,31 @@ function TravelModule:GetDefaultOptions()
   local firstItem = self:FindFirstOption()
   xb.db.char.portItem = xb.db.char.portItem or firstItem
   return 'travel', {
-    enabled = true
+	enabled = true
   }
 end
 
 function TravelModule:GetConfig()
   return {
-    name = self:GetName(),
-    type = "group",
-    args = {
-      enable = {
-        name = ENABLE,
-        order = 0,
-        type = "toggle",
-        get = function() return xb.db.profile.modules.travel.enabled; end,
-        set = function(_, val)
-          xb.db.profile.modules.travel.enabled = val
-          if val then
-            self:Enable()
-          else
-            self:Disable()
-          end
-        end,
-        width = "full"
-      }
-    }
+	name = self:GetName(),
+	type = "group",
+	args = {
+	  enable = {
+		name = ENABLE,
+		order = 0,
+		type = "toggle",
+		get = function() return xb.db.profile.modules.travel.enabled; end,
+		set = function(_, val)
+		  xb.db.profile.modules.travel.enabled = val
+		  if val then
+			self:Enable()
+		  else
+			self:Disable()
+		  end
+		end,
+		width = "full"
+	  }
+	}
   }
 end
+--]]

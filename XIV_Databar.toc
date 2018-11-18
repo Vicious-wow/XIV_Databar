@@ -7,9 +7,10 @@
 ## X-Issues: https://github.com/Mikeprod/XIV_Databar/issues
 
 embeds.xml
-
+db\ports.lua
 #locales\locales.xml
 core.lua
 Config.lua
 Bar.lua
 modules\load_modules.xml
+
