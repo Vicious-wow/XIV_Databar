@@ -21,21 +21,15 @@ local function updateTime(elapsed)
     hour, minu = GetGameTime()--CF time on the current version
     if minu < 10 then minu = ("0"..minu) end
     if GetCVarBool("timeMgrUseLocalTime") then
-     -- print("localTime used")
       if GetCVarBool("timeMgrUseMilitaryTime") then
-       -- print("military")
         clockText:SetText(date("%H:%M")) 
       else
-       -- print("no military")
         clockText:SetText(date("%I:%M").." "..date("%p"))
       end     
     else
-     -- print("server time")
       if GetCVarBool("timeMgrUseMilitaryTime") then
-        --print("military")
         clockText:SetText(hour..":"..minu)
       else
-       -- print("no military")
         if hour > 12 then 
           hour = hour - 12
           hour = ("0"..hour)
@@ -195,126 +189,3 @@ function Clock:CreateFrames()
     clockFrame.overlay.anchor:Hide()
   end
 end
---[[local AddOnName, XIVBar = ...;
-local _G = _G;
-local xb = XIVBar;
-local L = XIVBar.L;
-
-local ClockModule = xb:NewModule("ClockModule", 'AceEvent-3.0')
-
-function ClockModule:GetName()
-  return TIMEMANAGER_TITLE;
-end
-
-function ClockModule:OnInitialize()
-  if IsWindowsClient() then
-    self.timeFormats = {
-      twelveAmPm = '%I:%M %p',
-      twelveNoAm = '%I:%M',
-      twelveAmNoZero = '%#I:%M %p',
-      twelveNoAmNoZero = '%#I:%M',
-      twoFour = '%#H:%M',
-      twoFourNoZero = '%H:%M',
-    }
-  else
-    self.timeFormats = {
-      twelveAmPm = '%I:%M %p',
-      twelveNoAm = '%I:%M',
-      twelveAmNoZero = '%l:%M %p',
-      twelveNoAmNoZero = '%l:%M',
-      twoFour = '%R',
-      twoFourNoZero = '%k:%M',
-    }
-  end
-
-  self.exampleTimeFormats = {
-    twelveAmPm = '08:00 AM (12 Hour)',
-    twelveNoAm = '08:00 (12 Hour)',
-    twelveAmNoZero = '8:00 AM (12 Hour)',
-    twelveNoAmNoZero = '8:00 (12 Hour)',
-    twoFour = '08:00 (24 Hour)',
-    twoFourNoZero = '8:00 (24 Hour)'
-  }
-
-  self.elapsed = 0
-
-  self.functions = {}
-end
-
-
-function ClockModule:GetDefaultOptions()
-  return 'clock', {
-      enabled = true,
-      timeFormat = 'twelveAmPm',
-      fontSize = 20,
-      serverTime = false,
-      hideEventText = false
-    }
-end
-
-function ClockModule:GetConfig()
-  local timeFormatOptions = self.exampleTimeFormats
-  return {
-    name = self:GetName(),
-    type = "group",
-    args = {
-      enable = {
-        name = ENABLE,
-        order = 0,
-        type = "toggle",
-        get = function() return xb.db.profile.modules.clock.enabled; end,
-        set = function(_, val)
-          xb.db.profile.modules.clock.enabled = val
-          if val then
-            self:Enable()
-          else
-            self:Disable()
-          end
-        end,
-        width = "full",
-        hidden = true
-      },
-      useServerTime = {
-        name = L['Use Server Time'],
-        order = 1,
-        type = "toggle",
-        get = function() return xb.db.profile.modules.clock.serverTime; end,
-        set = function(_, val) xb.db.profile.modules.clock.serverTime = val; end
-      },
-      hideEventText = {
-        name = L['Hide Event Text'],
-        order = 2,
-        type = "toggle",
-        get = function() return xb.db.profile.modules.clock.hideEventText; end,
-        set = function(_, val) xb.db.profile.modules.clock.hideEventText = val; end
-      },
-      timeFormat = {
-        name = L['Time Format'],
-        order = 3,
-        type = "select",
-        values = { --TODO: WTF is with this not accepting a variable?
-          twelveAmPm = '08:00 AM (12 Hour)',
-          twelveNoAm = '08:00 (12 Hour)',
-          twelveAmNoZero = '8:00 AM (12 Hour)',
-          twelveNoAmNoZero = '8:00 (12 Hour)',
-          twoFour = '08:00 (24 Hour)',
-          twoFourNoZero = '8:00 (24 Hour)'
-        },
-        style = "dropdown",
-        get = function() return xb.db.profile.modules.clock.timeFormat; end,
-        set = function(info, val) xb.db.profile.modules.clock.timeFormat = val; self:Refresh(); end
-      },
-      fontSize = {
-        name = FONT_SIZE,
-        type = 'range',
-        order = 4,
-        min = 10,
-        max = 20,
-        step = 1,
-        get = function() return xb.db.profile.modules.clock.fontSize; end,
-        set = function(info, val) xb.db.profile.modules.clock.fontSize = val; self:Refresh(); end
-      }
-    }
-  }
-end
-]]--

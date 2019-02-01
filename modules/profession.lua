@@ -11,13 +11,14 @@ local profession_config
 local Bar, BarFrame
 local professionsGroupFrame
 local professionFrames, professionFramesNames = {},{}
-local prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
-local learnedProfs = {prof1,prof2,archaeology,fishing,cooking}-- firstAid is since BfA tailoring specific; value should always be nil
+local prof1, prof2, archaeology, fishing, cooking, firstAid = nil, nil, nil, nil, nil, nil
+local learnedProfs = {}
 local profIcons = {
     [164] = 'blacksmithing',
     [165] = 'leatherworking',
     [171] = 'alchemy',
     [182] = 'herbalism',
+    --[185] = 'cooking', --raising errors in prof frames
     [186] = 'mining',
     [202] = 'engineering',
     [333] = 'enchanting',
@@ -40,6 +41,9 @@ local function tooltip(hoveredFrame)
 	tooltip:SetAutoHideDelay(.5, hoveredFrame)
 	tooltip:AddHeader("[|cff6699FF"..TRADE_SKILLS.."|r]")
 	tooltip:AddLine(" ")
+	if #learnedProfs == 0 then
+    learnedProfs = {GetProfessions()}
+  end
 	for k,v in pairs(learnedProfs) do
 		local profName, _, profRank, profMaxRank, _,  _, _, _, _, _, _ = GetProfessionInfo(v)
 		if profRank < profMaxRank then
@@ -109,6 +113,9 @@ local profession_default = {
 -- Module functions
 ----------------------------------------------------------------------------------------------------------
 function Profession:OnInitialize()
+  prof1, prof2, archaeology, fishing, cooking, firstAid = GetProfessions()
+  learnedProfs = {prof1,prof2,archaeology,fishing,cooking}-- firstAid is since BfA tailoring specific; value should always be nil
+  
 	libTT = LibStub('LibQTip-1.0')
 	self.db = XB.db:RegisterNamespace("Profession", profession_default)
     self.settings = self.db.profile
@@ -123,6 +130,9 @@ function Profession:OnEnable()
   elseif not self.settings.enable and self:IsEnabled() then
     self:Disable()
   else
+--[[    for k,v in pairs(learnedProfs) do
+      print(k,v)
+    end--]]
     self:CreateFrames()
   end
 end
@@ -217,7 +227,7 @@ function Profession:CreateProfessionFrame(wowProfId,index)
   profIcon:SetSize(16, 16)
   profIcon:SetPoint("LEFT")
   profIcon:SetVertexColor(unpack(color))
-  profIcon:SetTexture(XB.mediaFold..'profession\\'..profIcons[skillLine])
+  profIcon:SetTexture(skillLine and XB.mediaFold..'profession\\'..profIcons[skillLine] or "")
 
   local profText = profFrame:CreateFontString(nil, "OVERLAY")
   profText:SetFont(XB.mediaFold.."font\\homizio_bold.ttf", 12)

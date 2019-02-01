@@ -1,4 +1,76 @@
-local AddOnName, XIVBar = ...;
+local addOnName, XB = ...;
+
+local Currency = XB:RegisterModule("Currency")
+
+----------------------------------------------------------------------------------------------------------
+-- Local variables
+----------------------------------------------------------------------------------------------------------
+local ccR,ccG,ccB = GetClassColor(XB.playerClass)
+local libTT
+local currencyGroupFrame,currencyFrame,currencyIcon,currencyText
+local Bar,BarFrame
+
+----------------------------------------------------------------------------------------------------------
+-- Private functions
+----------------------------------------------------------------------------------------------------------
+local function refreshOptions()
+  Bar,BarFrame = XB:GetModule("Bar"),XB:GetModule("Bar"):GetFrame()
+end
+
+----------------------------------------------------------------------------------------------------------
+-- Options
+----------------------------------------------------------------------------------------------------------
+local currency_default ={
+  profile = {
+  enable = true,
+  lock = true,
+  x = 590,
+  y = 0,
+  w = 16,
+  h = 16,
+  anchor = "LEFT",
+  combatEn = false,
+  tooltip = true,
+  color = {1,1,1,.75},
+  colorCC = false,
+  hover = XB.playerClass == "PRIEST" and {.5,.5,0,.75} or {ccR,ccG,ccB,.75},
+  hoverCC = not (XB.playerClass == "PRIEST"),
+  thresh = 70,
+  showIlvl = true,
+  alwaysDurability = true,
+  replaceDurWithIlvl = false,
+  floatPrecision = 2
+  }
+}
+----------------------------------------------------------------------------------------------------------
+-- Module functions
+----------------------------------------------------------------------------------------------------------
+function Currency:OnInitialize()
+  libTT = LibStub('LibQTip-1.0')
+  self.db = XB.db:RegisterNamespace("Currency", arm_default)
+  self.settings = self.db.profile
+end
+
+function Currency:OnEnable()
+  self.settings.lock = self.settings.lock or not self.settings.lock
+  refreshOptions()
+  XB.Config:Register("Currency",currency_config)
+  if self.settings.enable then
+    self:CreateFrames()
+  else
+    self:Disable()
+  end
+end
+
+function Currency:OnDisable()
+  --[[currencyGroupFrame:Hide()
+  currencyText:Hide()--]]
+end
+
+function Currency:CreateFrames()
+end
+
+--[[local AddOnName, XIVBar = ...;
 local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
@@ -10,7 +82,7 @@ function CurrencyModule:GetName()
 end
 
 function CurrencyModule:OnInitialize()
-  self.rerollItems = {
+  self.rerollItems = 
     697,  -- Elder Charm of Good Fortune
     752,  -- Mogu Rune of Fate
     776,  -- Warforged Seal
@@ -106,8 +178,8 @@ function CurrencyModule:Refresh()
   else -- show xp bar/show currencies
     local iconsWidth = 0
     for i = 1, 3 do
-      if db.modules.currency[self.intToOpt[i]] ~= '0' then
-        iconsWidth = iconsWidth + self:StyleCurrencyFrame(tonumber(db.modules.currency[self.intToOpt[i]]), i)
+      if db.modules.currency[self.intToOpt[i]] --[[~= '0' then
+        iconsWidth = iconsWidth + self:StyleCurrencyFrame(tonumber(db.modules.currency[self.intToOpt[i]]--[[), i)
       end
     end
     self.curButtons[1]:SetPoint('LEFT')
@@ -284,8 +356,8 @@ function CurrencyModule:ShowTooltip()
     GameTooltip:AddLine(" ")
 
     for i = 1, 3 do
-      if xb.db.profile.modules.currency[self.intToOpt[i]] ~= '0' then
-        local curId = tonumber(xb.db.profile.modules.currency[self.intToOpt[i]])
+      if xb.db.profile.modules.currency[self.intToOpt[i]] --[[~= '0' then
+        local curId = tonumber(xb.db.profile.modules.currency[self.intToOpt[i]]--[[)
         local name, count, _, _, _, totalMax, _, _ = GetCurrencyInfo(curId)
         GameTooltip:AddDoubleLine(name, string.format('%d/%d', count, totalMax), 1, 1, 0, 1, 1, 1)
       end
@@ -417,3 +489,4 @@ function CurrencyModule:GetConfig()
     }
   }
 end
+--]]
