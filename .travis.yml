@@ -7,3 +7,7 @@ addons:
     - pandoc
  
 script: curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash
+
+branches:
+  only:
+  - /^master$|^Rework$|^\d+\.\d+(\.\d+)?(-\S*)?$/
