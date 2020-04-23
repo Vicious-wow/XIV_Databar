@@ -466,7 +466,7 @@ function MenuModule:SocialHover(hoverFunc)
             battleTag = '['..L['No Tag']..']'
           end
 
-          local _, _, _, realmName, _ = BNGetGameAccountInfo(gameAccount)
+          local realmName = GetRealmName(gameAccount)
           local status = FRIENDS_LIST_ONLINE
           local statusIcon = FRIENDS_TEXTURE_ONLINE
           local socialIcon = BNet_GetClientTexture(gameClient)
