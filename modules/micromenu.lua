@@ -54,6 +54,15 @@ function MenuModule:OnInitialize()
     },
     VIPR = {
       text = 'Call of Duty'
+    },
+    ODIN = {
+      text = 'Call of Duty MW'
+    },
+    LAZR = {
+      text = 'Call of Duty MW2'
+    },
+    W3 = {
+      text = 'Warcraft 3 Reforged'
     }
   }
 end
