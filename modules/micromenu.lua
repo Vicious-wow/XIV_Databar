@@ -46,6 +46,9 @@ function MenuModule:OnInitialize()
     Pro = {
       text = 'Overwatch'
     },
+    CLNT = {
+      text = ''
+    },
     WoW = {
       text = CINEMATIC_NAME_1
     },
@@ -407,8 +410,8 @@ end
 
 function MenuModule:UpdateFriendText()
   if xb.db.profile.modules.microMenu.hideSocialText or not xb.db.profile.modules.microMenu.social then return; end
-  local _, bnOnlineMembers = BNGetNumFriends()
-  local _, friendsOnline = GetNumFriends()
+  local _, bnOnlineMembers, _, _ = BNGetNumFriends()
+  local friendsOnline = C_FriendList.GetNumOnlineFriends()
   local totalFriends = bnOnlineMembers + friendsOnline
   self.text.social:SetText(totalFriends)
   self.bgTexture.social:SetPoint('CENTER', self.text.social)
@@ -441,25 +444,28 @@ function MenuModule:SocialHover(hoverFunc)
       return
     end
 
-	local modifierFunc = IsShiftKeyDown
-	if self.modifier == "ALT" then
-		modifierFunc = IsAltKeyDown
-	elseif self.modifier == "CONTROL" then
-		modifierFunc = IsControlKeyDown
-	end
+	  local modifierFunc = IsShiftKeyDown
+	  if self.modifier == "ALT" then
+		  modifierFunc = IsAltKeyDown
+	  elseif self.modifier == "CONTROL" then
+		  modifierFunc = IsControlKeyDown
+	  end
 
-	if self.LTip:IsAcquired("SocialToolTip") then
-		self.LTip:Release(self.LTip:Acquire("SocialToolTip"))
-	end
-	local tooltip = self.LTip:Acquire("SocialToolTip", 2, "LEFT", "RIGHT")
-	tooltip:EnableMouse(true)
-	tooltip:SetScript("OnEnter",function() self.tipHover=true end)
-	tooltip:SetScript("OnLeave",function() self.tipHover=false end)
-	tooltip:SetScript("OnUpdate",function() if not self.tipHover and not self.lineHover then tooltip:Release() end end)
-	MenuModule:SkinFrame(tooltip, "SocialToolTip")
-    local totalBNFriends, totalBNOnlineFriends = BNGetNumFriends()
-    local totalFriends, totalOnlineFriends = GetNumFriends()
-	local charNameFormat
+	  if self.LTip:IsAcquired("SocialToolTip") then
+		  self.LTip:Release(self.LTip:Acquire("SocialToolTip"))
+    end
+    
+	  local tooltip = self.LTip:Acquire("SocialToolTip", 2, "LEFT", "RIGHT")
+	  tooltip:EnableMouse(true)
+	  tooltip:SetScript("OnEnter",function() self.tipHover=true end)
+	  tooltip:SetScript("OnLeave",function() self.tipHover=false end)
+	  tooltip:SetScript("OnUpdate",function() if not self.tipHover and not self.lineHover then tooltip:Release() end end)
+	  MenuModule:SkinFrame(tooltip, "SocialToolTip")
+    local totalBNFriends, totalBNOnlineFriends, _, _ = BNGetNumFriends()
+	  local totalFriends = C_FriendList.GetNumFriends()
+    local totalOnlineFriends = C_FriendList.GetNumOnlineFriends()
+    local charNameFormat
+    local playerFaction, _ = UnitFactionGroup("player")
     if (totalOnlineFriends + totalBNOnlineFriends) > 0 then
       tooltip:SmartAnchorTo(MenuModule.frames.social)
       tooltip:AddHeader('[|cff6699FF'..SOCIAL_LABEL..'|r]')
@@ -467,31 +473,51 @@ function MenuModule:SocialHover(hoverFunc)
     end
 
     if totalBNOnlineFriends then
-      local clientsList = {BNET_CLIENT_WOW,BNET_CLIENT_SC2,BNET_CLIENT_D3,BNET_CLIENT_WTCG,BNET_CLIENT_HEROES,BNET_CLIENT_OVERWATCH,BNET_CLIENT_SC,BNET_CLIENT_DESTINY2,BNET_CLIENT_COD}
+      local clientsList = {BNET_CLIENT_WOW,BNET_CLIENT_SC2,BNET_CLIENT_D3,BNET_CLIENT_WTCG,BNET_CLIENT_APP,BNET_CLIENT_HEROES,BNET_CLIENT_OVERWATCH,BNET_CLIENT_CLNT,BNET_CLIENT_SC,BNET_CLIENT_DESTINY2,BNET_CLIENT_COD,BNET_CLIENT_COD_MW,BNET_CLIENT_COD_MW2,BNET_CLIENT_WC3}
       for i = 1, BNGetNumFriends() do
-        local battleID, battleName, battleTag, _, charName, gameAccount, gameClient, isOnline, _, isAfk, isDnd, _, note = BNGetFriendInfo(i)
+        local friendAccInfo = C_BattleNet.GetFriendAccountInfo(i)
+        local battleID = friendAccInfo.bnetAccountID
+        local battleName = friendAccInfo.accountName
+        local battleTag = friendAccInfo.battleTag
+        local gameAccount = friendAccInfo.gameAccountInfo
+        local isOnline = gameAccount.isOnline
+        local isAfk = friendAccInfo.isAFK
+        local isDnd = friendAccInfo.isDND
+        local note = friendAccInfo.note
+
         if isOnline then
           if not battleTag then
             battleTag = '['..L['No Tag']..']'
           end
-
-          local realmName = GetRealmName(gameAccount)
+          
+		      local charName = gameAccount.characterName
+		      local gameClient = gameAccount.clientProgram
+          local realmName = gameAccount.realmName
+          local faction = gameAccount.factionName
+          local richPresence = gameAccount.richPresence
+          local isClassic = false
           local status = FRIENDS_LIST_ONLINE
           local statusIcon = FRIENDS_TEXTURE_ONLINE
           local socialIcon = BNet_GetClientTexture(gameClient)
           local gameName = MenuModule.socialIcons[gameClient].text
 
-          if isAfk then
+          if isAfk or gameAccount.isGameAFK then
             statusIcon = FRIENDS_TEXTURE_AFK
             status = DEFAULT_AFK_MESSAGE
           end
-          if isDnd then
+          if isDnd or gameAccount.isGameBusy then
             statusIcon = FRIENDS_TEXTURE_DND
             status = DEFAULT_DND_MESSAGE
           end
 
           if gameClient == BNET_CLIENT_WOW then
-            charNameFormat = "(|cffecd672"..charName.."-"..realmName.."|r)"
+            if richPresence:find("Classic") then 
+              isClassic = true 
+            elseif faction ~= playerFaction then
+              charNameFormat = "(|cffecd672"..faction.." - "..charName.."|r)"
+            else
+              charNameFormat = "(|cffecd672"..charName.."-"..realmName.."|r)"
+            end
           else
             charNameFormat = ''
           end
@@ -502,33 +528,47 @@ function MenuModule:SocialHover(hoverFunc)
 
           if tContains(clientsList,gameClient) or not xb.db.profile.modules.microMenu.hideAppContact then
             local lineLeft = string.format("|T%s:16|t|cff82c5ff %s|r %s", statusIcon, battleName, note)
-            local lineRight = string.format("%s %s |T%s:16|t", charNameFormat, gameName, socialIcon)
+            local lineRight = ''
+            if isClassic then
+              lineRight = string.format("%s |T%s:16|t", richPresence, socialIcon)
+            else
+              lineRight = string.format("%s %s |T%s:16|t", charNameFormat, gameName, socialIcon)
+            end
             tooltip:AddLine(lineLeft, lineRight)
       		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true;end)
       		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false; end)
       		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
-  		    if button == "LeftButton" then
-  				if modifierFunc() then
-  					if CanGroupWithAccount(battleID) then
-  						InviteToGroup(charName.."-"..realmName)
-  					end
-  				else
-  					ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..battleName.." ")
-  				end
-  			elseif button == "RightButton" then
-  				if charName then
-  					ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..charName.."-"..realmName.." ")
-  				end
-  			end
-  		  end)
-            end --optApp
+  		        if button == "LeftButton" then
+  				      if modifierFunc() then
+  					      if CanGroupWithAccount(battleID) then
+  						      InviteToGroup(charName.."-"..realmName)
+  					      end
+                else
+                  ChatFrame_SendBNetTell(battleName)
+  				      end
+  			      elseif button == "RightButton" then
+                if (not isClassic and charName and faction == playerFaction ) then
+                  ChatFrame_SendTell(charName.."-"..realmName)
+  				      end
+  			      end
+  		      end)
+          end --optApp
         end -- isOnline
       end -- for in BNGetNumFriends
     end -- totalBNOnlineFriends
 
     if totalOnlineFriends then
-      for i = 1, GetNumFriends() do
-        local name, level, class, area, isOnline, status, note = GetFriendInfo(i)
+      for i = 1, C_FriendList.GetNumFriends() do
+        local friendInfo = C_FriendList.GetFriendInfoByIndex(i)
+        local name = friendInfo.name
+        local class = friendInfo.className
+        local area = friendInfo.area
+        local level = friendInfo.level
+        local isOnline = friendInfo.connected
+        local isAfk = friendInfo.afk
+        local isDnd = friendInfo.dnd
+        local note = friendInfo.notes
+
         if isOnline then
           local status = FRIENDS_LIST_ONLINE
           local statusIcon = FRIENDS_TEXTURE_ONLINE
@@ -544,22 +584,22 @@ function MenuModule:SocialHover(hoverFunc)
           local lineLeft = string.format("|T%s:16|t %s, "..LEVEL..":%s %s", statusIcon, name, level, class)
           local lineRight = string.format("%s", area)
           tooltip:AddLine(lineLeft, lineRight)
-		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true;end)
-		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false; end)
-		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
-		    if not name:find('%u%U*-%u%U') then
-				local homeRealm = GetRealmName()
-				homeRealm = homeRealm:gsub("%s+", "")
-				name=name.."-"..homeRealm
-			end
-		    if button == "RightButton" then
-				ChatFrame_OpenChat(SLASH_SMART_WHISPER1.." "..name.." ")
-			elseif button == "LeftButton" then
-				if modifierFunc() then
-					InviteUnit(name)
-				end
-			end
-		  end)
+		      tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true;end)
+		      tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false; end)
+		      tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
+		        if not name:find('%u%U*-%u%U') then
+				      local homeRealm = GetRealmName()
+				      homeRealm = homeRealm:gsub("%s+", "")
+				      name=name.."-"..homeRealm
+			      end
+		        if button == "RightButton" then
+				      ChatFrame_SendTell(name)
+			      elseif button == "LeftButton" then
+				      if modifierFunc() then
+					      InviteUnit(name)
+				      end
+			      end
+		      end)
         end -- isOnline
       end -- for in GetNumFriends
     end -- totalOnlineFriends
