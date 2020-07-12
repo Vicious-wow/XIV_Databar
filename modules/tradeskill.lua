@@ -37,6 +37,9 @@ function TradeskillModule:OnEnable()
   self.prof1 = prof1
   self.prof2 = prof2
 
+  local firstProfID = 0
+  local secondProfID = 0
+
   self:CreateFrames()
   self:RegisterFrameEvents()
   self:Refresh()
@@ -50,73 +53,79 @@ function TradeskillModule:OnDisable()
 end
 
 function TradeskillModule:UpdateProfValues()
-  if self.prof1 then
-    local _, _, skill, cap, _ = GetProfessionInfo(self.prof1)
-    if not GetProfessionInfo(self.prof1) then return end
-    self.firstProfBar:SetMinMaxValues(1, cap)
-    self.firstProfBar:SetValue(skill)
+  --update profession indexes before anything else or receive a million bugs when (un)learning professions
+  self.prof1, self.prof2, _ = GetProfessions() --this is the most important line in the entire fucking module
+
+  --if prof1 doesn't exist, the player hasn't learned any profession and thus the tradeskillFrame is hidden
+  if not self.prof1 then
+    self.tradeskillFrame:Hide()
+    return
   end
 
-  if self.prof2 then
-    local _, _, skill, cap, _ = GetProfessionInfo(self.prof2)
-    if not GetProfessionInfo(self.prof2) then return end
-    self.secondProfBar:SetMinMaxValues(1, cap)
-    self.secondProfBar:SetValue(skill)
+  --player has at least one profession, setting first one. show tradeskillFrame because it might've been hidden before
+  self.tradeskillFrame:Show()
+  local _, _, skill1, cap1, _ = GetProfessionInfo(self.prof1)
+  self.firstProfBar:SetMinMaxValues(1, cap1)
+  self.firstProfBar:SetValue(skill1)
+
+  --if prof2 doesn't exist, hide the secondProfFrame 
+  if not self.prof2 then
+    self.secondProfFrame:Hide()
+    return
   end
+
+  --player has two profession, setting second one. show secondProfFrame because it might've been hidden before
+  self.secondProfFrame:Show()
+  local _, _, skill2, cap2, _ = GetProfessionInfo(self.prof2)
+  self.secondProfBar:SetMinMaxValues(1, cap2)
+  self.secondProfBar:SetValue(skill2)
 end
 
 function TradeskillModule:Refresh()
-  if InCombatLockdown() then
-    self:UpdateProfValues()
-    return
-  end
+  --don't refresh anything while in combat because why the fuck would you?
+  if InCombatLockdown() then return end
+  --do this before updating prof values or get rekt by bugs because refresh triggers a thousand times before anything is even loaded
+  if self.tradeskillFrame == nil then return end
+  --similar reasons for the line above apply here
   local db = xb.db.profile
-  if self.tradeskillFrame == nil then return; end
-  if not db.modules.tradeskill.enabled then self:Disable(); return; end
-  local iconSize = db.text.fontSize + db.general.barPadding
+  if not db.modules.tradeskill.enabled then self:Disable() return end
 
+  --update before doing anything here mister addon creator. if we have no professions, why the fuck would we refresh anything?
+  self:UpdateProfValues()
+  --get the hell out of this function if we have no professions
+  if not self.prof1 then return end
+
+  --prepare tradeskillFrame bar width and profession icon size
+  local iconSize = db.text.fontSize + db.general.barPadding
   local totalWidth = 0
 
-  if self.prof1 then
-    self:StyleTradeskillFrame('firstProf', self.prof1)
-    totalWidth = totalWidth + self.firstProfFrame:GetWidth()
-    self.firstProfFrame:SetPoint('LEFT')
-  end
+  --setting width and position for profession 1 frame
+  self:StyleTradeskillFrame('firstProf', self.prof1)
+  totalWidth = totalWidth + self.firstProfFrame:GetWidth()
+  self.firstProfFrame:SetPoint('LEFT')
 
+  -- setting width and position for profession 2 frame if it exists, otherwise its frame is hidden anyway
   if self.prof2 then
     self:StyleTradeskillFrame('secondProf', self.prof2)
     totalWidth = totalWidth + self.secondProfFrame:GetWidth()
     self.secondProfFrame:SetPoint('LEFT', self.firstProfFrame, 'RIGHT', 5, 0)
   end
 
-  if self.prof1 or self.prof2 then
-
-    self:UpdateProfValues()
-
-    self.tradeskillFrame:SetSize(totalWidth, xb:GetHeight())
-
-    --self.tradeskillFrame:SetSize(self.goldButton:GetSize())
-
-    local relativeAnchorPoint = 'RIGHT'
-    local xOffset = db.general.moduleSpacing
-    if not xb:GetFrame('clockFrame'):IsVisible() then
-      relativeAnchorPoint = 'LEFT'
-      xOffset = 0
-    end
-    self.tradeskillFrame:SetPoint('LEFT', xb:GetFrame('clockFrame'), relativeAnchorPoint, xOffset, 0)
-  else
-    self.tradeskillFrame:Hide()
+  --final touches on our precious tradeskillFrame
+  self.tradeskillFrame:SetSize(totalWidth, xb:GetHeight())
+  local relativeAnchorPoint = 'RIGHT'
+  local xOffset = db.general.moduleSpacing
+  if not xb:GetFrame('clockFrame'):IsVisible() then
+    relativeAnchorPoint = 'LEFT'
+    xOffset = 0
   end
+  self.tradeskillFrame:SetPoint('LEFT', xb:GetFrame('clockFrame'), relativeAnchorPoint, xOffset, 0)
 end
 
 function TradeskillModule:StyleTradeskillFrame(framePrefix, profIndex)
   local db = xb.db.profile
   local iconSize = db.text.fontSize + db.general.barPadding
   local name, _, skill, cap, _, spellOffset, skillLine, _ = GetProfessionInfo(profIndex)
-  if not name then return end
-  --[[if not self.profIcons[skillLine] then
-  	return
-  end]]
   local icon = xb.constants.mediaPath..'profession\\'..self.profIcons[skillLine]
 
   local textHeight = floor((xb:GetHeight() - 4) / 2)
@@ -128,6 +137,8 @@ function TradeskillModule:StyleTradeskillFrame(framePrefix, profIndex)
   if barHeight < 2 then
     barHeight = 2
   end
+
+  self[framePrefix..'ID'] = skillLine
 
   self[framePrefix..'Icon']:SetTexture(icon)
   self[framePrefix..'Icon']:SetSize(iconSize, iconSize)
@@ -155,84 +166,62 @@ function TradeskillModule:StyleTradeskillFrame(framePrefix, profIndex)
     self[framePrefix..'BarBg']:SetColorTexture(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
   end
   self[framePrefix..'Frame']:SetSize(iconSize + self[framePrefix..'Text']:GetStringWidth() + 5, xb:GetHeight())
-
-  local spellName, subSpellName = GetSpellBookItemName(spellOffset + 1, BOOKTYPE_PROFESSION)
-  self[framePrefix..'Frame']:SetAttribute('spell', spellName) --- While this is usually the type of thing I'd put into RegisterFrameEvents(), I need it to update
 end
 
 function TradeskillModule:CreateFrames()
-  self.firstProfFrame = self.firstProfFrame or CreateFrame("BUTTON", nil, self.tradeskillFrame, 'SecureActionButtonTemplate')
+  self.firstProfFrame = self.firstProfFrame or CreateFrame("BUTTON", nil, self.tradeskillFrame)
   self.firstProfIcon = self.firstProfIcon or self.firstProfFrame:CreateTexture(nil, 'OVERLAY')
   self.firstProfText = self.firstProfText or self.firstProfFrame:CreateFontString(nil, 'OVERLAY')
   self.firstProfBar = self.firstProfBar or CreateFrame('STATUSBAR', nil, self.firstProfFrame)
   self.firstProfBarBg = self.firstProfBarBg or self.firstProfBar:CreateTexture(nil, 'BACKGROUND')
 
-  self.secondProfFrame = self.secondProfFrame or CreateFrame("BUTTON", nil, self.tradeskillFrame, 'SecureActionButtonTemplate')
+  self.secondProfFrame = self.secondProfFrame or CreateFrame("BUTTON", nil, self.tradeskillFrame)
   self.secondProfIcon = self.secondProfIcon or self.secondProfFrame:CreateTexture(nil, 'OVERLAY')
   self.secondProfText = self.secondProfText or self.secondProfFrame:CreateFontString(nil, 'OVERLAY')
   self.secondProfBar = self.secondProfBar or CreateFrame('STATUSBAR', nil, self.secondProfFrame)
   self.secondProfBarBg = self.secondProfBarBg or self.secondProfBar:CreateTexture(nil, 'BACKGROUND')
 end
 
+function TradeskillModule:SetProfScripts(framePrefix)
+  self[framePrefix..'Frame']:SetScript('OnMouseDown', function()
+    local _, _, _, _, _, openSkillLine, _ = C_TradeSkillUI.GetTradeSkillLine()
+    if openSkillLine == self[framePrefix..'ID'] then C_TradeSkillUI.CloseTradeSkill() return end
+      C_TradeSkillUI.OpenTradeSkill(self[framePrefix..'ID'])
+  end)
+
+  self[framePrefix..'Frame']:SetScript('OnEnter', function()
+    if InCombatLockdown() then return end
+    self[framePrefix..'Text']:SetTextColor(unpack(xb:HoverColors()))
+    if xb.db.profile.modules.tradeskill.showTooltip then
+      self:ShowTooltip()
+    end
+  end)
+
+  self[framePrefix..'Frame']:SetScript('OnLeave', function()
+    if InCombatLockdown() then return; end
+    local db = xb.db.profile
+    self[framePrefix..'Text']:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    if xb.db.profile.modules.tradeskill.showTooltip then
+      GameTooltip:Hide()
+    end
+  end)
+end
+
 function TradeskillModule:RegisterFrameEvents()
-
-  self:RegisterEvent('TRADE_SKILL_DETAILS_UPDATE', 'Refresh')
-  self:RegisterEvent('SPELLS_CHANGED', 'Refresh')
+  self.tradeskillFrame:SetScript('OnEvent', function() self:Refresh() end)
+  self.tradeskillFrame:RegisterEvent('TRADE_SKILL_DETAILS_UPDATE')
+  self.tradeskillFrame:RegisterEvent('SPELLS_CHANGED')
   self.tradeskillFrame:RegisterUnitEvent('UNIT_SPELLCAST_STOP', 'player')
-  self.tradeskillFrame:SetScript('OnEvent', function(_, event)
-    if event == 'UNIT_SPELLCAST_STOP' then
-      self:Refresh()
-    end
-  end)
 
-  self.firstProfFrame:EnableMouse(true)
-  self.firstProfFrame:RegisterForClicks('AnyUp')
+  self:SetProfScripts('firstProf')
+  self:SetProfScripts('secondProf')
 
-  self.firstProfFrame:SetScript('OnEnter', function()
-    if InCombatLockdown() then return; end
-    self.firstProfText:SetTextColor(unpack(xb:HoverColors()))
-    if xb.db.profile.modules.tradeskill.showTooltip then
-      self:ShowTooltip()
-    end
-  end)
-  self.firstProfFrame:SetScript('OnLeave', function()
-    if InCombatLockdown() then return; end
-    local db = xb.db.profile
-    self.firstProfText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    if xb.db.profile.modules.tradeskill.showTooltip then
-      GameTooltip:Hide()
-    end
-  end)
-  self.firstProfFrame:SetAttribute('*type1', 'spell')
-  self.firstProfFrame:SetAttribute('unit', 'player')
-
-  self.secondProfFrame:EnableMouse(true)
-  self.secondProfFrame:RegisterForClicks('AnyUp')
-
-  self.secondProfFrame:SetScript('OnEnter', function()
-    if InCombatLockdown() then return; end
-    self.secondProfText:SetTextColor(unpack(xb:HoverColors()))
-    if xb.db.profile.modules.tradeskill.showTooltip then
-      self:ShowTooltip()
-    end
-  end)
-  self.secondProfFrame:SetScript('OnLeave', function()
-    if InCombatLockdown() then return; end
-    local db = xb.db.profile
-    self.secondProfText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    if xb.db.profile.modules.tradeskill.showTooltip then
-      GameTooltip:Hide()
-    end
-  end)
-  self.secondProfFrame:SetAttribute('*type1', 'spell')
-  self.secondProfFrame:SetAttribute('unit', 'player')
-
-  self.tradeskillFrame:EnableMouse(true)
   self.tradeskillFrame:SetScript('OnEnter', function()
     if xb.db.profile.modules.tradeskill.showTooltip then
       self:ShowTooltip()
     end
   end)
+
   self.tradeskillFrame:SetScript('OnLeave', function()
     if xb.db.profile.modules.tradeskill.showTooltip then
       GameTooltip:Hide()
@@ -253,6 +242,7 @@ function TradeskillModule:RegisterFrameEvents()
 end
 
 function TradeskillModule:ShowTooltip()
+  --lol wtf is happening here. more "bugfixes"?
   return
   --[[
   GameTooltip:SetOwner(self.tradeskillFrame, 'ANCHOR_'..xb.miniTextPosition)
