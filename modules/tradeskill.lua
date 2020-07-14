@@ -257,7 +257,7 @@ function TradeskillModule:RegisterFrameEvents()
 end
 
 function TradeskillModule:ShowTooltip()
-  local r, g, b, _ = xb:GetClassColors()
+  local r, g, b, _ = unpack(xb:HoverColors())
   GameTooltip:SetOwner(self.tradeskillFrame, 'ANCHOR_'..xb.miniTextPosition)
   GameTooltip:AddLine("|cFFFFFFFF[|r"..TRADE_SKILLS.."|cFFFFFFFF]|r", r, g, b)
   GameTooltip:AddLine(" ")
