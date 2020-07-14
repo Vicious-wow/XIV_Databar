@@ -128,6 +128,8 @@ L['Cleaned'] = "已清理";
 
 L['Use Class Colors'] = "使用职业颜色";
 L['Cooldowns'] = "冷却";
+L['Toggle Profession Frame'] = '顯示職業框架';
+L['Toggle Profession Spellbook'] = '表演專業拼寫本';
 
 L['Set Specialization'] = "设置专精";
 L['Set Loot Specialization'] = "设置拾取专精";

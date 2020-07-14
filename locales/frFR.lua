@@ -128,6 +128,8 @@ L['Cleaned'] = "Nettoyé";
 
 L['Use Class Colors'] = "Utiliser les couleurs de classe";
 L['Cooldowns'] = "Temps de recharge";
+L['Toggle Profession Frame'] = 'Afficher le cadre de la profession';
+L['Toggle Profession Spellbook'] = 'afficher le livre de sorts de la profession';
 
 L['Set Specialization'] = "Choix de la spécialisation";
 L['Set Loot Specialization'] = "Spécialisation du butin";

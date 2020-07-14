@@ -128,6 +128,8 @@ L['Cleaned'] = true;
 
 L['Use Class Colors'] = true;
 L['Cooldowns'] = true;
+L['Toggle Profession Frame'] = true;
+L['Toggle Profession Spellbook'] = true;
 
 L['Set Specialization'] = true;
 L['Set Loot Specialization'] = true;

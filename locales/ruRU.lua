@@ -128,6 +128,8 @@ L['Cleaned'] = "Очищено";
 
 L['Use Class Colors'] = "Использовать цвет класса";
 L['Cooldowns'] = "Кулдауны";
+L['Toggle Profession Frame'] = 'Показать кадр профессии';
+L['Toggle Profession Spellbook'] = 'показать книгу заклинаний профессии';
 
 L['Set Specialization'] = "Выбрать специализацию";
 L['Set Loot Specialization'] = "Выбрать специализацию для добычи";

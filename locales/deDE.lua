@@ -128,6 +128,8 @@ L['Cleaned'] = "Gesäubert";
 
 L['Use Class Colors'] = "Klassenfarben benutzen";
 L['Cooldowns'] = "Abklingzeiten";
+L['Toggle Profession Frame'] = 'Berufsrahmen anzeigen';
+L['Toggle Profession Spellbook'] = 'Zauberbuch für Berufe anzeigen';
 
 L['Set Specialization'] = "Spezialisierung auswählen";
 L['Set Loot Specialization'] = "Beute-Spezialisierung auswählen";
