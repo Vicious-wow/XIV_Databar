@@ -32,8 +32,8 @@ end
 
 function SystemModule:Refresh()
   local db = xb.db.profile
-  if self.systemFrame == nil then return; end
-  if not db.modules.system.enabled then self:Disable(); return; end 
+  if self.systemFrame == nil then return end
+  if not db.modules.system.enabled then self:Disable(); return end 
 
   if InCombatLockdown() then
     self:UpdateTexts()
@@ -60,30 +60,32 @@ function SystemModule:Refresh()
 
   self.pingText:SetFont(xb:GetFont(db.text.fontSize))
   if db.modules.system.showWorld then
-	self.worldPingText:SetFont(xb:GetFont(db.text.fontSize))
+	  self.worldPingText:SetFont(xb:GetFont(db.text.fontSize))
   end
-  self.fpsText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-  self.pingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+
+  self.fpsText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self.pingText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
   if db.modules.system.showWorld then
-	self.worldPingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+	  self.worldPingText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
   end
+
   if self.fpsFrame:IsMouseOver() then
     self.fpsText:SetTextColor(unpack(xb:HoverColors()))
   end
+
   if self.pingFrame:IsMouseOver() then
     self.pingText:SetTextColor(unpack(xb:HoverColors()))
-	if db.modules.system.showWorld then
-		self.worldPingText:SetTextColor(unpack(xb:HoverColors()))
+	  if db.modules.system.showWorld then
+      self.worldPingText:SetTextColor(unpack(xb:HoverColors()))
+    end
 	end
-  end
 
   if db.modules.system.showWorld then
-	self.worldPingText:SetText('000'..MILLISECONDS_ABBR)
-  else
-	if self.worldPing then
+	  self.worldPingText:SetText('000'..MILLISECONDS_ABBR)
+  elseif self.worldPing then
 		self.worldPingText:SetText('')
-	end
   end
+  
   self.pingText:SetText('000'..MILLISECONDS_ABBR) -- get the widest we can be
 
   local pingWidest = self.pingText:GetStringWidth() + 5
@@ -108,13 +110,13 @@ function SystemModule:Refresh()
   local xOffset = db.general.moduleSpacing
   local parentFrame = xb:GetFrame('goldFrame');
   if not xb.db.profile.modules.gold.enabled then
-	if xb.db.profile.modules.travel.enabled then
-	  parentFrame = xb:GetFrame('travelFrame');
-	else
-	  relativeAnchorPoint = 'RIGHT'
-	  xOffset = 0
-	  parentFrame = self.systemFrame:GetParent();
-	end
+	  if xb.db.profile.modules.travel.enabled then
+	    parentFrame = xb:GetFrame('travelFrame');
+	  else
+	    relativeAnchorPoint = 'RIGHT'
+	    xOffset = 0
+	    parentFrame = self.systemFrame:GetParent();
+	  end
   end
   self.systemFrame:SetPoint('RIGHT', parentFrame, relativeAnchorPoint, -(xOffset), 0)
 end
@@ -153,80 +155,27 @@ function SystemModule:HoverFunction()
 		self.worldPingText:SetTextColor(unpack(xb:HoverColors()))
 	end
   end
-  if xb.db.profile.modules.system.showTooltip and not self.fpsFrame:IsMouseOver() then
+  if xb.db.profile.modules.system.showTooltip then
     self:ShowTooltip()
   end
 end
 
 function SystemModule:LeaveFunction()
-  if InCombatLockdown() then return; end
+  if InCombatLockdown() then return end
   local db = xb.db.profile
-  self.fpsText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-  self.pingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  self.fpsText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self.pingText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
   if xb.db.profile.modules.system.showWorld then
-	self.worldPingText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+	self.worldPingText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
   end
   if xb.db.profile.modules.system.showTooltip then
     GameTooltip:Hide()
   end
 end
 
-function SystemModule:RegisterFrameEvents()
-
-  self.fpsFrame:EnableMouse(true)
-  self.fpsFrame:RegisterForClicks("AnyUp")
-
-  self.pingFrame:EnableMouse(true)
-  self.pingFrame:RegisterForClicks("AnyUp")
-
-  self.fpsFrame:SetScript('OnEnter', function()
-    self:HoverFunction()
-  end)
-  self.fpsFrame:SetScript('OnLeave', function()
-    self:LeaveFunction()
-  end)
-
-  self.pingFrame:SetScript('OnEnter', function()
-    self:HoverFunction()
-  end)
-  self.pingFrame:SetScript('OnLeave', function()
-    self:LeaveFunction()
-  end)
-
-  --[[self.fpsFrame:SetScript('OnKeyDown', function()
-    if IsShiftKeyDown() and self.fpsFrame:IsMouseOver() then
-      if xb.db.profile.modules.system.showTooltip then
-        self:ShowTooltip()
-      end
-    end
-  end)
-
-  self.pingFrame:SetScript('OnKeyDown', function()
-    if IsShiftKeyDown() and self.pingFrame:IsMouseOver() then
-      if xb.db.profile.modules.system.showTooltip then
-        self:ShowTooltip()
-      end
-    end
-  end)
-
-  self.fpsFrame:SetScript('OnKeyUp', function()
-    if self.fpsFrame:IsMouseOver() then
-      if xb.db.profile.modules.system.showTooltip then
-        self:ShowTooltip()
-      end
-    end
-  end)
-
-  self.pingFrame:SetScript('OnKeyUp', function()
-    if self.pingFrame:IsMouseOver() then
-      if xb.db.profile.modules.system.showTooltip then
-        self:ShowTooltip()
-      end
-    end
-  end)]]--
-
-  self.fpsFrame:SetScript('OnClick', function(_, button)
-    if InCombatLockdown() then return; end
+function SystemModule:SetOnClickScript(prefix)
+  self[prefix..'Frame']:SetScript('OnClick', function(_, button)
+    if InCombatLockdown() then return end
     if button == 'LeftButton' then
       UpdateAddOnMemoryUsage()
       local before = collectgarbage('count')
@@ -242,13 +191,33 @@ function SystemModule:RegisterFrameEvents()
       print("|cff6699FFXIV_Databar|r: "..L['Cleaned']..": |cffffff00"..memString)
     end
   end)
+end
 
-  self.pingFrame:SetScript('OnClick', function(_, button)
-    if InCombatLockdown() then return; end
-    if button == 'LeftButton' then
-      collectgarbage()
-    end
+function SystemModule:RegisterFrameEvents()
+  self.fpsFrame:EnableMouse(true)
+  self.fpsFrame:RegisterForClicks("AnyUp")
+
+  self.pingFrame:EnableMouse(true)
+  self.pingFrame:RegisterForClicks("AnyUp")
+
+  self.fpsFrame:SetScript('OnEnter', function()
+    self:HoverFunction()
   end)
+
+  self.fpsFrame:SetScript('OnLeave', function()
+    self:LeaveFunction()
+  end)
+
+  self.pingFrame:SetScript('OnEnter', function()
+    self:HoverFunction()
+  end)
+
+  self.pingFrame:SetScript('OnLeave', function()
+    self:LeaveFunction()
+  end)
+
+  self:SetOnClickScript('fps')
+  self:SetOnClickScript('ping')
 
   self.fpsFrame:SetScript('OnUpdate', function(self, elapsed)
     SystemModule.elapsed = SystemModule.elapsed + elapsed
@@ -294,7 +263,9 @@ function SystemModule:ShowTooltip()
 
   GameTooltip:SetOwner(self.systemFrame, 'ANCHOR_'..xb.miniTextPosition)
   GameTooltip:ClearLines()
-  GameTooltip:AddLine("[|cff6699FF"..L['Memory Usage'].."|r]")
+  local r, g, b, _ = unpack(xb:HoverColors())
+  GameTooltip:AddLine("|cFFFFFFFF[|r"..L['Memory Usage'].."|cFFFFFFFF]|r", r, g, b)
+  GameTooltip:AddLine(" ")
 
   local toLoop = xb.db.profile.modules.system.addonsToShow
   if IsShiftKeyDown() and xb.db.profile.modules.system.showAllOnShift then
@@ -310,13 +281,13 @@ function SystemModule:ShowTooltip()
         else
           memString = string.format("%.0f KB", floor(memTable[i].memory))
         end
-        GameTooltip:AddDoubleLine(memTable[i].name, memString, 1, 1, 0, 1, 1, 1)
+        GameTooltip:AddDoubleLine(memTable[i].name, memString, r, g, b, 1, 1, 1)
       end
     end
   end
 
   GameTooltip:AddLine(" ")
-  GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Garbage Collect'], 1, 1, 0, 1, 1, 1)
+  GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Garbage Collect'], r, g, b, 1, 1, 1)
   GameTooltip:Show()
 end
 

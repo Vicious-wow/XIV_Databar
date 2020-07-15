@@ -414,6 +414,7 @@ function MenuModule:UpdateFriendText()
   local friendsOnline = C_FriendList.GetNumOnlineFriends()
   local totalFriends = bnOnlineMembers + friendsOnline
   self.text.social:SetText(totalFriends)
+  self.text.social:SetPoint('TOP', 1, 3)
   self.bgTexture.social:SetPoint('CENTER', self.text.social)
 end
 
@@ -466,9 +467,11 @@ function MenuModule:SocialHover(hoverFunc)
     local totalOnlineFriends = C_FriendList.GetNumOnlineFriends()
     local charNameFormat
     local playerFaction, _ = UnitFactionGroup("player")
+    local r, g, b, _ = unpack(xb:HoverColors())
     if (totalOnlineFriends + totalBNOnlineFriends) > 0 then
       tooltip:SmartAnchorTo(MenuModule.frames.social)
-      tooltip:AddHeader('[|cff6699FF'..SOCIAL_LABEL..'|r]')
+      tooltip:AddHeader('|cFFFFFFFF[|r'..SOCIAL_LABEL..'|cFFFFFFFF]|r')
+      tooltip:SetCellTextColor(1, 1, r, g, b, 1)
       tooltip:AddLine(' ',' ')
     end
 
@@ -535,8 +538,8 @@ function MenuModule:SocialHover(hoverFunc)
               lineRight = string.format("%s %s |T%s:16|t", charNameFormat, gameName, socialIcon)
             end
             tooltip:AddLine(lineLeft, lineRight)
-      		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true;end)
-      		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false; end)
+      		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true end)
+      		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false end)
       		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
   		        if button == "LeftButton" then
   				      if modifierFunc() then
@@ -584,8 +587,8 @@ function MenuModule:SocialHover(hoverFunc)
           local lineLeft = string.format("|T%s:16|t %s, "..LEVEL..":%s %s", statusIcon, name, level, class)
           local lineRight = string.format("%s", area)
           tooltip:AddLine(lineLeft, lineRight)
-		      tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true;end)
-		      tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false; end)
+		      tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true end)
+		      tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false end)
 		      tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
 		        if not name:find('%u%U*-%u%U') then
 				      local homeRealm = GetRealmName()
@@ -605,9 +608,12 @@ function MenuModule:SocialHover(hoverFunc)
     end -- totalOnlineFriends
 
 	tooltip:AddLine(' ',' ')
-    tooltip:AddLine('|cffffff00<'..L['Left-Click']..'>|r', '|cffffffff'..L['Whisper BNet']..'|r')
-    tooltip:AddLine('|cffffff00<'..self.modifier..'+'..L['Left-Click']..'>|r', '|cffffffff'..CALENDAR_INVITELIST_INVITETORAID..'|r')
-    tooltip:AddLine('|cffffff00<'..L['Right-Click']..'>|r', '|cffffffff'..L['Whisper Character']..'|r')
+    tooltip:AddLine('<'..L['Left-Click']..'>', L['Whisper BNet'])
+    tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
+    tooltip:AddLine('<'..self.modifier..'+'..L['Left-Click']..'>', CALENDAR_INVITELIST_INVITETORAID)
+    tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
+    tooltip:AddLine('<'..L['Right-Click']..'>', L['Whisper Character'])
+    tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
     if (totalOnlineFriends + totalBNOnlineFriends) > 0 then
       tooltip:Show()
     end

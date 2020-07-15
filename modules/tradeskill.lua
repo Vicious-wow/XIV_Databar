@@ -156,7 +156,7 @@ function TradeskillModule:StyleTradeskillFrame(prefix)
   self[prefix..'Icon']:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
 
   self[prefix..'Text']:SetFont(xb:GetFont(textHeight))
-  self[prefix..'Text']:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  self[prefix..'Text']:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
   self[prefix..'Text']:SetText(string.upper(self[prefix].name))
 
   if self[prefix].lvl == self[prefix].maxLvl then
@@ -215,7 +215,7 @@ function TradeskillModule:SetProfScripts(prefix)
   self[prefix..'Frame']:SetScript('OnLeave', function()
     if InCombatLockdown() then return; end
     local db = xb.db.profile
-    self[prefix..'Text']:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    self[prefix..'Text']:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
     if xb.db.profile.modules.tradeskill.showTooltip then
       GameTooltip:Hide()
     end

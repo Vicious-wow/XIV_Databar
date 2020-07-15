@@ -106,23 +106,24 @@ function TravelModule:RegisterFrameEvents()
 
     GameTooltip:SetOwner(self.portButton, 'ANCHOR_'..xb.miniTextPosition)
     GameTooltip:ClearLines()
-    GameTooltip:AddLine("[|cff6699FF"..L['Travel Cooldowns'].."|r]")
+    local r, g, b, _ = unpack(xb:HoverColors())
+    GameTooltip:AddLine("|cFFFFFFFF[|r"..L['Travel Cooldowns'].."|cFFFFFFFF]|r", r, g, b)
     for i, v in pairs(self.portOptions) do
       if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
         if IsUsableItem(v.portId) then
           local _, cd, _ = GetItemCooldown(v.portId)
           local cdString = self:FormatCooldown(cd)
-          GameTooltip:AddDoubleLine(v.text, cdString, 1, 1, 0, 1, 1, 1)
+          GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
         end
         if IsPlayerSpell(v.portId) then
           local _, cd, _ = GetSpellCooldown(v.portId)
           local cdString = self:FormatCooldown(cd)
-          GameTooltip:AddDoubleLine(v.text, cdString, 1, 1, 0, 1, 1, 1)
+          GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
         end
       end
     end
     GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Change Port Option'], 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Change Port Option'], r, g, b, 1, 1, 1)
     GameTooltip:Show()
   end)
 
@@ -200,9 +201,9 @@ function TravelModule:SetHearthColor()
   if self.hearthButton:IsMouseOver() then
     self.hearthText:SetTextColor(unpack(xb:HoverColors()))
   else
-    self.hearthIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    self.hearthIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
     local hearthName = ''
-    local hearthActive = false
+    local hearthActive = true
     for i,v in ipairs(self.hearthstones) do
       if (PlayerHasToy(v) or IsUsableItem(v)) then
         if GetItemCooldown(v) == 0 then
@@ -222,10 +223,12 @@ function TravelModule:SetHearthColor()
         end
       end -- if is spell
     end -- for hearthstones
-    if hearthActive then
-      self.hearthIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    if not hearthActive then
+      self.hearthIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+      self.hearthText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    else
+      self.hearthText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
     end
-    self.hearthText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
   end --else
 end
 
@@ -270,12 +273,13 @@ function TravelModule:SetPortColor()
       end
     end -- if is spell
 
-    if hearthActive then
-      self.portIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
-    else
+    if not hearthActive then
       self.portIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+      self.portText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    else
+      self.portIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+      self.portText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
     end
-    self.portText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
   end --else
 end
 
@@ -300,7 +304,7 @@ function TravelModule:CreatePortPopup()
         local buttonText = button:CreateFontString(nil, 'OVERLAY')
 
         buttonText:SetFont(xb:GetFont(db.text.fontSize))
-        buttonText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+        buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
         buttonText:SetText(v.text)
         buttonText:SetPoint('LEFT')
         local textWidth = buttonText:GetStringWidth()
@@ -318,7 +322,7 @@ function TravelModule:CreatePortPopup()
         end)
 
         button:SetScript('OnLeave', function()
-          buttonText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+          buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
         end)
 
         button:SetScript('OnClick', function(self)

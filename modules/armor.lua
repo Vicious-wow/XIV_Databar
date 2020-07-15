@@ -55,13 +55,16 @@ function ArmorModule:RegisterFrameEvents()
   self.armorButton:SetScript('OnEnter', function()
 	if not InCombatLockdown() then
 		ArmorModule:SetArmorColor()
-		GameTooltip:SetOwner(ArmorModule.armorFrame, 'ANCHOR_'..xb.miniTextPosition)
-		GameTooltip:AddLine("[|cff6699FF"..AUCTION_CATEGORY_ARMOR.."|r]")
+    GameTooltip:SetOwner(ArmorModule.armorFrame, 'ANCHOR_'..xb.miniTextPosition)
+    local r, g, b, _ = unpack(xb:HoverColors())
+		GameTooltip:AddLine("|cFFFFFFFF[|r"..AUCTION_CATEGORY_ARMOR.."|cFFFFFFFF]|r", r, g, b)
 		GameTooltip:AddLine(" ")
 		for i,v in pairs(ArmorModule.durabilityList) do
 		  if v.max ~= nil and v.max > 0 then
-			local perc = floor((v.cur / v.max)  * 100)
-			GameTooltip:AddDoubleLine(v.text, string.format('%d/%d (%d%%)', v.cur, v.max, perc), 1, 1, 0, 1, 1, 1)
+      local perc = floor((v.cur / v.max)  * 100)
+      local u20G, u20B = 1, 1
+      if perc <= 20 then u20G, u20B = 0, 0 end
+			GameTooltip:AddDoubleLine(v.text, string.format('%d/%d (%d%%)', v.cur, v.max, perc), r, g, b, 1, u20G, u20B)
 		  end
 		end
 		GameTooltip:Show()
@@ -101,11 +104,11 @@ function ArmorModule:SetArmorColor()
   if self.armorButton:IsMouseOver() then
     self.armorText:SetTextColor(unpack(xb:HoverColors()))
   else
-    self.armorText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    self.armorText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
     if self.durabilityAverage >= db.modules.armor.durabilityMin then
-      self.armorIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    else
       self.armorIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    else
+      self.armorIcon:SetVertexColor(1, 0, 0, 1)
     end
   end
 end
@@ -169,7 +172,7 @@ function ArmorModule:UpdateDurabilityText()
   self.durabilityAverage = floor((total / maxTotal) * 100)
 
   if self.durabilityAverage <= db.durabilityMax then
-    text = text..self.durabilityAverage..'%'
+    text = '|cFFFF0000'..text..self.durabilityAverage..'%|r'
   end
 
   if (self.durabilityAverage > db.durabilityMax) or db.alwaysShowIlvl then

@@ -134,7 +134,8 @@ function ClockModule:RegisterFrameEvents()
     if InCombatLockdown() then return; end
     ClockModule:SetClockColor()
     GameTooltip:SetOwner(ClockModule.clockTextFrame, 'ANCHOR_'..xb.miniTextPosition)
-    GameTooltip:AddLine("[|cff6699FF"..TIMEMANAGER_TITLE.."|r]")
+    local r, g, b, _ = unpack(xb:HoverColors())
+    GameTooltip:AddLine("|cFFFFFFFF[|r"..TIMEMANAGER_TITLE.."|cFFFFFFFF]|r", r, g, b)
     GameTooltip:AddLine(" ")
     local clockTime = nil
     if xb.db.profile.modules.clock.serverTime then
@@ -145,11 +146,11 @@ function ClockModule:RegisterFrameEvents()
 
     local realmTime = GetServerTimeString(xb.db.profile.modules.clock.timeFormat)
 
-    GameTooltip:AddDoubleLine(L['Local Time'], date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime), 1, 1, 0, 1, 1, 1)
-    GameTooltip:AddDoubleLine(L['Realm Time'], realmTime, 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine(L['Local Time'], date(ClockModule.timeFormats[xb.db.profile.modules.clock.timeFormat], clockTime), r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine(L['Realm Time'], realmTime, r, g, b, 1, 1, 1)
     GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Open Calendar'], 1, 1, 0, 1, 1, 1)
-    GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Open Clock'], 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Open Calendar'], r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Open Clock'], r, g, b, 1, 1, 1)
     GameTooltip:Show()
   end)
 

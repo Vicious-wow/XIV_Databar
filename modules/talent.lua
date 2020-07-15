@@ -112,7 +112,7 @@ function TalentModule:Refresh()
   self.specIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
 
   self.specText:SetFont(xb:GetFont(textHeight))
-  self.specText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  self.specText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
   self.specText:SetText(string.upper(name or ""))
 
   if artifactId > 0 then
@@ -238,7 +238,7 @@ function TalentModule:RegisterFrameEvents()
   self.specFrame:SetScript('OnLeave', function()
     if InCombatLockdown() then return; end
     local db = xb.db.profile
-    self.specText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    self.specText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
     if xb.db.profile.modules.tradeskill.showTooltip then
       if self.LTip:IsAcquired("TalentTooltip") then
 		self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
@@ -306,7 +306,8 @@ function TalentModule:CreateSpecPopup()
   local iconSize = db.text.fontSize + db.general.barPadding
   self.specOptionString = self.specOptionString or self.specPopup:CreateFontString(nil, 'OVERLAY')
   self.specOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
-  self.specOptionString:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  local r, g, b, _ = unpack(xb:HoverColors())
+  self.specOptionString:SetTextColor(r, g, b, 1)
   self.specOptionString:SetText(L['Set Specialization'])
   self.specOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
   self.specOptionString:SetPoint('CENTER')
@@ -329,7 +330,7 @@ function TalentModule:CreateSpecPopup()
       buttonIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
 
       buttonText:SetFont(xb:GetFont(db.text.fontSize))
-      buttonText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+      buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
       buttonText:SetText(name)
       buttonText:SetPoint('LEFT', buttonIcon, 'RIGHT', 5, 0)
       local textWidth = iconSize + 5 + buttonText:GetStringWidth()
@@ -342,11 +343,11 @@ function TalentModule:CreateSpecPopup()
       button:RegisterForClicks('AnyUp')
 
       button:SetScript('OnEnter', function()
-        buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+        buttonText:SetTextColor(r, g, b, 1)
       end)
 
       button:SetScript('OnLeave', function()
-        buttonText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+        buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
       end)
 
       button:SetScript('OnClick', function(self, button)
@@ -408,7 +409,8 @@ function TalentModule:CreateLootSpecPopup()
   local iconSize = db.text.fontSize + db.general.barPadding
   self.lootSpecOptionString = self.lootSpecOptionString or self.lootSpecPopup:CreateFontString(nil, 'OVERLAY')
   self.lootSpecOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
-  self.lootSpecOptionString:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  local r, g, b, _ = unpack(xb:HoverColors())
+  self.lootSpecOptionString:SetTextColor(r, g, b, 1)
   self.lootSpecOptionString:SetText(L['Set Loot Specialization'])
   self.lootSpecOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
   self.lootSpecOptionString:SetPoint('CENTER')
@@ -437,7 +439,7 @@ function TalentModule:CreateLootSpecPopup()
       buttonIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
 
       buttonText:SetFont(xb:GetFont(db.text.fontSize))
-      buttonText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+      buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
       buttonText:SetText(name)
       buttonText:SetPoint('LEFT', buttonIcon, 'RIGHT', 5, 0)
       local textWidth = iconSize + 5 + buttonText:GetStringWidth()
@@ -452,11 +454,11 @@ function TalentModule:CreateLootSpecPopup()
       button:RegisterForClicks('AnyUp')
 
       button:SetScript('OnEnter', function()
-        buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+        buttonText:SetTextColor(r, g, b, 1)
       end)
 
       button:SetScript('OnLeave', function()
-        buttonText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+        buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
       end)
 
       button:SetScript('OnClick', function(self, button)
@@ -520,11 +522,13 @@ end
 
 function TalentModule:ShowTooltip()
   if self.LTip:IsAcquired("TalentTooltip") then
-	self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
+	  self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
   end
   local tooltip = self.LTip:Acquire("TalentTooltip",2,"LEFT","RIGHT")
   tooltip:SmartAnchorTo(self.talentFrame)
-  tooltip:AddHeader("[|cff6699FF"..SPECIALIZATION.."|r]")
+  local r, g, b, _ = unpack(xb:HoverColors())
+  tooltip:AddHeader("|cFFFFFFFF[|r"..SPECIALIZATION.."|cFFFFFFFF]|r")
+  tooltip:SetCellTextColor(1, 1, r, g, b, 1)
   tooltip:AddLine(" ")
 
   local name = ''
@@ -533,29 +537,33 @@ function TalentModule:ShowTooltip()
   else
     _, name, _ = GetSpecializationInfoByID(self.currentLootSpecID)
   end
-  tooltip:AddLine("|cFFFFFF00"..L['Current Loot Specialization'].."|r", "|cFFFFFFFF"..name.."|r")
+  tooltip:AddLine(L['Current Loot Specialization'], "|cFFFFFFFF"..name.."|r")
+  tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
 
-  if self.curArtifactId > 0 then
+  --rip legion, cya artifact stuff
+  --[[if self.curArtifactId > 0 then
     tooltip:AddLine(" ")
     local _, artifactData = self.LAD:GetArtifactInfo(self.curArtifactId)
-   --[[ local knowLevel, knowMult = self.LAD:GetArtifactKnowledge()
+    local knowLevel, knowMult = self.LAD:GetArtifactKnowledge()
     if knowLevel and knowLevel > 0 then
       tooltip:AddLine("|cFFFFFF00"..L['Artifact Knowledge']..':|r', "|cFFFFFFFF"..string.format('%d (x%d)', knowLevel, ((knowMult) - 1 * 100)).."|r")
       tooltip:AddLine(" ")
-    end--]]
+    end
     tooltip:AddLine("|cFFFFFF00"..ARTIFACT_POWER..':|r', "|cFFFFFFFF"..string.format('%.0f / %.0f (%d%%)', artifactData.power, artifactData.maxPower == 0 and artifactData.power or artifactData.maxPower, floor((artifactData.power / (artifactData.maxPower == 0 and artifactData.power or artifactData.maxPower)) * 100)).."|r")
     tooltip:AddLine("|cFFFFFF00"..L['Remaining']..':|r', "|cFFFFFFFF"..string.format('%.0f (%d%%)', artifactData.powerForNextRank, floor((artifactData.powerForNextRank / (artifactData.maxPower == 0 and artifactData.power or artifactData.maxPower)) * 100)).."|r")
     if artifactData.numRanksPurchasable > 0 then
       tooltip:AddLine("|cFFFFFF00"..L['Available Ranks']..':|r', "|cFFFFFFFF"..string.format('%d', artifactData.numRanksPurchasable).."|r")
     end
-  end
+  end]]--
 
   tooltip:AddLine(" ")
-  tooltip:AddLine('|cFFFFFF00<'..L['Left-Click']..'>|r', "|cFFFFFFFF"..L['Set Specialization'].."|r")
-  tooltip:AddLine('|cFFFFFF00<'..SHIFT_KEY_TEXT.."+"..L['Left-Click']..'>|r', "|cFFFFFFFF"..L['Set Loot Specialization'].."|r")
-  if self.curArtifactId > 0 then
+  tooltip:AddLine('<'..L['Left-Click']..'>', "|cFFFFFFFF"..L['Set Specialization'].."|r")
+  tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
+  tooltip:AddLine('<'..SHIFT_KEY_TEXT.."+"..L['Left-Click']..'>', "|cFFFFFFFF"..L['Set Loot Specialization'].."|r")
+  tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
+  --[[if self.curArtifactId > 0 then
 	tooltip:AddLine('|cFFFFFF00<'..L['Right-Click']..'>|r', "|cFFFFFFFF"..L['Open Artifact'].."|r")
-  end
+  end]]--
   self:SkinFrame(tooltip,"TalentTooltip")
   tooltip:Show()
 end

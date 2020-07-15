@@ -139,7 +139,7 @@ function GoldModule:Refresh()
   self.goldIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
 
   self.goldText:SetFont(xb:GetFont(db.text.fontSize))
-  self.goldText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+  self.goldText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
   self.goldText:SetText(self:FormatCoinText(GetMoney()))
   self.goldText:SetPoint('LEFT', self.goldIcon, 'RIGHT', 5, 0)
 
@@ -150,7 +150,7 @@ function GoldModule:Refresh()
       freeSpace = freeSpace + GetContainerNumFreeSlots(i)
     end
     self.bagText:SetFont(xb:GetFont(db.text.fontSize))
-    self.bagText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    self.bagText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
     self.bagText:SetText('('..tostring(freeSpace)..')')
     self.bagText:SetPoint('LEFT', self.goldText, 'RIGHT', 5, 0)
     bagWidth = self.bagText:GetStringWidth()
@@ -184,7 +184,6 @@ function GoldModule:CreateFrames()
 end
 
 function GoldModule:RegisterFrameEvents()
-
   self.goldButton:EnableMouse(true)
   self.goldButton:RegisterForClicks("AnyUp")
 
@@ -197,32 +196,33 @@ function GoldModule:RegisterFrameEvents()
     self.bagText:SetTextColor(unpack(xb:HoverColors()))
 
     GameTooltip:SetOwner(GoldModule.goldFrame, 'ANCHOR_'..xb.miniTextPosition)
-    GameTooltip:AddLine("[|cff6699FF"..BONUS_ROLL_REWARD_MONEY.."|r - |cff82c5ff"..xb.constants.playerFactionLocal.." "..xb.constants.playerRealm.."|r]")
+    local r, g, b, _ = unpack(xb:HoverColors())
+    GameTooltip:AddLine("|cFFFFFFFF[|r"..BONUS_ROLL_REWARD_MONEY.."|cFFFFFFFF - |r"..xb.constants.playerFactionLocal.." "..xb.constants.playerRealm.."|cFFFFFFFF]|r", r, g, b)
     if not xb.db.profile.modules.gold.showSmallCoins then
-      GameTooltip:AddLine(L["Gold rounded values"])
+      GameTooltip:AddLine(L["Gold rounded values"], r, g, b)
     end
     GameTooltip:AddLine(" ")
 
-    GameTooltip:AddDoubleLine(L['Session Total'], moneyWithTexture(math.abs(xb.db.factionrealm[xb.constants.playerName].sessionMoney),true), 1, 1, 0, 1, 1, 1)
-    GameTooltip:AddDoubleLine(L['Daily Total'], moneyWithTexture(math.abs(xb.db.factionrealm[xb.constants.playerName].dailyMoney),true), 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine(L['Session Total'], moneyWithTexture(math.abs(xb.db.factionrealm[xb.constants.playerName].sessionMoney),true), r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine(L['Daily Total'], moneyWithTexture(math.abs(xb.db.factionrealm[xb.constants.playerName].dailyMoney),true), r, g, b, 1, 1, 1)
     GameTooltip:AddLine(" ")
 
     local totalGold = 0
     for charName, goldData in pairs(xb.db.factionrealm) do
-      GameTooltip:AddDoubleLine(charName, moneyWithTexture(goldData.currentMoney), 1, 1, 0, 1, 1, 1)
+      GameTooltip:AddDoubleLine(charName, moneyWithTexture(goldData.currentMoney), r, g, b, 1, 1, 1)
       totalGold = totalGold + goldData.currentMoney
     end
     GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine(TOTAL, GoldModule:FormatCoinText(totalGold), 1, 1, 0, 1, 1, 1)
-    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Bags'], 1, 1, 0, 1, 1, 1)
+    GameTooltip:AddDoubleLine(TOTAL, GoldModule:FormatCoinText(totalGold), r, g, b, 1, 1, 1)
+    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Bags'], r, g, b, 1, 1, 1)
     GameTooltip:Show()
   end)
 
   self.goldButton:SetScript('OnLeave', function()
     if InCombatLockdown() then return; end
     local db = xb.db.profile
-    self.goldText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    self.bagText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
+    self.goldText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    self.bagText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
     GameTooltip:Hide()
   end)
 
