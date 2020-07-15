@@ -414,7 +414,7 @@ function MenuModule:UpdateFriendText()
   local friendsOnline = C_FriendList.GetNumOnlineFriends()
   local totalFriends = bnOnlineMembers + friendsOnline
   self.text.social:SetText(totalFriends)
-  self.text.social:SetPoint('TOP', 1, 3)
+  self.text.social:SetPoint('TOP', 0, 4)
   self.bgTexture.social:SetPoint('CENTER', self.text.social)
 end
 
