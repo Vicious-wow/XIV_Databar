@@ -89,6 +89,8 @@ function GoldModule:OnInitialize()
   else
     playerData.lastLoginDate = today
   end
+
+  if not playerData.class then playerData.class = select(2, UnitClass("player")) end
 end
 
 function GoldModule:OnEnable()
@@ -199,7 +201,7 @@ function GoldModule:RegisterFrameEvents()
     local r, g, b, _ = unpack(xb:HoverColors())
     GameTooltip:AddLine("|cFFFFFFFF[|r"..BONUS_ROLL_REWARD_MONEY.."|cFFFFFFFF - |r"..xb.constants.playerFactionLocal.." "..xb.constants.playerRealm.."|cFFFFFFFF]|r", r, g, b)
     if not xb.db.profile.modules.gold.showSmallCoins then
-      GameTooltip:AddLine(L["Gold rounded values"], r, g, b)
+      GameTooltip:AddLine(L["Gold rounded values"], 1, 1, 1)
     end
     GameTooltip:AddLine(" ")
 
@@ -209,9 +211,14 @@ function GoldModule:RegisterFrameEvents()
 
     local totalGold = 0
     for charName, goldData in pairs(xb.db.factionrealm) do
-      GameTooltip:AddDoubleLine(charName, moneyWithTexture(goldData.currentMoney), r, g, b, 1, 1, 1)
+      local charClass = xb.db.factionrealm[charName].class
+      local cc_r = RAID_CLASS_COLORS[charClass].r
+      local cc_g = RAID_CLASS_COLORS[charClass].g
+      local cc_b = RAID_CLASS_COLORS[charClass].b
+      GameTooltip:AddDoubleLine(charName, moneyWithTexture(goldData.currentMoney), cc_r, cc_g, cc_b, 1, 1, 1)
       totalGold = totalGold + goldData.currentMoney
     end
+
     GameTooltip:AddLine(" ")
     GameTooltip:AddDoubleLine(TOTAL, GoldModule:FormatCoinText(totalGold), r, g, b, 1, 1, 1)
     GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Toggle Bags'], r, g, b, 1, 1, 1)
