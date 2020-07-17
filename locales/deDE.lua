@@ -24,6 +24,7 @@ L['Hide Bar in combat'] = "Verstecke die Leiste im Kampf";
 L['Bar Padding'] = "Leistenabstand";
 L['Module Spacing'] = "Abstand zwischen Modulen";
 L['Hide order hall bar'] = "Verstecke Klassenhallenleiste";
+L['Use ElvUI for tooltips'] = "Verwenden Sie ElvUI für QuickInfos";
 
 -- Positioning Options
 L['Positioning Options'] = "Positions-Optionen";

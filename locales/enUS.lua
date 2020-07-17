@@ -24,6 +24,7 @@ L['Hide Bar in combat'] = true;
 L['Bar Padding'] = true;
 L['Module Spacing'] = true;
 L['Hide order hall bar'] = true;
+L['Use ElvUI for tooltips'] = true;
 
 -- Positioning Options
 L['Positioning Options'] = true;

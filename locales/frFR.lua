@@ -24,6 +24,7 @@ L['Hide Bar in combat'] = "Cacher la barre en combat";
 L['Bar Padding'] = "Décalage de la barre";
 L['Module Spacing'] = "Espacement des modules";
 L['Hide order hall bar'] = "Cacher la barre du hall de classe";
+L['Use ElvUI for tooltips'] = "Utiliser ElvUI pour les info-bulles";
 
 -- Positioning Options
 L['Positioning Options'] = "Options de positionnement";

@@ -24,6 +24,7 @@ L['Hide Bar in combat'] = "战斗中隐藏";
 L['Bar Padding'] = "条填充";
 L['Module Spacing'] = "模块间距";
 L['Hide order hall bar'] = "隐藏职业大厅条";
+L['Use ElvUI for tooltips'] = "使用ElvUI作為工具提示";
 
 -- Positioning Options
 L['Positioning Options'] = "位置选项";

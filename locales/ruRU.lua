@@ -24,6 +24,7 @@ L['Hide Bar in combat'] = "Прятать полосу во время боя";
 L['Bar Padding'] = "Заполнение";
 L['Module Spacing'] = "Расстояние между модулями";
 L['Hide order hall bar'] = "Прятать полосу оплота класса";
+L['Use ElvUI for tooltips'] = "Используйте ElvUI для подсказок";
 
 -- Positioning Options
 L['Positioning Options'] = "Настройки позиционированя";
