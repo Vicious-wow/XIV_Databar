@@ -381,10 +381,6 @@ function OffsetUI()
     if (not ticketStatusFrameShown and not gmChatStatusFrameShown) then
         buffsAreaTopOffset = buffsAreaTopOffset + 13;
     end
-
-	--[[if(not IsAddOnLoaded("ElvUI") and not MinimapCluster:IsUserPlaced() and MinimapCluster:GetTop()-UIParent:GetHeight() < 1) then
-		MinimapCluster:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0 - buffsAreaTopOffset);
-	end]]--
 		
     BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -205, 0 - buffsAreaTopOffset);
 end
@@ -394,9 +390,6 @@ function XIVBar:ResetUI()
 		UIParent_UpdateTopFramePositions = topOffsetBlizz
 	end
 	UIParent_UpdateTopFramePositions();
-	--[[if not MinimapCluster:IsUserPlaced() then
-		MinimapCluster:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0);
-	end]]--
 end
 
 function XIVBar:GetGeneralOptions()
@@ -552,12 +545,6 @@ function XIVBar:GetGeneralOptions()
 end
 
 function XIVBar:GetTextOptions()
-	-- Don't know if this still needed, so i keep it commendet out.
-    local t = self.LSM:List(self.LSM.MediaType.FONT);
-    local fontList = {};
-    for k,v in pairs(t) do
-        fontList[v] = v;
-    end
     return {
         name = LOCALE_TEXT_LABEL,
         type = "group",
@@ -569,7 +556,7 @@ function XIVBar:GetTextOptions()
                 type = "select",
 				dialogControl = 'LSM30_Font',
                 order = 1,
-				values = AceGUIWidgetLSMlists and AceGUIWidgetLSMlists.font or fontList,
+				values = AceGUIWidgetLSMlists.font,
                 style = "dropdown",
                 get = function() return self.db.profile.text.font; end,
                 set = function(info, val) self.db.profile.text.font = val; self:Refresh(); end
