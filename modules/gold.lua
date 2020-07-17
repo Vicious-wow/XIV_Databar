@@ -197,7 +197,7 @@ function GoldModule:RegisterFrameEvents()
     self.goldText:SetTextColor(unpack(xb:HoverColors()))
     self.bagText:SetTextColor(unpack(xb:HoverColors()))
 
-    GameTooltip:SetOwner(GoldModule.goldFrame, 'ANCHOR_'..xb.miniTextPosition)
+    GameTooltip:SetOwner(GoldModule.goldFrame, 'ANCHOR_'..xb.miniTextPosition, 0, 6)
     local r, g, b, _ = unpack(xb:HoverColors())
     GameTooltip:AddLine("|cFFFFFFFF[|r"..BONUS_ROLL_REWARD_MONEY.."|cFFFFFFFF - |r"..xb.constants.playerFactionLocal.." "..xb.constants.playerRealm.."|cFFFFFFFF]|r", r, g, b)
     if not xb.db.profile.modules.gold.showSmallCoins then
@@ -212,9 +212,12 @@ function GoldModule:RegisterFrameEvents()
     local totalGold = 0
     for charName, goldData in pairs(xb.db.factionrealm) do
       local charClass = xb.db.factionrealm[charName].class
-      local cc_r = RAID_CLASS_COLORS[charClass].r
-      local cc_g = RAID_CLASS_COLORS[charClass].g
-      local cc_b = RAID_CLASS_COLORS[charClass].b
+      local cc_r, cc_g, cc_b = 1, 1, 1
+      if charClass then
+        cc_r = RAID_CLASS_COLORS[charClass].r
+        cc_g = RAID_CLASS_COLORS[charClass].g
+        cc_b = RAID_CLASS_COLORS[charClass].b
+      end
       GameTooltip:AddDoubleLine(charName, moneyWithTexture(goldData.currentMoney), cc_r, cc_g, cc_b, 1, 1, 1)
       totalGold = totalGold + goldData.currentMoney
     end

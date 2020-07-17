@@ -133,7 +133,8 @@ function ClockModule:RegisterFrameEvents()
   self.clockTextFrame:SetScript('OnEnter', function()
     if InCombatLockdown() then return; end
     ClockModule:SetClockColor()
-    GameTooltip:SetOwner(ClockModule.clockTextFrame, 'ANCHOR_'..xb.miniTextPosition)
+    GameTooltip:SetOwner(ClockModule.clockTextFrame, 'ANCHOR_'..xb.miniTextPosition, 0, 3)
+    --GameTooltip:SetPoint(xb.db.profile.general.barPosition, self.clockTextFrame, xb.miniTextPosition, 0, 1)
     local r, g, b, _ = unpack(xb:HoverColors())
     GameTooltip:AddLine("|cFFFFFFFF[|r"..TIMEMANAGER_TITLE.."|cFFFFFFFF]|r", r, g, b)
     GameTooltip:AddLine(" ")
@@ -252,7 +253,7 @@ function ClockModule:GetConfig()
         type = 'range',
         order = 4,
         min = 10,
-        max = 20,
+        max = 40,
         step = 1,
         get = function() return xb.db.profile.modules.clock.fontSize; end,
         set = function(info, val) xb.db.profile.modules.clock.fontSize = val; self:Refresh(); end
