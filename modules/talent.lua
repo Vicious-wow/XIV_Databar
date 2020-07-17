@@ -10,8 +10,10 @@ function TalentModule:GetName()
 end
 
 -- Skin Support for ElvUI/TukUI
+-- Make sure to disable "Tooltip" in the Skins section of ElvUI together with 
+-- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
 function TalentModule:SkinFrame(frame, name)
-	if IsAddOnLoaded("ElvUI") or IsAddOnLoaded("Tukui") then
+	if self.useElvUI then
 		if frame.StripTextures then
 			frame:StripTextures()
 		end
@@ -50,6 +52,7 @@ function TalentModule:OnInitialize()
   self.classIcon = xb.constants.mediaPath..'spec\\'..xb.constants.playerClass
   self.LAD = LibStub('LibArtifactData-1.0')
   self.curArtifactId = 0
+  self.useElvUI = xb.db.profile.general.useElvUI and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui'))
 end
 
 function TalentModule:OnEnable()
@@ -201,10 +204,19 @@ function TalentModule:CreateFrames()
 
   self.specPopup = self.specPopup or CreateFrame('BUTTON', "SpecPopup", self.specFrame)
   self.specPopup:SetFrameStrata("TOOLTIP")
-  self.specPopupTexture = self.specPopupTexture or self.specPopup:CreateTexture(nil, 'BACKGROUND')
   self.lootSpecPopup = self.lootSpecPopup or CreateFrame('BUTTON', "LootPopup", self.specFrame)
   self.lootSpecPopup:SetFrameStrata("TOOLTIP")
-  self.lootSpecPopupTexture = self.lootSpecPopupTexture or self.lootSpecPopup:CreateTexture(nil, 'BACKGROUND')
+
+  local backdrop = GameTooltip:GetBackdrop()
+  if backdrop and (not self.useElvUI) then
+    self.specPopup:SetBackdrop(backdrop)
+    self.specPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
+    self.specPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+    self.lootSpecPopup:SetBackdrop(backdrop)
+    self.lootSpecPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
+    self.lootSpecPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+  end
+
   self:CreateSpecPopup()
   self:CreateLootSpecPopup()
 end
@@ -227,7 +239,7 @@ function TalentModule:RegisterFrameEvents()
   self.specFrame:RegisterForClicks('AnyUp')
 
   self.specFrame:SetScript('OnEnter', function()
-    if InCombatLockdown() then return; end
+    if InCombatLockdown() then return end
     self.specText:SetTextColor(unpack(xb:HoverColors()))
     if xb.db.profile.modules.tradeskill.showTooltip then
       if ((not self.specPopup:IsVisible()) or (not self.lootSpecPopup:IsVisible())) then
@@ -235,53 +247,54 @@ function TalentModule:RegisterFrameEvents()
       end
     end
   end)
+
   self.specFrame:SetScript('OnLeave', function()
-    if InCombatLockdown() then return; end
+    if InCombatLockdown() then return end
     local db = xb.db.profile
     self.specText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
     if xb.db.profile.modules.tradeskill.showTooltip then
       if self.LTip:IsAcquired("TalentTooltip") then
-		self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
-	  end
+		    self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
+	    end
     end
   end)
+
   self.specFrame:SetScript('OnClick', function(_, button)
     if self.LTip:IsAcquired("TalentTooltip") then
-	  self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
+	    self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
     end
     if button == 'LeftButton' then
       if not InCombatLockdown() then
-		if IsShiftKeyDown() then
-			if self.lootSpecPopup:IsVisible() then
-			  self.lootSpecPopup:Hide()
-			  if xb.db.profile.modules.tradeskill.showTooltip then
-				self:ShowTooltip()
-			  end
-			else
-			  self.specPopup:Hide()
-			  self:CreateLootSpecPopup()
-			  self.lootSpecPopup:Show()
-			end
-		else
-			if self.specPopup:IsVisible() then
-			  self.specPopup:Hide()
-			  if xb.db.profile.modules.tradeskill.showTooltip then
-				self:ShowTooltip()
-			  end
-			else
-			  self.lootSpecPopup:Hide()
-			  self:CreateSpecPopup()
-			  self.specPopup:Show()
-			end
-		end
+		    if IsShiftKeyDown() then
+			    if self.lootSpecPopup:IsVisible() then
+			      self.lootSpecPopup:Hide()
+			      if xb.db.profile.modules.tradeskill.showTooltip then
+				      self:ShowTooltip()
+			      end
+			    else
+			      self.specPopup:Hide()
+			      self:CreateLootSpecPopup()
+			      self.lootSpecPopup:Show()
+			    end
+		    else
+			    if self.specPopup:IsVisible() then
+			      self.specPopup:Hide()
+			      if xb.db.profile.modules.tradeskill.showTooltip then
+				      self:ShowTooltip()
+			      end
+			    else
+			      self.lootSpecPopup:Hide()
+			      self:CreateSpecPopup()
+			      self.specPopup:Show()
+			    end
+		    end
       end
     end
-
     if button == 'RightButton' then
       if not InCombatLockdown() then
-		if self.curArtifactId > 0 then
-			SocketInventoryItem(16)
-		end
+		    if self.curArtifactId > 0 then
+			    SocketInventoryItem(16)
+		    end
       end
     end
   end)
@@ -395,10 +408,8 @@ function TalentModule:CreateSpecPopup()
   end
 
   self.specPopup:ClearAllPoints()
-  self.specPopupTexture:ClearAllPoints()
-  self.specPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, popupPadding)
-  self.specPopupTexture:SetColorTexture(db.color.barColor.r, db.color.barColor.g, db.color.barColor.b, db.color.barColor.a)
-  self.specPopupTexture:SetAllPoints()
+  self.specPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, 0)
+  self:SkinFrame(self.specPopup, "SpecToolTip")
   self.specPopup:Hide()
 end
 
@@ -513,10 +524,8 @@ function TalentModule:CreateLootSpecPopup()
   end
 
   self.lootSpecPopup:ClearAllPoints()
-  self.lootSpecPopupTexture:ClearAllPoints()
-  self.lootSpecPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, popupPadding)
-  self.lootSpecPopupTexture:SetColorTexture(db.color.barColor.r, db.color.barColor.g, db.color.barColor.b, db.color.barColor.a)
-  self.lootSpecPopupTexture:SetAllPoints()
+  self.lootSpecPopup:SetPoint(db.general.barPosition, self.specFrame, xb.miniTextPosition, 0, 0)
+  self:SkinFrame(self.lootSpecPopup, "LootSpecToolTip")
   self.lootSpecPopup:Hide()
 end
 
@@ -564,7 +573,7 @@ function TalentModule:ShowTooltip()
   --[[if self.curArtifactId > 0 then
 	tooltip:AddLine('|cFFFFFF00<'..L['Right-Click']..'>|r', "|cFFFFFFFF"..L['Open Artifact'].."|r")
   end]]--
-  self:SkinFrame(tooltip,"TalentTooltip")
+  self:SkinFrame(tooltip, "TalentTooltip")
   tooltip:Show()
 end
 

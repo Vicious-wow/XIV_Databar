@@ -71,8 +71,10 @@ function MenuModule:OnInitialize()
 end
 
 -- Skin Support for ElvUI/TukUI
+-- Make sure to disable "Tooltip" in the Skins section of ElvUI together with 
+-- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
 function MenuModule:SkinFrame(frame, name)
-	if IsAddOnLoaded("ElvUI") or IsAddOnLoaded("Tukui") then
+	if xb.db.profile.general.useElvUI and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui')) then
 		if frame.StripTextures then
 			frame:StripTextures()
 		end
@@ -104,9 +106,9 @@ function MenuModule:OnEnable()
   self.microMenuFrame:Show()
 
   if not self.frames.menu then
-	self:CreateFrames()
-	self:RegisterFrameEvents()
-	self:CreateIcons()
+	  self:CreateFrames()
+	  self:RegisterFrameEvents()
+	  self:CreateIcons()
   end
   xb:Refresh()
 end
@@ -456,12 +458,12 @@ function MenuModule:SocialHover(hoverFunc)
 		  self.LTip:Release(self.LTip:Acquire("SocialToolTip"))
     end
     
-	  local tooltip = self.LTip:Acquire("SocialToolTip", 2, "LEFT", "RIGHT")
+    local tooltip = self.LTip:Acquire("SocialToolTip", 2, "LEFT", "RIGHT")
 	  tooltip:EnableMouse(true)
 	  tooltip:SetScript("OnEnter",function() self.tipHover=true end)
 	  tooltip:SetScript("OnLeave",function() self.tipHover=false end)
-	  tooltip:SetScript("OnUpdate",function() if not self.tipHover and not self.lineHover then tooltip:Release() end end)
-	  MenuModule:SkinFrame(tooltip, "SocialToolTip")
+    tooltip:SetScript("OnUpdate",function() if not self.tipHover and not self.lineHover then tooltip:Release() end end)
+    MenuModule:SkinFrame(tooltip, "SocialToolTip")
     local totalBNFriends, totalBNOnlineFriends, _, _ = BNGetNumFriends()
 	  local totalFriends = C_FriendList.GetNumFriends()
     local totalOnlineFriends = C_FriendList.GetNumOnlineFriends()
@@ -646,8 +648,8 @@ function MenuModule:GuildHover(hoverFunc)
 	tooltip:EnableMouse(true)
 	tooltip:SetScript("OnEnter",function() self.gtipHover=true end)
 	tooltip:SetScript("OnLeave",function() self.gtipHover=false end)
-	tooltip:SetScript("OnUpdate",function() if not self.gtipHover and not self.glineHover then tooltip:Release() end end)
-	MenuModule:SkinFrame(tooltip, "SocialToolTip")
+  tooltip:SetScript("OnUpdate",function() if not self.gtipHover and not self.glineHover then tooltip:Release() end end)
+  MenuModule:SkinFrame(tooltip, "SocialToolTip")
 
     GuildRoster()
     tooltip:SmartAnchorTo(MenuModule.frames.guild)
@@ -675,9 +677,9 @@ function MenuModule:GuildHover(hoverFunc)
         local lineLeft = string.format('%s |c%s%s|r %s %s', level, colorHex, name, status, note)
         local lineRight = string.format('%s|cffffffff %s', (isMobile and "|cffffffa0[M]|r " or ""), zone or '')
         tooltip:AddLine(lineLeft, lineRight)
-		tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.glineHover = true;end)
-		tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.glineHover = false; end)
-		tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
+		    tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.glineHover = true;end)
+		    tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.glineHover = false; end)
+		    tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
 		    if button == "LeftButton" then
 				if modifierFunc() then
 					InviteUnit(name)

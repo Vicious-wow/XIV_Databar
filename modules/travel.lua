@@ -30,11 +30,38 @@ function TravelModule:OnInitialize()
   self.optionTextExtra = 4
 end
 
+-- Skin Support for ElvUI/TukUI
+-- Make sure to disable "Tooltip" in the Skins section of ElvUI together with 
+-- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
+function TravelModule:SkinFrame(frame, name)
+	if self.useElvUI then
+		if frame.StripTextures then
+			frame:StripTextures()
+		end
+		if frame.SetTemplate then
+			frame:SetTemplate("Transparent")
+		end
+
+		local close = _G[name.."CloseButton"] or frame.CloseButton
+		if close and close.SetAlpha then
+			if ElvUI then
+				ElvUI[1]:GetModule('Skins'):HandleCloseButton(close)
+			end
+
+			if Tukui and Tukui[1] and Tukui[1].SkinCloseButton then
+				Tukui[1].SkinCloseButton(close)
+			end
+			close:SetAlpha(1)
+		end
+	end
+end
+
 function TravelModule:OnEnable()
   if self.hearthFrame == nil then
     self.hearthFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
     xb:RegisterFrame('travelFrame', self.hearthFrame)
   end
+  self.useElvUI = xb.db.profile.general.useElvUI and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui'))
   self.hearthFrame:Show()
   self:CreateFrames()
   self:RegisterFrameEvents()
@@ -58,7 +85,12 @@ function TravelModule:CreateFrames()
   self.portText = self.portText or self.portButton:CreateFontString(nil, 'OVERLAY')
 
   self.portPopup = self.portPopup or CreateFrame('BUTTON', "portPopup", self.portButton)
-  self.popupTexture = self.popupTexture or self.portPopup:CreateTexture(nil, 'BACKGROUND')
+  local backdrop = GameTooltip:GetBackdrop()
+  if backdrop and (not self.useElvUI) then
+    self.portPopup:SetBackdrop(backdrop)
+    self.portPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
+    self.portPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+  end
 end
 
 function TravelModule:RegisterFrameEvents()
@@ -80,9 +112,11 @@ function TravelModule:RegisterFrameEvents()
   self.portButton.portFunction = self.portButton.portFunction or function()
     if TravelModule.portPopup:IsVisible() then
       TravelModule.portPopup:Hide()
+      self:ShowTooltip()
     else
       TravelModule:CreatePortPopup()
       TravelModule.portPopup:Show()
+      GameTooltip:Hide()
     end
   end
 
@@ -102,29 +136,8 @@ function TravelModule:RegisterFrameEvents()
 
   self.portButton:SetScript('OnEnter', function()
     TravelModule:SetPortColor()
-    if InCombatLockdown() then return; end
-
-    GameTooltip:SetOwner(self.portButton, 'ANCHOR_'..xb.miniTextPosition)
-    GameTooltip:ClearLines()
-    local r, g, b, _ = unpack(xb:HoverColors())
-    GameTooltip:AddLine("|cFFFFFFFF[|r"..L['Travel Cooldowns'].."|cFFFFFFFF]|r", r, g, b)
-    for i, v in pairs(self.portOptions) do
-      if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
-        if IsUsableItem(v.portId) then
-          local _, cd, _ = GetItemCooldown(v.portId)
-          local cdString = self:FormatCooldown(cd)
-          GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
-        end
-        if IsPlayerSpell(v.portId) then
-          local _, cd, _ = GetSpellCooldown(v.portId)
-          local cdString = self:FormatCooldown(cd)
-          GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
-        end
-      end
-    end
-    GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine('<'..L['Left-Click']..'>', L['Change Port Option'], r, g, b, 1, 1, 1)
-    GameTooltip:Show()
+    if InCombatLockdown() then return end
+    self:ShowTooltip()
   end)
 
   self.portButton:SetScript('OnLeave', function()
@@ -247,8 +260,6 @@ function TravelModule:SetPortColor()
     end
   end
 
-
-
   if self.portButton:IsMouseOver() then
     self.portText:SetTextColor(unpack(xb:HoverColors()))
   else
@@ -289,7 +300,8 @@ function TravelModule:CreatePortPopup()
   local db = xb.db.profile
   self.portOptionString = self.portOptionString or self.portPopup:CreateFontString(nil, 'OVERLAY')
   self.portOptionString:SetFont(xb:GetFont(db.text.fontSize + self.optionTextExtra))
-  self.portOptionString:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  local r, g, b, _ = unpack(xb:HoverColors())
+  self.portOptionString:SetTextColor(r, g, b, 1)
   self.portOptionString:SetText(L['Port Options'])
   self.portOptionString:SetPoint('TOP', 0, -(xb.constants.popupPadding))
   self.portOptionString:SetPoint('CENTER')
@@ -427,11 +439,8 @@ function TravelModule:Refresh()
   end
 
   self.portPopup:ClearAllPoints()
-  self.popupTexture:ClearAllPoints()
-
-  self.portPopup:SetPoint(popupPoint, self.portButton, relPoint, 0, popupPadding)
-  self.popupTexture:SetColorTexture(db.color.barColor.r, db.color.barColor.g, db.color.barColor.b, db.color.barColor.a)
-  self.popupTexture:SetAllPoints()
+  self.portPopup:SetPoint(popupPoint, self.portButton, relPoint, 0, 0)
+  self:SkinFrame(self.portPopup, "SpecToolTip")
   self.portPopup:Hide()
 
   local totalWidth = self.hearthButton:GetWidth() + db.general.barPadding
@@ -442,6 +451,32 @@ function TravelModule:Refresh()
   self.hearthFrame:SetSize(totalWidth, xb:GetHeight())
   self.hearthFrame:SetPoint("RIGHT", -(db.general.barPadding), 0)
   self.hearthFrame:Show()
+end
+
+function TravelModule:ShowTooltip()
+  if not self.portPopup:IsVisible() then
+    GameTooltip:SetOwner(self.portButton, 'ANCHOR_'..xb.miniTextPosition)
+    GameTooltip:ClearLines()
+    local r, g, b, _ = unpack(xb:HoverColors())
+    GameTooltip:AddLine("|cFFFFFFFF[|r"..L['Travel Cooldowns'].."|cFFFFFFFF]|r", r, g, b)
+    for i, v in pairs(self.portOptions) do
+      if IsUsableItem(v.portId) or IsPlayerSpell(v.portId) then
+        if IsUsableItem(v.portId) then
+          local _, cd, _ = GetItemCooldown(v.portId)
+          local cdString = self:FormatCooldown(cd)
+          GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
+        end
+        if IsPlayerSpell(v.portId) then
+          local _, cd, _ = GetSpellCooldown(v.portId)
+          local cdString = self:FormatCooldown(cd)
+          GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
+        end
+      end
+    end
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddDoubleLine('<'..L['Right-Click']..'>', L['Change Port Option'], r, g, b, 1, 1, 1)
+    GameTooltip:Show()
+  end
 end
 
 function TravelModule:FindFirstOption()
