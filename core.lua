@@ -20,7 +20,7 @@ XIVBar.constants = {
     playerLevel = UnitLevel("player"),
     playerFactionLocal = select(2, UnitFactionGroup("player")),
     playerRealm = GetRealmName(),
-    popupPadding = 3
+    popupPadding = 10,
 }
 
 XIVBar.defaults = {
@@ -33,7 +33,8 @@ XIVBar.defaults = {
             barWidth = GetScreenWidth(),
             barHoriz = 'CENTER',
 			barCombatHide = false,
-            barFlightHide = false
+            barFlightHide = false,
+            useElvUI = true,
         },
         color = {
             barColor = {
@@ -381,9 +382,9 @@ function OffsetUI()
         buffsAreaTopOffset = buffsAreaTopOffset + 13;
     end
 
-	if(not IsAddOnLoaded("ElvUI") and not MinimapCluster:IsUserPlaced() and MinimapCluster:GetTop()-UIParent:GetHeight() < 1) then
+	--[[if(not IsAddOnLoaded("ElvUI") and not MinimapCluster:IsUserPlaced() and MinimapCluster:GetTop()-UIParent:GetHeight() < 1) then
 		MinimapCluster:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0 - buffsAreaTopOffset);
-	end
+	end]]--
 		
     BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -205, 0 - buffsAreaTopOffset);
 end
@@ -393,9 +394,9 @@ function XIVBar:ResetUI()
 		UIParent_UpdateTopFramePositions = topOffsetBlizz
 	end
 	UIParent_UpdateTopFramePositions();
-	if not MinimapCluster:IsUserPlaced() then
+	--[[if not MinimapCluster:IsUserPlaced() then
 		MinimapCluster:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", 0, 0);
-	end
+	end]]--
 end
 
 function XIVBar:GetGeneralOptions()
@@ -516,7 +517,7 @@ function XIVBar:GetGeneralOptions()
 						order = 9,
 						get = function() return self.db.profile.general.barCombatHide; end,
 						set = function(_,val) self.db.profile.general.barCombatHide = val; self:Refresh(); end
-					},
+                    },
 					barPadding = {
 						name = L['Bar Padding'],
 						type = 'range',
@@ -532,11 +533,18 @@ function XIVBar:GetGeneralOptions()
 						type = 'range',
 						order = 11,
 						min = 10,
-						max = 50,
+						max = 80,
 						step = 1,
 						get = function() return self.db.profile.general.moduleSpacing; end,
 						set = function(info, val) self.db.profile.general.moduleSpacing = val; self:Refresh(); end
-					}
+                    },
+                    useElvUI = {
+                        name = L['Use ElvUI for tooltips'],
+                        type = "toggle",
+                        order = 12,
+                        get = function() return self.db.profile.general.useElvUI; end,
+                        set = function(_, val) self.db.profile.general.useElvUI = val; self:Refresh(); end
+                    }
 				}
 			}
         }
@@ -571,7 +579,7 @@ function XIVBar:GetTextOptions()
                 type = 'range',
                 order = 2,
                 min = 10,
-                max = 20,
+                max = 40,
                 step = 1,
                 get = function() return self.db.profile.text.fontSize; end,
                 set = function(info, val) self.db.profile.text.fontSize = val; self:Refresh(); end
