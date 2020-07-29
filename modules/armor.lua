@@ -171,8 +171,10 @@ function ArmorModule:UpdateDurabilityText()
   end
   self.durabilityAverage = floor((total / maxTotal) * 100)
 
-  if self.durabilityAverage <= db.durabilityMax then
+  if self.durabilityAverage <= db.durabilityMin then
     text = '|cFFFF0000'..text..self.durabilityAverage..'%|r'
+  else
+    text = text..self.durabilityAverage..'%'
   end
 
   if (self.durabilityAverage > db.durabilityMax) or db.alwaysShowIlvl then
