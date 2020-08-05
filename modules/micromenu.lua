@@ -132,9 +132,10 @@ function MenuModule:Refresh()
     return
   end
 
-  self.modifier=self.modifiers[xb.db.profile.modules.microMenu.modifierTooltip];
+  -- get the user's designated modifier for the social and guild tooltip hover function
+  self.modifier = self.modifiers[xb.db.profile.modules.microMenu.modifierTooltip]
 
-  self.iconSize = xb:GetHeight();
+  self.iconSize = xb:GetHeight()
 
   local colors = xb.db.profile.color
   local totalWidth = 0;
@@ -385,6 +386,9 @@ function MenuModule:RegisterFrameEvents()
   self:RegisterEvent('CHAT_MSG_GUILD', function()
     self:UpdateGuildText()
   end)
+  -- going to add these 2 when i sub again and join a guild. not touching anything in case things bug
+  --self:RegisterEvent('GUILD_ROSTER_UPDATE', 'UpdateGuildText')
+  --self:RegisterEvent('CHAT_MSG_GUILD', 'UpdateGuildText')
   self:RegisterEvent('BN_FRIEND_ACCOUNT_ONLINE', 'UpdateFriendText')
   self:RegisterEvent('BN_FRIEND_ACCOUNT_OFFLINE', 'UpdateFriendText')
   self:RegisterEvent('FRIENDLIST_UPDATE', 'UpdateFriendText')
@@ -397,26 +401,63 @@ function MenuModule:UnregisterFrameEvents()
   self:UnregisterEvent('FRIENDLIST_UPDATE')
 end
 
+-- called on refresh, guild related events and profile changes to social text
 function MenuModule:UpdateGuildText()
-  if xb.db.profile.modules.microMenu.hideSocialText or not xb.db.profile.modules.microMenu.guild then return; end
-  GuildRoster()
-  if IsInGuild() then
-    local _, onlineMembers = GetNumGuildMembers()
-    self.text.guild:SetText(onlineMembers)
-    self.bgTexture.guild:SetPoint('CENTER', self.text.guild)
-  else
+  -- if player is not in a guild, hide everything related to guild text
+  if not IsInGuild() then
     self.text.guild:Hide()
     self.bgTexture.guild:Hide()
+    return
   end
+
+  -- player is in a guild, show everything related to guild text
+  self.text.guild:Show()
+  self.bgTexture.guild:Show()
+
+  local db = xb.db.profile.modules.microMenu --shortcut to access profile variables
+  if db.hideSocialText or not db.guild then return end --don't do anything if social text or the guild icon are not displayed
+  C_GuildInfo.GuildRoster() --requests an update to guild roster information from blizzbois
+
+  -- get the number of online guild members and set social text to that number
+  local _, onlineMembers = GetNumGuildMembers()
+  self.text.guild:SetText(onlineMembers)
+
+  local osTopBottom
+  -- databar is at the bottom, take the social text offset
+  if xb.db.profile.general.barPosition == 'BOTTOM' then 
+    osTopBottom = db.osSocialText
+  -- databar is at the top, inverse the social text offset
+  elseif xb.db.profile.general.barPosition == 'TOP' then 
+    osTopBottom = -db.osSocialText
+  end
+
+  -- apply social text position depending on whether the databar is at the top/bottom
+  self.text.guild:SetPoint('CENTER', 0, osTopBottom)
+  self.bgTexture.guild:SetPoint('CENTER', self.text.guild)
 end
 
+-- called on refresh, friend related events and profile changes to social text
 function MenuModule:UpdateFriendText()
-  if xb.db.profile.modules.microMenu.hideSocialText or not xb.db.profile.modules.microMenu.social then return; end
+  local db = xb.db.profile.modules.microMenu --shortcut to access profile variables
+  if db.hideSocialText or not db.social then return end --don't do anything if social text or the social icon are not displayed
+
+  -- get bnet and regular friends that are online, add them together and set social text to that number
   local _, bnOnlineMembers, _, _ = BNGetNumFriends()
   local friendsOnline = C_FriendList.GetNumOnlineFriends()
   local totalFriends = bnOnlineMembers + friendsOnline
   self.text.social:SetText(totalFriends)
-  self.text.social:SetPoint('TOP', 0, 4)
+
+  local osTopBottom
+  -- databar is at the bottom, take the social text offset
+  if xb.db.profile.general.barPosition == 'BOTTOM' then 
+    osTopBottom = db.osSocialText
+  -- databar is at the top, inverse the social text offset
+  elseif xb.db.profile.general.barPosition == 'TOP' then 
+    osTopBottom = -db.osSocialText
+  end
+
+  -- apply social text position depending on whether the databar is at the top/bottom
+  self.text.social:SetPoint('CENTER', 0, osTopBottom)
   self.bgTexture.social:SetPoint('CENTER', self.text.social)
 end
 
@@ -442,118 +483,145 @@ end
 
 function MenuModule:SocialHover(hoverFunc)
   return function()
+    -- get out of here if showTooltips in the options is set to false
     if not xb.db.profile.modules.microMenu.showTooltips then
       hoverFunc()
       return
     end
 
+    -- determines whether SHIFT/ALT/CTRL has been pressed based on the user's designated modifier
 	  local modifierFunc = IsShiftKeyDown
-	  if self.modifier == "ALT" then
-		  modifierFunc = IsAltKeyDown
-	  elseif self.modifier == "CONTROL" then
-		  modifierFunc = IsControlKeyDown
-	  end
+	  if self.modifier == "ALT" then modifierFunc = IsAltKeyDown
+	  elseif self.modifier == "CONTROL" then modifierFunc = IsControlKeyDown end
 
-	  if self.LTip:IsAcquired("SocialToolTip") then
-		  self.LTip:Release(self.LTip:Acquire("SocialToolTip"))
-    end
+    -- if the social tooltip already exists, deletus fetus it
+	  if self.LTip:IsAcquired("SocialToolTip") then self.LTip:Release(self.LTip:Acquire("SocialToolTip")) end
     
+    -- declare our LTip tooltip with 2 columns and mouse interaction when hovering/leaving/updating the tooltip
     local tooltip = self.LTip:Acquire("SocialToolTip", 2, "LEFT", "RIGHT")
 	  tooltip:EnableMouse(true)
-	  tooltip:SetScript("OnEnter",function() self.tipHover=true end)
-	  tooltip:SetScript("OnLeave",function() self.tipHover=false end)
+	  tooltip:SetScript("OnEnter",function() self.tipHover = true end)
+	  tooltip:SetScript("OnLeave",function() self.tipHover = false end)
     tooltip:SetScript("OnUpdate",function() if not self.tipHover and not self.lineHover then tooltip:Release() end end)
     MenuModule:SkinFrame(tooltip, "SocialToolTip")
-    local totalBNFriends, totalBNOnlineFriends, _, _ = BNGetNumFriends()
-	  local totalFriends = C_FriendList.GetNumFriends()
+
+    -- get the amount of bnet and non-bnet online friends as well as the player's faction
+    local _, totalBNOnlineFriends = BNGetNumFriends()
     local totalOnlineFriends = C_FriendList.GetNumOnlineFriends()
-    local charNameFormat
-    local playerFaction, _ = UnitFactionGroup("player")
-    local r, g, b, _ = unpack(xb:HoverColors())
+    local playerFaction = UnitFactionGroup("player")
+
+    -- ties the 'Social' and '<Left-Click>' etc. in the tooltip to the addon's hovercolors
+    local r, g, b = unpack(xb:HoverColors())
+
+    -- if any friends are online add the [Social] section and an empty line to the tooltip
     if (totalOnlineFriends + totalBNOnlineFriends) > 0 then
       tooltip:SmartAnchorTo(MenuModule.frames.social)
-      tooltip:AddHeader('|cFFFFFFFF[|r'..SOCIAL_LABEL..'|cFFFFFFFF]|r')
+      tooltip:AddHeader('|cFFFFFFFF[|r' .. SOCIAL_LABEL .. '|cFFFFFFFF]|r')
       tooltip:SetCellTextColor(1, 1, r, g, b, 1)
       tooltip:AddLine(' ',' ')
     end
 
+    -- executes if there are any online bnet friends
     if totalBNOnlineFriends then
-      local clientsList = {BNET_CLIENT_WOW,BNET_CLIENT_SC2,BNET_CLIENT_D3,BNET_CLIENT_WTCG,BNET_CLIENT_APP,BNET_CLIENT_HEROES,BNET_CLIENT_OVERWATCH,BNET_CLIENT_CLNT,BNET_CLIENT_SC,BNET_CLIENT_DESTINY2,BNET_CLIENT_COD,BNET_CLIENT_COD_MW,BNET_CLIENT_COD_MW2,BNET_CLIENT_WC3}
+      -- iterate through every bnet friend - get their info and add the friend as an interactable line in the tooltip
       for i = 1, BNGetNumFriends() do
         local friendAccInfo = C_BattleNet.GetFriendAccountInfo(i)
-        local battleID = friendAccInfo.bnetAccountID
-        local battleName = friendAccInfo.accountName
-        local battleTag = friendAccInfo.battleTag
         local gameAccount = friendAccInfo.gameAccountInfo
-        local isOnline = gameAccount.isOnline
-        local isAfk = friendAccInfo.isAFK
-        local isDnd = friendAccInfo.isDND
-        local note = friendAccInfo.note
 
-        if isOnline then
-          if not battleTag then
-            battleTag = '['..L['No Tag']..']'
+        -- executes if the friend is online
+        if gameAccount.isOnline then
+          -- if the friend has no battle tag, set it to 'No Tag'
+          if not friendAccInfo.battleTag then
+            friendAccInfo.battleTag = '[' .. L['No Tag'] .. ']'
           end
           
-		      local charName = gameAccount.characterName
-		      local gameClient = gameAccount.clientProgram
-          local realmName = gameAccount.realmName
-          local faction = gameAccount.factionName
-          local richPresence = gameAccount.richPresence
-          local isClassic = false
-          local status = FRIENDS_LIST_ONLINE
-          local statusIcon = FRIENDS_TEXTURE_ONLINE
-          local socialIcon = BNet_GetClientTexture(gameClient)
-          local gameName = MenuModule.socialIcons[gameClient].text
+		      local charName = gameAccount.characterName               --gets the friend's character name
+		      local gameClient = gameAccount.clientProgram             --the application that the friend is online with - can be any game or 'App'/'Mobile'
+          local realmName = gameAccount.realmName                  --gets the realm name the friend's char is on
+          local faction = gameAccount.factionName                  --gets the friend's currently logged in char's faction
+          local richPresence = gameAccount.richPresence            --rich presence is used here to determine whether a friend logged into WoW is playing classic
+          local isClassic = false                                  --tracks whether the friend is logged into classic or not, default being that the friend isn't
+          local statusIcon = FRIENDS_TEXTURE_ONLINE                --get icon for online friends, might later be changed to afk/dnd icons
+          local socialIcon = BNet_GetClientTexture(gameClient)     --get icon for the friend's application
+          local gameName = MenuModule.socialIcons[gameClient].text --name of the application the friend is currently using - can be any game or 'App'/'Mobile'
+          local note = friendAccInfo.note                          --note of the friend, if there is no note it's an empty string
+          local charNameFormat = ''                                --format in which the friend's character is displayed - is '' if not playing WoW, 'Char - Realm' or 'FACTION - Char' if playing WoW
 
-          if isAfk or gameAccount.isGameAFK then
-            statusIcon = FRIENDS_TEXTURE_AFK
-            status = DEFAULT_AFK_MESSAGE
-          end
-          if isDnd or gameAccount.isGameBusy then
-            statusIcon = FRIENDS_TEXTURE_DND
-            status = DEFAULT_DND_MESSAGE
-          end
+          -- if the friend is afk, set the icon left to the friend's name to afk
+          if friendAccInfo.isAFK or gameAccount.isGameAFK then statusIcon = FRIENDS_TEXTURE_AFK end
+          -- if the friend is set to 'do not disturb', set the icon left to the friend's name to dnd
+          if friendAccInfo.isDND or gameAccount.isGameBusy then statusIcon = FRIENDS_TEXTURE_DND end
+          -- if the friend has a note, color and display it
+          if note ~= '' then note = "(|cffecd672" .. note .. "|r)" end
 
+          -- if the friend is playing World of Warcraft - note that this is true for both retail and classic. yes, blizzard is retarded.
           if gameClient == BNET_CLIENT_WOW then
-            if richPresence:find("Classic") then 
+            -- checks if the friend is logged into classic or retail
+            if richPresence:find("Classic") then
               isClassic = true 
-            elseif faction ~= playerFaction then
-              charNameFormat = "(|cffecd672"..faction.." - "..charName.."|r)"
+            -- friend is playing retail WoW and is of the same faction as the player
+            elseif faction == playerFaction then
+              charNameFormat = "(|cffecd672" .. charName .. "-" .. realmName .. "|r)"
             else
-              charNameFormat = "(|cffecd672"..charName.."-"..realmName.."|r)"
+            -- friend is playing retail WoW but is playing on the player's opposite faction
+              charNameFormat = "(|cffecd672" .. faction .. " - " .. charName .. "|r)"
             end
-          else
-            charNameFormat = ''
           end
 
-          if note ~= '' then
-            note = "(|cffecd672"..note.."|r)"
-          end
+          -- clientsList contains all game related clients a bnet friend can have - being on mobile or just in the app is excluded from this list
+          local clientsList = { 
+            BNET_CLIENT_WOW,
+            BNET_CLIENT_SC2, 
+            BNET_CLIENT_D3, 
+            BNET_CLIENT_WTCG, 
+            BNET_CLIENT_HEROES, 
+            BNET_CLIENT_OVERWATCH, 
+            BNET_CLIENT_SC, 
+            BNET_CLIENT_DESTINY2, 
+            BNET_CLIENT_COD, 
+            BNET_CLIENT_COD_MW, 
+            BNET_CLIENT_COD_MW2, 
+            BNET_CLIENT_WC3 
+          }
 
-          if tContains(clientsList,gameClient) or not xb.db.profile.modules.microMenu.hideAppContact then
-            local lineLeft = string.format("|T%s:16|t|cff82c5ff %s|r %s", statusIcon, battleName, note)
+          -- set up tooltip line for the friend unless he's not logged into a game and 'hide bnet app friends' is true
+          if tContains(clientsList, gameClient) or not xb.db.profile.modules.microMenu.hideAppContact then
+            -- lineLeft displays status icon, bnet name and the friend's note
+            local lineLeft = string.format("|T%s:16|t|cff82c5ff %s|r %s", statusIcon, friendAccInfo.accountName, note)
             local lineRight = ''
-            if isClassic then
-              lineRight = string.format("%s |T%s:16|t", richPresence, socialIcon)
-            else
+
+            -- if friend is not playing classic, set lineRight to char name (if playing WoW, otherwise empty string), game name and game icon
+            if not isClassic then
               lineRight = string.format("%s %s |T%s:16|t", charNameFormat, gameName, socialIcon)
+            -- friend is logged into classic, set lineRight to 'WoW Classic - RealmName' and game icon
+            else
+              lineRight = string.format("%s |T%s:16|t", richPresence, socialIcon)
             end
+
+            -- add left and right line to the tooltip
             tooltip:AddLine(lineLeft, lineRight)
-      		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true end)
-      		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false end)
-      		  tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
-  		        if button == "LeftButton" then
-  				      if modifierFunc() then
-  					      if CanGroupWithAccount(battleID) then
-  						      InviteToGroup(charName.."-"..realmName)
-  					      end
+            -- set up mouse events when the player hovers over/clicks on/leaves the friend's line in the tooltip
+      		  tooltip:SetLineScript(tooltip:GetLineCount(), "OnEnter", function() self.lineHover = true end)
+      		  tooltip:SetLineScript(tooltip:GetLineCount(), "OnLeave", function() self.lineHover = false end)
+            tooltip:SetLineScript(tooltip:GetLineCount(), "OnMouseUp", function(self,_,button)
+              -- player left clicks on the friend, checks whether a modifier was used or not after
+              if button == "LeftButton" then
+                -- player pressed SHIFT/ALT/CTRL when left clicking the friend
+                if modifierFunc() then
+                  -- invite to group / raid if possible
+                  if CanGroupWithAccount(friendAccInfo.bnetAccountID) then
+                    C_PartyInfo.InviteUnit(charName .. "-" .. realmName)
+  						      --InviteToGroup(charName .. "-" .. realmName)
+                  end
+                -- player did not use a modifier when left clicking on the friend, send a bnet whisper
                 else
-                  ChatFrame_SendBNetTell(battleName)
-  				      end
+                  ChatFrame_SendBNetTell(friendAccInfo.accountName)
+                end
+
+              -- player right clicked on the friend, send an ingame whisper if the player is not playing classic or of the opposite faction
   			      elseif button == "RightButton" then
                 if (not isClassic and charName and faction == playerFaction ) then
-                  ChatFrame_SendTell(charName.."-"..realmName)
+                  ChatFrame_SendTell(charName .. "-" .. realmName)
   				      end
   			      end
   		      end)
@@ -562,63 +630,63 @@ function MenuModule:SocialHover(hoverFunc)
       end -- for in BNGetNumFriends
     end -- totalBNOnlineFriends
 
+    -- executes if there are any online non-bnet friends
     if totalOnlineFriends then
+      -- iterate through every non-bnet friend - get their info and add the friend as an interactable line in the tooltip
       for i = 1, C_FriendList.GetNumFriends() do
         local friendInfo = C_FriendList.GetFriendInfoByIndex(i)
-        local name = friendInfo.name
-        local class = friendInfo.className
-        local area = friendInfo.area
-        local level = friendInfo.level
-        local isOnline = friendInfo.connected
-        local isAfk = friendInfo.afk
-        local isDnd = friendInfo.dnd
-        local note = friendInfo.notes
 
-        if isOnline then
-          local status = FRIENDS_LIST_ONLINE
-          local statusIcon = FRIENDS_TEXTURE_ONLINE
-          if isAfk then
-            statusIcon = FRIENDS_TEXTURE_AFK
-            status = DEFAULT_AFK_MESSAGE
-          end
-          if isDnd then
-            statusIcon = FRIENDS_TEXTURE_DND
-            status = DEFAULT_DND_MESSAGE
-          end
+        -- executes if the friend is online
+        if friendInfo.connected then
+          local name = friendInfo.name              --friend's character name as 'CharName - RealmName'
+          local level = friendInfo.level            --level of the friend's character
+          local statusIcon = FRIENDS_TEXTURE_ONLINE --get icon for online friends, might later be changed to afk/dnd icons
 
-          local lineLeft = string.format("|T%s:16|t %s, "..LEVEL..":%s %s", statusIcon, name, level, class)
-          local lineRight = string.format("%s", area)
+          -- if the friend is afk, set the icon left to the friend's name to afk
+          if friendInfo.afk then statusIcon = FRIENDS_TEXTURE_AFK end
+          -- if the friend is set to 'do not disturb', set the icon left to the friend's name to dnd
+          if friendInfo.dnd then statusIcon = FRIENDS_TEXTURE_DND end
+
+          -- lineLeft displays status icon, char name, char level, char class
+          local lineLeft = string.format("|T%s:16|t %s, " .. LEVEL .. ":%s %s", statusIcon, name, level, friendInfo.className)
+          -- lineRight displays the area the friend is currently in
+          local lineRight = string.format("%s", friendInfo.area)
+
+          -- add left and right line to the tooltip
           tooltip:AddLine(lineLeft, lineRight)
+          -- set up mouse events when the player hovers over/clicks on/leaves the friend's line in the tooltip
 		      tooltip:SetLineScript(tooltip:GetLineCount(),"OnEnter",function() self.lineHover = true end)
 		      tooltip:SetLineScript(tooltip:GetLineCount(),"OnLeave",function() self.lineHover = false end)
-		      tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
+          tooltip:SetLineScript(tooltip:GetLineCount(),"OnMouseUp",function(self,_,button)
+            -- if there is no realm name in the friend's name, the friend is playing on the same realm as the player
 		        if not name:find('%u%U*-%u%U') then
 				      local homeRealm = GetRealmName()
 				      homeRealm = homeRealm:gsub("%s+", "")
-				      name=name.."-"..homeRealm
-			      end
+				      name = name .. "-" .. homeRealm
+            end
+
+            -- player right clicked on the friend, send an ingame whisper
 		        if button == "RightButton" then
-				      ChatFrame_SendTell(name)
-			      elseif button == "LeftButton" then
-				      if modifierFunc() then
-					      InviteUnit(name)
-				      end
+              ChatFrame_SendTell(name)
+            -- player SHIFT/ALT/CTRL + left clicked on the friend, attempt to invite to group / raid
+            elseif button == "LeftButton" and modifierFunc() then
+              C_PartyInfo.InviteUnit(name)
 			      end
 		      end)
         end -- isOnline
       end -- for in GetNumFriends
     end -- totalOnlineFriends
 
-	tooltip:AddLine(' ',' ')
+    -- add section under the friends list for (modifiers) + left/right click and what each action does
+	  tooltip:AddLine(' ',' ')
     tooltip:AddLine('<'..L['Left-Click']..'>', L['Whisper BNet'])
     tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
     tooltip:AddLine('<'..self.modifier..'+'..L['Left-Click']..'>', CALENDAR_INVITELIST_INVITETORAID)
     tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
     tooltip:AddLine('<'..L['Right-Click']..'>', L['Whisper Character'])
     tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
-    if (totalOnlineFriends + totalBNOnlineFriends) > 0 then
-      tooltip:Show()
-    end
+    -- if any bnet or non-bnet friends are online, set the tooltip to show
+    if (totalOnlineFriends + totalBNOnlineFriends) > 0 then tooltip:Show() end
     hoverFunc()
   end
 end
@@ -651,8 +719,8 @@ function MenuModule:GuildHover(hoverFunc)
   tooltip:SetScript("OnUpdate",function() if not self.gtipHover and not self.glineHover then tooltip:Release() end end)
   MenuModule:SkinFrame(tooltip, "SocialToolTip")
 
-    GuildRoster()
-    tooltip:SmartAnchorTo(MenuModule.frames.guild)
+  C_GuildInfo.GuildRoster() --requests an update to guild roster information from blizzbois
+  tooltip:SmartAnchorTo(MenuModule.frames.guild)
 	local gName, _, _, _ = GetGuildInfo('player')
     tooltip:AddHeader("[|cff6699FF"..GUILD.."|r]",'|cff00ff00'..gName..'|r')
     tooltip:AddLine(" "," ")
@@ -826,7 +894,8 @@ function MenuModule:GetDefaultOptions()
       iconSpacing = 2,
       hideSocialText = false,
 	  modifierTooltip = 1,
-	  showGMOTD = false,
+    showGMOTD = false,
+    osSocialText = 12,
 	  menu = true,
       chat = true,
       guild = true,
@@ -865,6 +934,7 @@ function MenuModule:GetConfig()
           end
         end
       },
+
       showTooltips = {
         name = L['Show Social Tooltips'],
         order = 1,
@@ -872,13 +942,15 @@ function MenuModule:GetConfig()
         get = function() return xb.db.profile.modules.microMenu.showTooltips; end,
         set = function(_, val) xb.db.profile.modules.microMenu.showTooltips = val; self:Refresh(); end
       },
-      hideSocialText = {
-        name = L['Hide Social Text'],
-        order = 2,
+
+      appFriendsHide = {
+        name = L["Hide BNet App Friends"],
         type = "toggle",
-        get = function() return xb.db.profile.modules.microMenu.hideSocialText; end,
-        set = function(_, val) xb.db.profile.modules.microMenu.hideSocialText = val; self:Refresh(); end
+        order = 2,
+        get = function() return xb.db.profile.modules.microMenu.hideAppContact end,
+        set = function(_,val) xb.db.profile.modules.microMenu.hideAppContact = val; self:Refresh(); end
       },
+
       combatEn = {
         name = 'Enable in combat',
         order = 3,
@@ -886,6 +958,7 @@ function MenuModule:GetConfig()
         get = function() return xb.db.profile.modules.microMenu.combatEn; end,
         set = function(_, val) xb.db.profile.modules.microMenu.combatEn = val; self:Refresh(); end
       },
+
       mainMenuSpacing = {
         name = L['Main Menu Icon Right Spacing'],
         order = 4,
@@ -896,6 +969,7 @@ function MenuModule:GetConfig()
         get = function() return xb.db.profile.modules.microMenu.mainMenuSpacing; end,
         set = function(_, val) xb.db.profile.modules.microMenu.mainMenuSpacing = val; self:Refresh(); end
       },
+
       iconSpacing = {
         name = L['Icon Spacing'],
         order = 5,
@@ -906,34 +980,49 @@ function MenuModule:GetConfig()
         get = function() return xb.db.profile.modules.microMenu.iconSpacing; end,
         set = function(_, val) xb.db.profile.modules.microMenu.iconSpacing = val; self:Refresh(); end
       },
-	  showGMOTD = {
-		name = L["GMOTD in Tooltip"],
-		type = "toggle",
-		order = 6,
-		get = function() return xb.db.profile.modules.microMenu.showGMOTD end,
-		set = function(_,val) xb.db.profile.modules.microMenu.showGMOTD = val; self:Refresh(); end
-	  },
-	  modifierTooltip = {
-		name = L["Modifier for friend invite"],
-		order = 7,
-		type = "select",
-		values = {SHIFT_KEY_TEXT,ALT_KEY_TEXT,CTRL_KEY_TEXT},
-		style = "dropdown",
-		get = function() return xb.db.profile.modules.microMenu.modifierTooltip; end,
-		set = function(info, val) xb.db.profile.modules.microMenu.modifierTooltip = val; self:Refresh(); end,
-		disabled = function() return not xb.db.profile.modules.microMenu.guild and not xb.db.profile.modules.microMenu.social end
-	  },
-    appFriendsHide = {
-    name = L["Hide BNet App Friends"],
-    type = "toggle",
-    order = 8,
-    get = function() return xb.db.profile.modules.microMenu.hideAppContact end,
-    set = function(_,val) xb.db.profile.modules.microMenu.hideAppContact = val; self:Refresh(); end
-    },
+
+	    showGMOTD = {
+		    name = L["GMOTD in Tooltip"],
+		    type = "toggle",
+		    order = 6,
+		    get = function() return xb.db.profile.modules.microMenu.showGMOTD end,
+		    set = function(_,val) xb.db.profile.modules.microMenu.showGMOTD = val; self:Refresh(); end
+      },
+      
+	    modifierTooltip = {
+		    name = L["Modifier for friend invite"],
+		    order = 7,
+		    type = "select",
+		    values = { SHIFT_KEY_TEXT, ALT_KEY_TEXT, CTRL_KEY_TEXT },
+		    style = "dropdown",
+		    get = function() return xb.db.profile.modules.microMenu.modifierTooltip; end,
+		    set = function(info, val) xb.db.profile.modules.microMenu.modifierTooltip = val; self:Refresh(); end,
+		    disabled = function() return not xb.db.profile.modules.microMenu.guild and not xb.db.profile.modules.microMenu.social end
+      },
+
+      hideSocialText = {
+        name = L['Hide Social Text'],
+        order = 8,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.microMenu.hideSocialText; end,
+        set = function(_, val) xb.db.profile.modules.microMenu.hideSocialText = val; self:Refresh(); end
+      },
+
+      osSocialText = {
+        name = "Hehexd",
+        order = 9,
+        type = "range",
+        min = 0,
+        max = 20,
+        step = 1,
+        get = function() return xb.db.profile.modules.microMenu.osSocialText end,
+        set = function(_, val) xb.db.profile.modules.microMenu.osSocialText = val; self:UpdateFriendText(); end
+      },
+
       buttons = {
         type = 'group',
         name = L['Show/Hide Buttons'],
-        order = 9,
+        order = 10,
         inline = true,
         args = {
           menu = {
