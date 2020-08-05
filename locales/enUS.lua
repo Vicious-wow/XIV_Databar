@@ -61,6 +61,7 @@ L['No Tag'] = true;
 L['Whisper BNet'] = true;
 L['Whisper Character'] = true;
 L['Hide Social Text'] = true;
+L['Social Text Offset'] = true;
 L["GMOTD in Tooltip"] = true;
 L["Modifier for friend invite"] = true;
 L['Show/Hide Buttons'] = true;

@@ -61,6 +61,7 @@ L['No Tag'] = "Aucun Tag";
 L['Whisper BNet'] = "Chuchoter BNet";
 L['Whisper Character'] = "Chuchoter le personnage";
 L['Hide Social Text'] = "Cacher le texte des contacts";
+L['Social Text Offset'] = "Décalage du texte social";
 L["GMOTD in Tooltip"] = "Afficher le message de guilde dans la bulle";
 L["Modifier for friend invite"] = "Touche modifieuse pour inviter un contact";
 L['Show/Hide Buttons'] = "Montrer/Cacher les boutons";

@@ -61,6 +61,7 @@ L['No Tag'] = "Keine Markierung";
 L['Whisper BNet'] = "über BNet anflüstern";
 L['Whisper Character'] = "Charakter anflüstern";
 L['Hide Social Text'] = "Social Text verstecken";
+L['Social Text Offset'] = "Social Text versetzen";
 L["GMOTD in Tooltip"] = "Nachricht des Tages im Tooltip";
 L["Modifier for friend invite"] = "Modifier um Freunde einzuladen";
 L['Show/Hide Buttons'] = "Zeige/Verstecke Tasten";

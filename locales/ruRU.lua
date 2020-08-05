@@ -61,6 +61,7 @@ L['No Tag'] = "Нет Battletag";
 L['Whisper BNet'] = "Шепнуть по Battle.Net";
 L['Whisper Character'] = "Шепнуть персонажу";
 L['Hide Social Text'] = "Скрыть количество онлайна гильдии и друзей";
+L['Social Text Offset'] = "Смещение текста в социальных сетях";
 L["GMOTD in Tooltip"] = "Сообщение дня гильдии в подсказке";
 L["Modifier for friend invite"] = "Модификатор для приглашения друзей";
 L['Show/Hide Buttons'] = "Показать/скрыть кнопки";

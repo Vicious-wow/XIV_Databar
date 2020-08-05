@@ -61,6 +61,7 @@ L['No Tag'] = "无标签";
 L['Whisper BNet'] = "密语战网";
 L['Whisper Character'] = "密语角色";
 L['Hide Social Text'] = "隐藏社交文字";
+L['Social Text Offset'] = "社會文字偏移";
 L["GMOTD in Tooltip"] = "提示每日公会信息";
 L["Modifier for friend invite"] = "好友邀请";
 L['Show/Hide Buttons'] = "显示/隐藏按钮";
