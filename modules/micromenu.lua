@@ -410,10 +410,6 @@ function MenuModule:UpdateGuildText()
     return
   end
 
-  -- player is in a guild, show everything related to guild text
-  self.text.guild:Show()
-  self.bgTexture.guild:Show()
-
   local db = xb.db.profile.modules.microMenu --shortcut to access profile variables
   if db.hideSocialText or not db.guild then return end --don't do anything if social text or the guild icon are not displayed
   C_GuildInfo.GuildRoster() --requests an update to guild roster information from blizzbois
@@ -434,6 +430,9 @@ function MenuModule:UpdateGuildText()
   -- apply social text position depending on whether the databar is at the top/bottom
   self.text.guild:SetPoint('CENTER', 0, osTopBottom)
   self.bgTexture.guild:SetPoint('CENTER', self.text.guild)
+  -- player is in a guild, show everything related to guild text
+  self.text.guild:Show()
+  self.bgTexture.guild:Show()
 end
 
 -- called on refresh, friend related events and profile changes to social text
@@ -1009,7 +1008,7 @@ function MenuModule:GetConfig()
       },
 
       osSocialText = {
-        name = "Hehexd",
+        name = L['Social Text Offset'],
         order = 9,
         type = "range",
         min = 0,
