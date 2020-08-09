@@ -403,14 +403,18 @@ end
 
 -- called on refresh, guild related events and profile changes to social text
 function MenuModule:UpdateGuildText()
-  -- if player is not in a guild, hide everything related to guild text
+  local db = xb.db.profile.modules.microMenu --shortcut to access profile variables
+
+  -- if the guild icon is disabled, don't do anything
+  if not db.guild then return end
+
+  -- if guild icon is enabled but player is not in a guild, hide everything related to guild text
   if not IsInGuild() then
     self.text.guild:Hide()
     self.bgTexture.guild:Hide()
     return
   end
 
-  local db = xb.db.profile.modules.microMenu --shortcut to access profile variables
   if db.hideSocialText or not db.guild then return end --don't do anything if social text or the guild icon are not displayed
   C_GuildInfo.GuildRoster() --requests an update to guild roster information from blizzbois
 
@@ -534,8 +538,8 @@ function MenuModule:SocialHover(hoverFunc)
             friendAccInfo.battleTag = '[' .. L['No Tag'] .. ']'
           end
           
-		      local charName = gameAccount.characterName               --gets the friend's character name
-		      local gameClient = gameAccount.clientProgram             --the application that the friend is online with - can be any game or 'App'/'Mobile'
+          local charName = gameAccount.characterName               --gets the friend's character name
+          local gameClient = gameAccount.clientProgram             --the application that the friend is online with - can be any game or 'App'/'Mobile'
           local realmName = gameAccount.realmName                  --gets the realm name the friend's char is on
           local faction = gameAccount.factionName                  --gets the friend's currently logged in char's faction
           local richPresence = gameAccount.richPresence            --rich presence is used here to determine whether a friend logged into WoW is playing classic
@@ -891,11 +895,11 @@ function MenuModule:GetDefaultOptions()
       combatEn = false,
       mainMenuSpacing = 2,
       iconSpacing = 2,
+	    modifierTooltip = 1,
+      showGMOTD = false,
       hideSocialText = false,
-	  modifierTooltip = 1,
-    showGMOTD = false,
-    osSocialText = 12,
-	  menu = true,
+      osSocialText = 12,
+	    menu = true,
       chat = true,
       guild = true,
       social = true,
