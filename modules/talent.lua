@@ -50,8 +50,6 @@ function TalentModule:OnInitialize()
   self.specButtons = {}
   self.lootSpecButtons = {}
   self.classIcon = xb.constants.mediaPath..'spec\\'..xb.constants.playerClass
-  self.LAD = LibStub('LibArtifactData-1.0')
-  self.curArtifactId = 0
   self.useElvUI = xb.db.profile.general.useElvUI and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui'))
 end
 
@@ -68,7 +66,6 @@ function TalentModule:OnEnable()
 
   self:CreateFrames()
   self:RegisterFrameEvents()
-  self.LAD:ForceUpdate()
   self:Refresh()
 end
 
@@ -82,10 +79,6 @@ function TalentModule:OnDisable()
   self:UnregisterEvent('PLAYER_SPECIALIZATION_CHANGED')
   self:UnregisterEvent('ACTIVE_TALENT_GROUP_CHANGED')
   self:UnregisterEvent('PLAYER_LOOT_SPEC_UPDATED')
-  self:UnregisterEvent('ARTIFACT_CLOSE')
-  self:UnregisterEvent('UNIT_INVENTORY_CHANGED')
-  self:UnregisterEvent('ARTIFACT_XP_UPDATE')
-  self:UnregisterEvent('INSPECT_READY')
 end
 
 function TalentModule:Refresh()
@@ -95,18 +88,13 @@ function TalentModule:Refresh()
   if self.talentFrame == nil then return; end
   if not db.modules.talent.enabled then self:Disable(); return; end
 
-  local artifactId = self.LAD:GetActiveArtifactID() or 0
-  self.curArtifactId = artifactId
   self.currentSpecID = GetSpecialization()
   self.currentLootSpecID = GetLootSpecialization()
 
   local iconSize = db.text.fontSize + db.general.barPadding
   local _, name, _ = GetSpecializationInfo(self.currentSpecID)
-
   local textHeight = db.text.fontSize
-  if artifactId > 0 then
-    textHeight = floor((xb:GetHeight() - 4) / 2)
-  end
+
   self.specIcon:SetTexture(self.classIcon)
   self.specIcon:SetTexCoord(unpack(self.specCoords[self.currentSpecID]))
 
@@ -118,52 +106,18 @@ function TalentModule:Refresh()
   self.specText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
   self.specText:SetText(string.upper(name or ""))
 
-  if artifactId > 0 then
-    self.specText:SetPoint('TOPLEFT', self.specIcon, 'TOPRIGHT', 5, 0)
-  else
-    self.specText:SetPoint('LEFT', self.specIcon, 'RIGHT', 5, 0)
-  end
+  self.specText:SetPoint('LEFT', self.specIcon, 'RIGHT', 5, 0)
 
   self.lootSpecButtons[0].icon:SetTexture(self.classIcon)
   self.lootSpecButtons[0].icon:SetTexCoord(unpack(self.specCoords[self.currentSpecID]))
 
-  if artifactId > 0 then
-    self.specBar:SetStatusBarTexture(1, 1, 1)
-    if db.modules.tradeskill.barCC then
-      self.specBar:SetStatusBarColor(xb:GetClassColors())
-    else
-      self.specBar:SetStatusBarColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
-    end
-    local barHeight = iconSize - textHeight - 2
-    if barHeight < 2 then 
-      barHeight = 2
-    end
-    self.specBar:SetSize(self.specText:GetStringWidth(), barHeight)
-    self.specBar:SetPoint('BOTTOMLEFT', self.specIcon, 'BOTTOMRIGHT', 5, 0)
-
-    self.specBarBg:SetAllPoints()
-    self.specBarBg:SetColorTexture(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
-    self:UpdateArtifactBar(artifactId)
-	self.specText:Show()
-	self.specBar:Show()
-  else
-	if self.specBar and self.specBar:IsVisible() then
-		self.specBar:Hide()
-	end
-  end
-  if self.specBar:IsVisible() then
-	self.specFrame:SetSize(iconSize + self.specBar:GetWidth() + 5, xb:GetHeight())
-  else
+  self.specText:Show()
+  
 	self.specFrame:SetSize(iconSize + self.specText:GetWidth() + 5, xb:GetHeight())
-  end
   self.specFrame:SetPoint('LEFT')
 
   if self.specFrame:GetWidth() < db.modules.talent.minWidth then
     self.specFrame:SetWidth(db.modules.talent.minWidth)
-  end
-
-  if self.specBar:GetWidth() < db.modules.talent.minWidth then
-    self.specBar:SetWidth(db.modules.talent.minWidth)
   end
 
   self.talentFrame:SetSize(self.specFrame:GetWidth(), xb:GetHeight())
@@ -185,22 +139,10 @@ function TalentModule:Refresh()
   self:CreateLootSpecPopup()
 end
 
-function TalentModule:UpdateArtifactBar(artifactId)
-  local _, artifactData = self.LAD:GetArtifactInfo(artifactId)
-  if artifactData and self.specBar:IsVisible() then
-    self.specBar:SetMinMaxValues(0, artifactData.maxPower)
-    self.specBar:SetValue(artifactData.power)
-  elseif not self.specBar:IsVisible() then
-    C_Timer.After(1,function()self:Refresh()end)
-  end
-end
-
 function TalentModule:CreateFrames()
   self.specFrame = self.specFrame or CreateFrame("BUTTON", nil, self.talentFrame, 'SecureActionButtonTemplate')
   self.specIcon = self.specIcon or self.specFrame:CreateTexture(nil, 'OVERLAY')
   self.specText = self.specText or self.specFrame:CreateFontString(nil, 'OVERLAY')
-  self.specBar = self.specBar or CreateFrame('STATUSBAR', nil, self.specFrame)
-  self.specBarBg = self.specBarBg or self.specBar:CreateTexture(nil, 'BACKGROUND')
 
   self.specPopup = self.specPopup or CreateFrame('BUTTON', "SpecPopup", self.specFrame)
   self.specPopup:SetFrameStrata("TOOLTIP")
@@ -222,18 +164,9 @@ function TalentModule:CreateFrames()
 end
 
 function TalentModule:RegisterFrameEvents()
-
   self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED', 'Refresh')
   self:RegisterEvent('ACTIVE_TALENT_GROUP_CHANGED', 'Refresh')
   self:RegisterEvent('PLAYER_LOOT_SPEC_UPDATED', 'Refresh')
-  self:RegisterEvent('ARTIFACT_CLOSE', 'Refresh')
-  self:RegisterEvent('UNIT_INVENTORY_CHANGED', 'Refresh')
-  self:RegisterEvent('INSPECT_READY', 'Refresh')
-  self.LAD:RegisterCallback('ARTIFACT_EQUIPPED_CHANGED',self.Refresh)
-  self.LAD:RegisterCallback('ARTIFACT_KNOWLEDGE_CHANGED',self.Refresh)
-  self.LAD:RegisterCallback('ARTIFACT_POWER_CHANGED', function()
-    self:UpdateArtifactBar(self.curArtifactId)
-  end)
 
   self.specFrame:EnableMouse(true)
   self.specFrame:RegisterForClicks('AnyUp')
@@ -241,8 +174,8 @@ function TalentModule:RegisterFrameEvents()
   self.specFrame:SetScript('OnEnter', function()
     if InCombatLockdown() then return end
     self.specText:SetTextColor(unpack(xb:HoverColors()))
-    if xb.db.profile.modules.tradeskill.showTooltip then
-      if ((not self.specPopup:IsVisible()) or (not self.lootSpecPopup:IsVisible())) then
+    if xb.db.profile.modules.talent.showTooltip then
+      if (not self.specPopup:IsVisible()) or (not self.lootSpecPopup:IsVisible()) then
         self:ShowTooltip()
       end
     end
@@ -252,7 +185,7 @@ function TalentModule:RegisterFrameEvents()
     if InCombatLockdown() then return end
     local db = xb.db.profile
     self.specText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
-    if xb.db.profile.modules.tradeskill.showTooltip then
+    if xb.db.profile.modules.talent.showTooltip then
       if self.LTip:IsAcquired("TalentTooltip") then
 		    self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
 	    end
@@ -263,38 +196,26 @@ function TalentModule:RegisterFrameEvents()
     if self.LTip:IsAcquired("TalentTooltip") then
 	    self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
     end
+
+    if InCombatLockdown() then return end
+
     if button == 'LeftButton' then
-      if not InCombatLockdown() then
-		    if IsShiftKeyDown() then
-			    if self.lootSpecPopup:IsVisible() then
-			      self.lootSpecPopup:Hide()
-			      if xb.db.profile.modules.tradeskill.showTooltip then
-				      self:ShowTooltip()
-			      end
-			    else
-			      self.specPopup:Hide()
-			      self:CreateLootSpecPopup()
-			      self.lootSpecPopup:Show()
-			    end
-		    else
-			    if self.specPopup:IsVisible() then
-			      self.specPopup:Hide()
-			      if xb.db.profile.modules.tradeskill.showTooltip then
-				      self:ShowTooltip()
-			      end
-			    else
-			      self.lootSpecPopup:Hide()
-			      self:CreateSpecPopup()
-			      self.specPopup:Show()
-			    end
-		    end
+      if not self.specPopup:IsVisible() then
+        self.lootSpecPopup:Hide()
+        self:CreateSpecPopup()
+        self.specPopup:Show()
+      else
+        self.specPopup:Hide()
+        if xb.db.profile.modules.talent.showTooltip then self:ShowTooltip() end
       end
-    end
-    if button == 'RightButton' then
-      if not InCombatLockdown() then
-		    if self.curArtifactId > 0 then
-			    SocketInventoryItem(16)
-		    end
+    elseif button == 'RightButton' then
+      if not self.lootSpecPopup:IsVisible() then
+        self.specPopup:Hide()
+        self:CreateLootSpecPopup()
+        self.lootSpecPopup:Show()
+      else
+        self.lootSpecPopup:Hide()
+        if xb.db.profile.modules.talent.showTooltip then self:ShowTooltip() end
       end
     end
   end)
@@ -549,30 +470,11 @@ function TalentModule:ShowTooltip()
   tooltip:AddLine(L['Current Loot Specialization'], "|cFFFFFFFF"..name.."|r")
   tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
 
-  --rip legion, cya artifact stuff
-  --[[if self.curArtifactId > 0 then
-    tooltip:AddLine(" ")
-    local _, artifactData = self.LAD:GetArtifactInfo(self.curArtifactId)
-    local knowLevel, knowMult = self.LAD:GetArtifactKnowledge()
-    if knowLevel and knowLevel > 0 then
-      tooltip:AddLine("|cFFFFFF00"..L['Artifact Knowledge']..':|r', "|cFFFFFFFF"..string.format('%d (x%d)', knowLevel, ((knowMult) - 1 * 100)).."|r")
-      tooltip:AddLine(" ")
-    end
-    tooltip:AddLine("|cFFFFFF00"..ARTIFACT_POWER..':|r', "|cFFFFFFFF"..string.format('%.0f / %.0f (%d%%)', artifactData.power, artifactData.maxPower == 0 and artifactData.power or artifactData.maxPower, floor((artifactData.power / (artifactData.maxPower == 0 and artifactData.power or artifactData.maxPower)) * 100)).."|r")
-    tooltip:AddLine("|cFFFFFF00"..L['Remaining']..':|r', "|cFFFFFFFF"..string.format('%.0f (%d%%)', artifactData.powerForNextRank, floor((artifactData.powerForNextRank / (artifactData.maxPower == 0 and artifactData.power or artifactData.maxPower)) * 100)).."|r")
-    if artifactData.numRanksPurchasable > 0 then
-      tooltip:AddLine("|cFFFFFF00"..L['Available Ranks']..':|r', "|cFFFFFFFF"..string.format('%d', artifactData.numRanksPurchasable).."|r")
-    end
-  end]]--
-
   tooltip:AddLine(" ")
   tooltip:AddLine('<'..L['Left-Click']..'>', "|cFFFFFFFF"..L['Set Specialization'].."|r")
   tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
-  tooltip:AddLine('<'..SHIFT_KEY_TEXT.."+"..L['Left-Click']..'>', "|cFFFFFFFF"..L['Set Loot Specialization'].."|r")
+  tooltip:AddLine('<'..L['Right-Click']..'>', "|cFFFFFFFF"..L['Set Loot Specialization'].."|r")
   tooltip:SetCellTextColor(tooltip:GetLineCount(), 1, r, g, b, 1)
-  --[[if self.curArtifactId > 0 then
-	tooltip:AddLine('|cFFFFFF00<'..L['Right-Click']..'>|r', "|cFFFFFFFF"..L['Open Artifact'].."|r")
-  end]]--
   self:SkinFrame(tooltip, "TalentTooltip")
   tooltip:Show()
 end
@@ -580,7 +482,6 @@ end
 function TalentModule:GetDefaultOptions()
   return 'talent', {
       enabled = true,
-      barCC = false,
       showTooltip = true,
       minWidth = 50
     }
@@ -606,16 +507,9 @@ function TalentModule:GetConfig()
         end,
         width = "full"
       },
-      barCC = {
-        name = L['Use Class Colors'],
-        order = 2,
-        type = "toggle",
-        get = function() return xb.db.profile.modules.talent.barCC; end,
-        set = function(_, val) xb.db.profile.modules.talent.barCC = val; self:Refresh(); end
-      },
       showTooltip = {
         name = L['Show Tooltips'],
-        order = 3,
+        order = 1,
         type = "toggle",
         get = function() return xb.db.profile.modules.talent.showTooltip; end,
         set = function(_, val) xb.db.profile.modules.talent.showTooltip = val; self:Refresh(); end
@@ -623,7 +517,7 @@ function TalentModule:GetConfig()
       minWidth = {
         name = L['Talent Minimum Width'],
         type = 'range',
-        order = 4,
+        order = 2,
         min = 10,
         max = 200,
         step = 10,
