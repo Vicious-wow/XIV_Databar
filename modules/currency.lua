@@ -140,7 +140,8 @@ function CurrencyModule:StyleCurrencyFrame(curId, i)
   if tContains(self.rerollItems, curId) then
     icon = xb.constants.mediaPath..'datatexts\\reroll'
   end
-  local _, curAmount, _ = GetCurrencyInfo(curId)
+  --local curInfo = C_CurrencyInfo.GetCurrencyInfo(curId)
+  local _, curAmount, _ = GetCurrencyInfo(curId) --REMOVE FOR SHADOWLANDS
 
   local iconPoint = 'RIGHT'
   local textPoint = 'LEFT'
@@ -162,7 +163,8 @@ function CurrencyModule:StyleCurrencyFrame(curId, i)
 
   self.curText[i]:SetFont(xb:GetFont(db.text.fontSize))
   self.curText[i]:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
-  self.curText[i]:SetText(curAmount)
+  --self.curText[i]:SetText(curInfo.quantity)
+  self.curText[i]:SetText(curAmount) --REMOVE FOR SHADOWLANDS
   self.curText[i]:SetPoint(iconPoint, self.curIcons[i], textPoint, padding, 0)
 
   local buttonWidth = iconSize + self.curText[i]:GetStringWidth() + 5
@@ -288,8 +290,10 @@ function CurrencyModule:ShowTooltip()
     for i = 1, 3 do
       if xb.db.profile.modules.currency[self.intToOpt[i]] ~= '0' then
         local curId = tonumber(xb.db.profile.modules.currency[self.intToOpt[i]])
-        local name, count, _, _, _, totalMax, _, _ = GetCurrencyInfo(curId)
-        GameTooltip:AddDoubleLine(name, string.format('%d/%d', count, totalMax), r, g, b, 1, 1, 1)
+        --local curInfo = C_CurrencyInfo.GetCurrencyInfo(curId)
+        local name, count, _, _, _, totalMax, _, _ = GetCurrencyInfo(curId) --REMOVE FOR SHADOWLANDS
+        --GameTooltip:AddDoubleLine(curInfo.name, string.format('%d/%d', quantity, maxQuantity), r, g, b, 1, 1, 1)
+        GameTooltip:AddDoubleLine(name, string.format('%d/%d', count, totalMax), r, g, b, 1, 1, 1) --REMOVE FOR SHADOWLANDS
       end
     end
 
@@ -304,10 +308,14 @@ function CurrencyModule:GetCurrencyOptions()
   local curOpts = {
     ['0'] = ''
   }
-  for i = 1, GetCurrencyListSize() do
-    local _, isHeader, _, isUnused = GetCurrencyListInfo(i)
-    if not isHeader and not isUnused then
-      local cL = GetCurrencyListLink(i)
+  --for i = 1, C_CurrencyInfo.GetCurrencyListSize() do
+  for i = 1, GetCurrencyListSize() do --REMOVE FOR SHADOWLANDS
+    --local listInfo = C_CurrencyInfo.GetCurrencyListInfo(i)
+    local _, isHeader, _, isUnused = GetCurrencyListInfo(i) --REMOVE FOR SHADOWLANDS
+    --if not listInfo.isHeader and not listInfo.isTypeUnused then
+    if not isHeader and not isUnused then --REMOVE FOR SHADOWLANDS
+      --local cL = C_CurrencyInfo.GetCurrencyListLink(i)
+      local cL = GetCurrencyListLink(i) --REMOVE FOR SHADOWLANDS
       curOpts[tostring(C_CurrencyInfo.GetCurrencyIDFromLink(cL))] = C_CurrencyInfo.GetBasicCurrencyInfo(C_CurrencyInfo.GetCurrencyIDFromLink(cL)).name
     end
   end
