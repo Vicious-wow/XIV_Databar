@@ -328,16 +328,16 @@ function AcquireTooltip()
 	local tooltip = tremove(tooltipHeap)
 
 	if not tooltip then
-		tooltip = CreateFrame("Frame", nil, UIParent)
+		tooltip = CreateFrame("Frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate")
 
-		local scrollFrame = CreateFrame("ScrollFrame", nil, tooltip)
+		local scrollFrame = CreateFrame("ScrollFrame", nil, tooltip, BackdropTemplateMixin and "BackdropTemplate")
 		scrollFrame:SetPoint("TOP", tooltip, "TOP", 0, -TOOLTIP_PADDING)
 		scrollFrame:SetPoint("BOTTOM", tooltip, "BOTTOM", 0, TOOLTIP_PADDING)
 		scrollFrame:SetPoint("LEFT", tooltip, "LEFT", TOOLTIP_PADDING, 0)
 		scrollFrame:SetPoint("RIGHT", tooltip, "RIGHT", -TOOLTIP_PADDING, 0)
 		tooltip.scrollFrame = scrollFrame
 
-		local scrollChild = CreateFrame("Frame", nil, tooltip.scrollFrame)
+		local scrollChild = CreateFrame("Frame", nil, tooltip.scrollFrame, BackdropTemplateMixin and "BackdropTemplate")
 		scrollFrame:SetScrollChild(scrollChild)
 		tooltip.scrollChild = scrollChild
 		setmetatable(tooltip, tipMetatable)
