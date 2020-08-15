@@ -84,7 +84,7 @@ function TravelModule:CreateFrames()
   self.portIcon = self.portIcon or self.portButton:CreateTexture(nil, 'OVERLAY')
   self.portText = self.portText or self.portButton:CreateFontString(nil, 'OVERLAY')
 
-  self.portPopup = self.portPopup or CreateFrame('BUTTON', "portPopup", self.portButton)
+  self.portPopup = self.portPopup or CreateFrame('BUTTON', "portPopup", self.portButton, BackdropTemplateMixin and "BackdropTemplate")
   local backdrop = GameTooltip:GetBackdrop()
   if backdrop and (not self.useElvUI) then
     self.portPopup:SetBackdrop(backdrop)

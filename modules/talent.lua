@@ -144,9 +144,9 @@ function TalentModule:CreateFrames()
   self.specIcon = self.specIcon or self.specFrame:CreateTexture(nil, 'OVERLAY')
   self.specText = self.specText or self.specFrame:CreateFontString(nil, 'OVERLAY')
 
-  self.specPopup = self.specPopup or CreateFrame('BUTTON', "SpecPopup", self.specFrame)
+  self.specPopup = self.specPopup or CreateFrame('BUTTON', "SpecPopup", self.specFrame, BackdropTemplateMixin and "BackdropTemplate")
   self.specPopup:SetFrameStrata("TOOLTIP")
-  self.lootSpecPopup = self.lootSpecPopup or CreateFrame('BUTTON', "LootPopup", self.specFrame)
+  self.lootSpecPopup = self.lootSpecPopup or CreateFrame('BUTTON', "LootPopup", self.specFrame, BackdropTemplateMixin and "BackdropTemplate")
   self.lootSpecPopup:SetFrameStrata("TOOLTIP")
 
   local backdrop = GameTooltip:GetBackdrop()
