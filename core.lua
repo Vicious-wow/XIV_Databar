@@ -278,13 +278,8 @@ function XIVBar:Refresh()
 	self:HideBarEvent()
     self.miniTextPosition = "TOP"
     if self.db.profile.general.barPosition == 'TOP' then
-		hooksecurefunc("UIParent_UpdateTopFramePositions",function(self)
+		hooksecurefunc("UIParent_UpdateTopFramePositions", function(self)
 			if(XIVBar.db.profile.general.barPosition == 'TOP') then
-				if OrderHallCommandBar and OrderHallCommandBar:IsVisible() then
-					if XIVBar.db.profile.general.ohHide then
-						OrderHallCommandBar:Hide()
-					end
-				end
 				OffsetUI()
 			end
 		end)
@@ -355,8 +350,6 @@ function XIVBar:PrintTable(table, prefix)
 end
 
 function OffsetUI()
-    local inOrderHall = C_Garrison.IsPlayerInGarrison(LE_GARRISON_TYPE_7_0);
-
     local offset=XIVBar.frames.bar:GetHeight();
     local buffsAreaTopOffset = offset;
 
@@ -413,18 +406,7 @@ function XIVBar:GetGeneralOptions()
 						style = "dropdown",
 						get = function() return self.db.profile.general.barPosition; end,
 						set = function(info, value) self.db.profile.general.barPosition = value;
-						if value == "TOP" and self.db.profile.general.ohHide then
-							LoadAddOn("Blizzard_OrderHallUI"); local b = OrderHallCommandBar; b:Hide();
-						end
 						self:Refresh(); end,
-					},
-					ohHide = {
-						name = L['Hide order hall bar'],
-						type = "toggle",
-						order = 3,
-						hidden = function() return self.db.profile.general.barPosition == "BOTTOM" end,
-						get = function() return self.db.profile.general.ohHide end,
-						set = function(_,val) self.db.profile.general.ohHide = val; if val then LoadAddOn("Blizzard_OrderHallUI"); local b = OrderHallCommandBar; b:Hide(); end self:Refresh(); end
 					},
                     flightHide = {
                         name = "Hide when in flight",
