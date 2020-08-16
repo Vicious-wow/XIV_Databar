@@ -59,7 +59,7 @@ local cellMetatable = lib.cellMetatable
 
 local activeTooltips = lib.activeTooltips
 
-local highlightFrame = CreateFrame("Frame", nil, UIParent)
+local highlightFrame = CreateFrame("Frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate")
 highlightFrame:SetFrameStrata("TOOLTIP")
 highlightFrame:Hide()
 
@@ -205,7 +205,7 @@ layoutCleaner:SetScript('OnUpdate', layoutCleaner.CleanupLayouts)
 function providerPrototype:AcquireCell()
 	local cell = tremove(self.heap)
 	if not cell then
-		cell = setmetatable(CreateFrame("Frame", nil, UIParent), self.cellMetatable)
+		cell = setmetatable(CreateFrame("Frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate"), self.cellMetatable)
 		if type(cell.InitializeCell) == 'function' then
 			cell:InitializeCell()
 		end
@@ -685,7 +685,7 @@ function tipPrototype:UpdateScrolling(maxheight)
 		self.scrollFrame:SetPoint("RIGHT", self, "RIGHT", -(TOOLTIP_PADDING + 20), 0)
 
 		if not self.slider then
-			local slider = CreateFrame("Slider", nil, self)
+			local slider = CreateFrame("Slider", nil, self, BackdropTemplateMixin and "BackdropTemplate")
 
 			self.slider = slider
 
