@@ -58,26 +58,24 @@ function TradeskillModule:UpdateProfValues()
   --if firstProf.idx doesn't exist, the player hasn't learned any profession and thus the tradeskillFrame is hidden
   if not self.firstProf.idx then
     self.tradeskillFrame:Hide()
-    return
+  else
+    --player has at least one profession, setting first one. show tradeskillFrame because it might've been hidden before
+    self.tradeskillFrame:Show()
+    self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, _, _, self.firstProf.id, _ = GetProfessionInfo(self.firstProf.idx)
+    self.firstProfBar:SetMinMaxValues(1, self.firstProf.maxLvl)
+    self.firstProfBar:SetValue(self.firstProf.lvl)
   end
-
-  --player has at least one profession, setting first one. show tradeskillFrame because it might've been hidden before
-  self.tradeskillFrame:Show()
-  self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, _, _, self.firstProf.id, _ = GetProfessionInfo(self.firstProf.idx)
-  self.firstProfBar:SetMinMaxValues(1, self.firstProf.maxLvl)
-  self.firstProfBar:SetValue(self.firstProf.lvl)
 
   --if secondProf.idx doesn't exist, hide the secondProfFrame 
   if not self.secondProf.idx then
     self.secondProfFrame:Hide()
-    return
+  else
+    --player has two profession, setting second one. show secondProfFrame because it might've been hidden before
+    self.secondProfFrame:Show()
+    self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl, _, _, self.secondProf.id, _ = GetProfessionInfo(self.secondProf.idx)
+    self.secondProfBar:SetMinMaxValues(1, self.secondProf.maxLvl)
+    self.secondProfBar:SetValue(self.secondProf.lvl)
   end
-
-  --player has two profession, setting second one. show secondProfFrame because it might've been hidden before
-  self.secondProfFrame:Show()
-  self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl, _, _, self.secondProf.id, _ = GetProfessionInfo(self.secondProf.idx)
-  self.secondProfBar:SetMinMaxValues(1, self.secondProf.maxLvl)
-  self.secondProfBar:SetValue(self.secondProf.lvl)
 
   --update values for secondary professions if they exist (archaeology / fishing / cooking)
   --update archaeology
