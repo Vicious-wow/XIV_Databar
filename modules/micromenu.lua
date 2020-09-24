@@ -542,7 +542,9 @@ function MenuModule:SocialHover(hoverFunc)
           local gameClient = gameAccount.clientProgram             --the application that the friend is online with - can be any game or 'App'/'Mobile'
           local realmName = gameAccount.realmName                  --gets the realm name the friend's char is on
           local faction = gameAccount.factionName                  --gets the friend's currently logged in char's faction
+          local zone = gameAccount.areaName                        --zone name to be displayed when the friend is playing retail WoW
           local richPresence = gameAccount.richPresence            --rich presence is used here to determine whether a friend logged into WoW is playing classic
+          local isWoW = false                                      --tracks whether the friend is playing WoW or not, default being that the friend isn't
           local isClassic = false                                  --tracks whether the friend is logged into classic or not, default being that the friend isn't
           local statusIcon = FRIENDS_TEXTURE_ONLINE                --get icon for online friends, might later be changed to afk/dnd icons
           local socialIcon = BNet_GetClientTexture(gameClient)     --get icon for the friend's application
@@ -559,6 +561,7 @@ function MenuModule:SocialHover(hoverFunc)
 
           -- if the friend is playing World of Warcraft - note that this is true for both retail and classic. yes, blizzard is retarded.
           if gameClient == BNET_CLIENT_WOW then
+            isWoW = true
             -- checks if the friend is logged into classic or retail
             if richPresence:find("Classic") then
               isClassic = true 
@@ -593,14 +596,17 @@ function MenuModule:SocialHover(hoverFunc)
             local lineLeft = string.format("|T%s:16|t|cff82c5ff %s|r %s", statusIcon, friendAccInfo.accountName, note)
             local lineRight = ''
 
-            -- if friend is not playing classic, set lineRight to char name (if playing WoW, otherwise empty string), game name and game icon
-            if not isClassic then
-              lineRight = string.format("%s %s |T%s:16|t", charNameFormat, gameName, socialIcon)
-            -- friend is logged into classic, set lineRight to 'WoW Classic - RealmName' and game icon
-            else
+            -- friend is not playing wow, format is "GameName [Icon]"
+            if not isWoW then
+              lineRight = string.format("%s |T%s:16|t", gameName, socialIcon)
+            -- friend is playing classic WoW, format is "WoW Classic [Icon]"
+            elseif isClassic then
               lineRight = string.format("%s |T%s:16|t", richPresence, socialIcon)
+            -- friend is playing retail WoW, format is "(Name-Realm) Zone [Icon]"
+            else
+              lineRight = string.format("%s %s |T%s:16|t", charNameFormat, zone, socialIcon)
             end
-
+            
             -- add left and right line to the tooltip
             tooltip:AddLine(lineLeft, lineRight)
             -- set up mouse events when the player hovers over/clicks on/leaves the friend's line in the tooltip
