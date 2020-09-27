@@ -155,13 +155,11 @@ function TravelModule:RegisterFrameEvents()
   self.portButton:SetScript('OnEnter', function()
     TravelModule:UpdatePortOptions()
     TravelModule:UpdatePortButton()
-    -- TravelModule:CreatePortPopup()
     self:ShowTooltip()
   end)
 
   self.portButton:SetScript('OnLeave', function()
     TravelModule:UpdatePortButton()
-    -- TravelModule:CreatePortPopup()
     GameTooltip:Hide()
   end)
 end
@@ -226,7 +224,7 @@ function TravelModule:UpdatePortOptions()
   end
 
   -- Garrison Hearthstone
-  self:AddPortOption({ portId = self.garrisonHearth, text = GARRISON_LOCATION_TOOLTIP })
+  self:AddPortOption({ portId = self.garrisonHearth, spellLabel = GARRISON_LOCATION_TOOLTIP })
 
   -- DK
   --  Death Gate (55)
@@ -266,6 +264,47 @@ function TravelModule:UpdatePortOptions()
   spellID = 193759 -- Teleport: Hall of the Guardian
   if xb.constants.playerClass == 'MAGE' then
     self:AddPortOption({ portId = spellID, spellLabel = ORDER_HALL_MAGE })
+    spellIDs = {
+      -- Alliance
+        3565, -- Darnassus
+       32271, -- Exodar
+        3562, -- Ironforge
+        3561, -- Stormwind
+       49359, -- Theramore
+
+      -- Horde
+        3567, -- Orgrimmar
+       32272, -- Silvermoon
+        3566, -- Thunder Bluff
+        3563, -- Undercity
+       49358, -- Stonard
+
+      -- Neutral
+       53140, -- Dalaran - Northrend
+       33690, -- Shattrath - Alliance
+       35715, -- Shattrath - Horde
+       88342, -- Tol Barad - Alliance
+       88344, -- Tol Barad - Horde
+      120145, -- Dalaran Crater
+
+      -- Pandaria
+      132621, -- Alliance Shrine
+      132627, -- Horde Shrine
+
+      -- Ashran
+      176248, -- Alliance
+      176242, -- Horde
+
+      -- Neutral
+      224869, -- Dalaran - Broken Isles
+
+      -- BfA
+      281403, -- Alliance
+      281404, -- Horde
+    }
+    for _, spellID in pairs(spellIDs) do
+      self:AddPortOption(spellID)
+    end
   end
 
   -- Monk
@@ -290,12 +329,6 @@ function TravelModule:UpdatePortOptions()
     end
 
     self:AddPortOption({ portId = spellID, spellLabel = portText })
-  end
-
-  if not self.portOptions then
-    local firstOption = self:FindFirstOption()
-    self.portOptions = {}
-    self.portOptions[firstOption.portId] = firstOption
   end
 end
 
@@ -327,8 +360,8 @@ function TravelModule:AddPortOption(port)
     if port.portId then
       spellID = port.portId
     end
-    if port.text then
-      spellLabel = port.text
+    if port.spellLabel then
+      spellLabel = port.spellLabel
     end
   end
   -- If we've got a Spell ID
@@ -364,10 +397,10 @@ function TravelModule:AddPortOption(port)
       end
 
       self.portOptions[spellID] = {
+        activeObject = self:IsReady(spellID),
         portId = spellID,
-        spellMacro = spellMacro,
         spellLabel = spellLabel,
-        text = spellMacro
+        spellMacro = spellMacro
       }
       self.portOptionsSize = self.portOptionsSize + 1
     end
@@ -388,6 +421,7 @@ function TravelModule:GetAvailableObject(objectIDs,objectSize)
       if type(v) == "table" and v.portId ~= nil then
         v = v.portId
       end
+      -- FIXME: Getting a Table without a portId
       if self:IsUsable(v) then
         -- If it's an Item or Toy
         if self:IsReadyItem(v) then
@@ -395,6 +429,9 @@ function TravelModule:GetAvailableObject(objectIDs,objectSize)
           if hearthSpell then
             hearthActive = true
             hearthText = hearthSpell
+            break
+          else
+            hearthSpell = "item:" .. v
             break
           end -- Couldn't get Name
         else -- Not an Item or Toy or isn't Ready
@@ -427,28 +464,33 @@ function TravelModule:GetAvailableHearth()
   if not self:PlayerIsIdle() then return; end
 
   local hearth = self:GetAvailableObject(self.hearthstones,self.hearthstonesSize)
-  return { activeHearth = hearth.activeObject, portId = hearth.portId, spellMacro = hearth.spellMacro, spellLabel = GetBindLocation() }
+  return { activeObject = hearth.activeObject, portId = hearth.portId, spellMacro = hearth.spellMacro, spellLabel = GetBindLocation() }
 end
 
-function TravelModule:SetHearthSpell()
+function TravelModule:SetHearthSpell(hearth)
   if not self:PlayerIsIdle() then return; end
 
-  local hearth = self:GetAvailableHearth()
-  if hearth.activeHearth and hearth.spellMacro then
-    self.hearthButton:SetAttribute("macrotext", "/use " .. hearth.spellMacro)
+  if hearth.activeObject then
+    if hearth.spellMacro and hearth.spellMacro ~= "" then
+      self.hearthButton:SetAttribute("macrotext", "/use " .. hearth.spellMacro)
+    end
   end
 end
 
-function TravelModule:SetHearthText()
+function TravelModule:SetHearthText(hearth)
   if not self:PlayerIsIdle() then return; end
 
-  local hearth = self:GetAvailableHearth()
-  if hearth.activeHearth and hearth.spellLabel then
+  if self.hearthText:GetFont() == nil then
+    local db = xb.db.profile
+    self.hearthText:SetFont(xb:GetFont(db.text.fontSize))
+  end
+
+  if hearth.activeObject and hearth.spellLabel then
     self.hearthText:SetText(hearth.spellLabel)
   end
 end
 
-function TravelModule:SetHearthColor()
+function TravelModule:SetHearthColor(hearth)
   if not self:PlayerIsIdle() then return; end
 
   local db = xb.db.profile
@@ -459,8 +501,7 @@ function TravelModule:SetHearthColor()
     self.hearthText:SetTextColor(unpack(xb:HoverColors()))
   else
     self.hearthIcon:SetVertexColor(unpack(inactive))
-    local hearth = self:GetAvailableHearth()
-    if hearth.activeHearth and hearth.spellMacro then
+    if hearth.activeObject and hearth.spellMacro then
       self.hearthIcon:SetVertexColor(unpack(active))
     end
     self.hearthText:SetTextColor(unpack(inactive))
@@ -470,34 +511,35 @@ end
 function TravelModule:UpdateHearthButton()
   if not self:PlayerIsIdle() then return; end
 
-  self:SetHearthSpell()
-  self:SetHearthText()
-  self:SetHearthColor()
+  local hearth = self:GetAvailableHearth()
+
+  self:SetHearthSpell(hearth)
+  self:SetHearthText(hearth)
+  self:SetHearthColor(hearth)
+
+  self:InitializePortButton(hearth)
 end
 
 function TravelModule:GetAvailablePort(v)
   if not self:PlayerIsIdle() then return; end
 
-  local port = {}
+  local port = nil
 
   if not v or not self:IsReady(v) then
-    v = xb.db.char.portItem.portId
+    port = xb.db.char.portItem
+    v = port.portId
     if not v or not self:IsReady(v) then
-      hearth = self:GetAvailableHearth()
-      v = hearth.portId
+      port = self:GetAvailableHearth()
+      v = port.portId
     end
   end
 
-  if v then
-    if self.portOptionsSize > 1 then
-      port = self:GetAvailableObject(self.portOptions, self.portOptionsSize)
-      port["activePort"] = port.activeObject
-    else
-      port = self:GetAvailableObject({ v }, 1)
+  if port then
+    if self.portOptionsSize <= 0 then
+      port = self:GetAvailableObject(port, 1)
       for _, hId in pairs(self.hearthstones) do
         if port.portId == hId then
           port.spellLabel = GetBindLocation()
-          port["activePort"] = port.activeObject
         end
       end
     end
@@ -506,25 +548,28 @@ function TravelModule:GetAvailablePort(v)
   return port
 end
 
-function TravelModule:SetPortSpell(v)
+function TravelModule:SetPortSpell(port)
   if not self:PlayerIsIdle() then return; end
 
-  local port = self:GetAvailablePort(v)
-  if port.spellMacro then
+  if port.activeObject and port.spellMacro and port.spellMacro ~= "" then
     self.portButton:SetAttribute("macrotext", "/use " .. port.spellMacro)
   end
 end
 
-function TravelModule:SetPortText(v)
+function TravelModule:SetPortText(port)
   if not self:PlayerIsIdle() then return; end
 
-  local port = self:GetAvailablePort(v)
-  if port.spellLabel and port.spellLabel ~= "" then
+  if self.portText:GetFont() == nil then
+    local db = xb.db.profile
+    self.portText:SetFont(xb:GetFont(db.text.fontSize))
+  end
+
+  if port.spellLabel and port.spellLabel ~= "" and port.spellLabel ~= "your inn" then
     self.portText:SetText(port.spellLabel)
   end
 end
 
-function TravelModule:SetPortColorNew()
+function TravelModule:SetPortColorNew(port)
   if not self:PlayerIsIdle() then return; end
 
   local db = xb.db.profile
@@ -535,25 +580,38 @@ function TravelModule:SetPortColorNew()
     self.portText:SetTextColor(unpack(xb:HoverColors()))
   else
     self.portIcon:SetVertexColor(unpack(inactive))
-    local port = self:GetAvailablePort()
-    if port.activePort and port.spellMacro then
+    if port.activeObject and port.spellMacro then
       self.portIcon:SetVertexColor(unpack(active))
     end
     self.portText:SetTextColor(unpack(inactive))
   end
 end
 
-function TravelModule:UpdatePortButton(v)
+function TravelModule:UpdatePortButton(port)
   if not self:PlayerIsIdle() then return; end
 
-  if self.portOptionsSize <= 0 then
-    v = self:GetAvailableHearth()
-    v = v.portId
+  if port == nil then
+    port = self:GetAvailablePort()
+    if port == nil or self.portOptionsSize <= 0 then
+      port = self:GetAvailableHearth()
+    end
   end
 
-  self:SetPortSpell(v)
-  self:SetPortText(v)
-  self:SetPortColorNew(v)
+  self:SetPortSpell(port)
+  self:SetPortText(port)
+  self:SetPortColorNew(port)
+end
+
+function TravelModule:InitializePortButton(hearth)
+  -- print("Initializing Port Button!")
+
+  if hearth == nil then
+    hearth = TravelModule:GetAvailableHearth()
+  end
+
+  if hearth.activeObject and (TravelModule.portButton:GetAttribute("macrotext") == nil or TravelModule.portButton:GetAttribute("macrotext") == "" or TravelModule.portText:GetText() == nil or TravelModule.portText:GetText() == "" or TravelModule.portText:GetText() == "your inn") then
+    TravelModule:UpdatePortButton(hearth)
+  end
 end
 
 function TravelModule:SetPortColor()
@@ -706,9 +764,8 @@ function TravelModule:Refresh()
   self.portText:SetFont(xb:GetFont(db.text.fontSize))
   self.portText:SetPoint("RIGHT")
   if xb.db.char.portItem.spellLabel and xb.db.char.portItem.spellLabel ~= "" then
-    self.portText:SetText(xb.db.char.portItem.spellLabel)
+    self:UpdatePortButton(xb.db.char.portItem)
   end
-  self:UpdatePortButton()
   self:CreatePortPopup()
 
   local popupPadding = xb.constants.popupPadding
@@ -736,6 +793,8 @@ function TravelModule:Refresh()
 end
 
 function TravelModule:ShowTooltip()
+  if not self:PlayerIsIdle() then return; end
+
   if not self.portPopup:IsVisible() then
     if self.portOptionsSize > 0 then
       GameTooltip:SetOwner(self.portButton, 'ANCHOR_'..xb.miniTextPosition)
@@ -754,7 +813,7 @@ function TravelModule:ShowTooltip()
             start, cd, _ = GetSpellCooldown(v.portId)
           end
           local cdString = self:FormatCooldown(start + cd - time)
-          GameTooltip:AddDoubleLine(v.text, cdString, r, g, b, 1, 1, 1)
+          GameTooltip:AddDoubleLine(v.spellLabel, cdString, r, g, b, 1, 1, 1)
         end
       end
       GameTooltip:AddLine(" ")
@@ -765,6 +824,8 @@ function TravelModule:ShowTooltip()
 end
 
 function TravelModule:FindFirstOption()
+  if not self:PlayerIsIdle() then return; end
+
   -- Default to Hearthstone
   local firstItemID = 6948 -- Hearthstone
   local firstItem = { portId = firstItemID, spellLabel = GetBindLocation() }
@@ -777,6 +838,7 @@ function TravelModule:FindFirstOption()
         local hearth = self.hearthstones[i]
         if self:IsReady(hearth) then
           firstItem["portId"] = hearth
+          firstItem["spellMacro"] = "item:" .. hearth
           itemFound = true
           break
         end
@@ -799,11 +861,18 @@ function TravelModule:FindFirstOption()
   end
 
   -- If we still failed, default to Hearthstone and hope for the best
+
   return firstItem
 end
 
 -- True if Item or Toy
 function TravelModule:IsUsableItem(id)
+  if type(id) == "table" then
+    id = id.portId
+  end
+
+  if id == nil then return false; end
+
   return IsUsableItem(id) or PlayerHasToy(id)
 end
 
@@ -814,6 +883,11 @@ end
 
 -- True if Spell
 function TravelModule:IsUsableSpell(id)
+  if type(id) == "table" then
+    id = id.portId
+  end
+
+  if id == nil then return false; end
   return IsPlayerSpell(id)
 end
 
@@ -824,11 +898,13 @@ end
 
 -- True if Item, Toy or Spell
 function TravelModule:IsUsable(id)
+  if id == nil then return false; end
   return self:IsUsableItem(id) or self:IsUsableSpell(id)
 end
 
 -- True if Item, Toy or Spell and is Ready
 function TravelModule:IsReady(id)
+  if id == nil then return false; end
   return self:IsReadyItem(id) or self:IsReadySpell(id)
 end
 
