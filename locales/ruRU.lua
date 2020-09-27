@@ -142,3 +142,5 @@ L['Open Artifact'] = "Открыть меню артефакта";
 L['Remaining'] = "Осталось";
 L['Available Ranks'] = "Доступно уровней";
 L['Artifact Knowledge'] = "Знание артефакта";
+
+L['Coordinates'] = "координаты";
