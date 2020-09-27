@@ -55,24 +55,35 @@ function TradeskillModule:UpdateProfValues()
   --update profession indexes before anything else or receive a million bugs when (un)learning professions
   self.firstProf.idx, self.secondProf.idx, self.arch.idx, self.fish.idx, self.cook.idx = GetProfessions() --this is the most important line in the entire fucking module
 
+  local idxes = {}
+  if self.firstProf.idx then table.insert(idxes,self.firstProf.idx); end
+  if self.secondProf.idx then table.insert(idxes,self.secondProf.idx); end
+  if self.cook.idx then table.insert(idxes,self.cook.idx); end
+  if self.fish.idx then table.insert(idxes,self.fish.idx); end
+  if self.arch.idx then table.insert(idxes,self.arch.idx); end
+
   --if firstProf.idx doesn't exist, the player hasn't learned any profession and thus the tradeskillFrame is hidden
-  if not self.firstProf.idx then
+  if not idxes[1] then
     self.tradeskillFrame:Hide()
   else
+    local prof1 = idxes[1]
+    self.firstProf.idx = prof1
     --player has at least one profession, setting first one. show tradeskillFrame because it might've been hidden before
     self.tradeskillFrame:Show()
-    self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, _, _, self.firstProf.id, _ = GetProfessionInfo(self.firstProf.idx)
+    self.firstProf.name, self.firstProf.defIcon, self.firstProf.lvl, self.firstProf.maxLvl, _, _, self.firstProf.id, _ = GetProfessionInfo(prof1)
     self.firstProfBar:SetMinMaxValues(1, self.firstProf.maxLvl)
     self.firstProfBar:SetValue(self.firstProf.lvl)
   end
 
-  --if secondProf.idx doesn't exist, hide the secondProfFrame 
-  if not self.secondProf.idx then
+  --if secondProf.idx doesn't exist, hide the secondProfFrame
+  if not idxes[2] then
     self.secondProfFrame:Hide()
   else
+    local prof2 = idxes[2]
+    self.secondProf.idx = prof2
     --player has two profession, setting second one. show secondProfFrame because it might've been hidden before
     self.secondProfFrame:Show()
-    self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl, _, _, self.secondProf.id, _ = GetProfessionInfo(self.secondProf.idx)
+    self.secondProf.name, self.secondProf.defIcon, self.secondProf.lvl, self.secondProf.maxLvl, _, _, self.secondProf.id, _ = GetProfessionInfo(prof2)
     self.secondProfBar:SetMinMaxValues(1, self.secondProf.maxLvl)
     self.secondProfBar:SetValue(self.secondProf.lvl)
   end
@@ -136,7 +147,13 @@ end
 function TradeskillModule:StyleTradeskillFrame(prefix)
   local db = xb.db.profile
   local iconSize = db.text.fontSize + db.general.barPadding
-  local icon = xb.constants.mediaPath..'profession\\'..self.profIcons[self[prefix].id]
+  local icon = nil
+
+  if self.profIcons[self[prefix].id] then
+    icon = xb.constants.mediaPath..'profession\\'..self.profIcons[self[prefix].id]
+  else
+    icon = xb.constants.mediaPath..'microbar\\help.tga'
+  end
 
   local textHeight = floor((xb:GetHeight() - 4) / 2)
   if self[prefix].lvl == self[prefix].maxLvl then
@@ -148,10 +165,12 @@ function TradeskillModule:StyleTradeskillFrame(prefix)
     barHeight = 2
   end
 
-  self[prefix..'Icon']:SetTexture(icon)
-  self[prefix..'Icon']:SetSize(iconSize, iconSize)
-  self[prefix..'Icon']:SetPoint('LEFT')
-  self[prefix..'Icon']:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  if icon ~= nil then
+    self[prefix..'Icon']:SetTexture(icon)
+    self[prefix..'Icon']:SetSize(iconSize, iconSize)
+    self[prefix..'Icon']:SetPoint('LEFT')
+    self[prefix..'Icon']:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  end
 
   self[prefix..'Text']:SetFont(xb:GetFont(textHeight))
   self[prefix..'Text']:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
@@ -276,6 +295,9 @@ function TradeskillModule:ShowTooltip()
 end
 
 function TradeskillModule:ListTooltipProfession(prefix, r, g, b)
+  if prefix ~= "firstProf" and self.firstProf.name == self[prefix].name then return; end
+  if prefix ~= "secondProf" and self.secondProf.name == self[prefix].name then return; end
+
   local left = "|T"..self[prefix].defIcon..":0|t "..self[prefix].name
   local right = "|cFFFFFFFF"..self[prefix].lvl.."|r / "..self[prefix].maxLvl
   GameTooltip:AddDoubleLine(left, right, 1, 1, 1, r, g, b)
