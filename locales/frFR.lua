@@ -142,3 +142,5 @@ L['Open Artifact'] = "Ouvrir l'Arme Prodigieuse";
 L['Remaining'] = "Restant";
 L['Available Ranks'] = "Rangs disponibles";
 L['Artifact Knowledge'] = "Connaissance de l'arme prodigieuse";
+
+L['Reputation'] = "Réputation";
