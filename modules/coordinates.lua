@@ -3,6 +3,7 @@ local _G = _G;
 local L = xb.L;
 
 local CoordinatesModule = xb:NewModule("CoordinatesModule", 'AceEvent-3.0')
+local ticker = nil
 
 function CoordinatesModule:GetName()
   return "coordinates";
@@ -12,6 +13,7 @@ function CoordinatesModule:OnInitialize()
   self.frame = nil
   self.icon = nil
   self.text = nil
+  self.tooltip = nil
 end
 
 function CoordinatesModule:OnEnable()
@@ -22,6 +24,10 @@ function CoordinatesModule:OnEnable()
     self.frame:Show()
     self:RegisterEvents()
   end
+  if true and self.tooltip == nil then
+    self.tooltip = GameTooltip
+  end
+  ticker = C_Timer.NewTicker(1,function() self:Coordinates_Update_value() end)
 end
 
 function CoordinatesModule:OnDisable()
@@ -29,6 +35,7 @@ function CoordinatesModule:OnDisable()
     self.frame:Hide()
     self.frame:UnregisterAllEvents()
   end
+  ticker:Cancel()
 end
 
 function CoordinatesModule:CreateModuleFrame()
@@ -66,15 +73,20 @@ end
 
 function CoordinatesModule:GetCoordinates()
   local map = C_Map.GetBestMapForUnit("player")
-  local position = C_Map.GetPlayerMapPosition(map, "player")
-  local posX, posY = position:GetXY()
-  posX = string.format("%.1f", posX * 100)
-  posY = string.format("%.1f", posY * 100)
-  if string.find(posX,'.') == nil then
-    posX = posX .. ".0"
-  end
-  if string.find(posY,'.') == nil then
-    posY = posY .. ".0"
+  local posX, posY = 0, 0
+  if map then
+    local position = C_Map.GetPlayerMapPosition(map, "player")
+    if position then
+      posX, posY = position:GetXY()
+      posX = string.format("%.1f", posX * 100)
+      posY = string.format("%.1f", posY * 100)
+      if string.find(posX,'.') == nil then
+        posX = posX .. ".0"
+      end
+      if string.find(posY,'.') == nil then
+        posY = posY .. ".0"
+      end
+    end
   end
 
   return posX .. ", " .. posY
@@ -85,20 +97,9 @@ function CoordinatesModule:RegisterEvents()
     if InCombatLockdown() then return end
     self.icon:SetVertexColor(xb:GetColor('hover'))
     self.text:SetTextColor(xb:GetColor('hover'))
-
-    local coordinates = self:GetCoordinates()
-
-    if xb.db.profile.general.barPosition == "TOP" then
-      GameTooltip:SetOwner(self.frame, "ANCHOR_BOTTOM")
-    else
-      GameTooltip:SetOwner(self.frame, "ANCHOR_TOP")
+    if true then
+      self.tooltip:Show()
     end
-    GameTooltip:AddLine("[|cff6699FFLocation|r]")
-    GameTooltip:AddLine(" ")
-    GameTooltip:AddDoubleLine("<"..'Zone'..">", "|cffffffff"..GetZoneText().."|r")
-    GameTooltip:AddDoubleLine("<"..'Subzone'..">", "|cffffffff"..GetSubZoneText().."|r")
-    GameTooltip:AddDoubleLine("<"..'Coordinates'..">", "|cffffffff"..coordinates.."|r")
-    GameTooltip:Show()
   end)
 
   self.frame:SetScript("OnClick", function(self, button, down)
@@ -112,17 +113,9 @@ function CoordinatesModule:RegisterEvents()
   self.frame:SetScript("OnLeave", function()
     self.icon:SetVertexColor(xb:GetColor('normal'))
     self.text:SetTextColor(xb:GetColor('inactive'))
-    GameTooltip:Hide();
-  end)
-
-	self.frame:RegisterEvent("PLAYER_ENTERING_WORLD");
-  self.frame:RegisterEvent("ZONE_CHANGED");
-  self.frame:RegisterEvent("ZONE_CHANGED_INDOORS");
-  self.frame:RegisterEvent("ZONE_CHANGED_NEW_AREA");
-  self.frame:RegisterEvent("PLAYER_ENTERING_WORLD");
-  self.frame:RegisterEvent("CVAR_UPDATE");
-  self.frame:SetScript("OnEvent", function(self,event, ...)
-    CoordinatesModule:Coordinates_Update_value()
+    if true then
+      self.tooltip:Hide()
+    end
   end)
 end
 
@@ -151,12 +144,27 @@ function CoordinatesModule:Refresh()
     self.frame:Show()
   end
 end
+
 function CoordinatesModule:Coordinates_Update_value()
+  local coordinates = self:GetCoordinates()
+
 	if self.text and self.frame then
-    local coordinates = self:GetCoordinates()
     self.text:SetText(coordinates)
 		self.frame:SetSize(self.text:GetStringWidth()+18, 16)
 	end
+
+  if true then
+    if xb.db.profile.general.barPosition == "TOP" then
+      self.tooltip:SetOwner(self.frame, "ANCHOR_BOTTOM")
+    else
+      self.tooltip:SetOwner(self.frame, "ANCHOR_TOP")
+    end
+    self.tooltip:AddLine("[|cff6699FFLocation|r]")
+    self.tooltip:AddLine(" ")
+    self.tooltip:AddDoubleLine("<"..'Zone'..">", "|cffffffff"..GetZoneText().."|r")
+    self.tooltip:AddDoubleLine("<"..'Subzone'..">", "|cffffffff"..GetSubZoneText().."|r")
+    self.tooltip:AddDoubleLine("<"..'Coordinates'..">", "|cffffffff"..coordinates.."|r")
+  end
 end
 
 function CoordinatesModule:GetDefaultOptions()
