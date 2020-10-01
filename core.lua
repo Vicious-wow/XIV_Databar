@@ -70,6 +70,11 @@ XIVBar.defaults = {
             smallFontSize = 11,
             font =  'Homizio Bold'
         },
+        modulePos = {
+            left = { "microMenu", "armor", "volume" },                               -- Start at end, work backward
+            middle = { "talent", "clock", "tradeskill", "currency", "coordinates" }, -- Start at end, work backward
+            right = { "system", "gold", "travel" }                                   -- Start at beginning, work forward
+        },
         modules = {
 
         }
@@ -274,7 +279,7 @@ end
 
 function XIVBar:Refresh()
     if self.frames.bar == nil then return; end
-	
+
 	self:HideBarEvent()
     self.miniTextPosition = "TOP"
     if self.db.profile.general.barPosition == 'TOP' then
@@ -374,7 +379,7 @@ function OffsetUI()
     if (not ticketStatusFrameShown and not gmChatStatusFrameShown) then
         buffsAreaTopOffset = buffsAreaTopOffset + 13;
     end
-		
+
     BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -205, 0 - buffsAreaTopOffset);
 end
 
@@ -602,11 +607,11 @@ function XIVBar:GetTextColorOptions()
 				desc = L["Only the alpha can be set with the color picker"],
 				type = "toggle",
 				order = 2,
-				set = function(_,val) 
+				set = function(_,val)
 					if val then
 						XIVBar:SetColor("normal",self:GetClassColors())
-					end 
-					self.db.profile.color.useTextCC = val 
+					end
+					self.db.profile.color.useTextCC = val
 				end,
 				get = function() return self.db.profile.color.useTextCC end
 			},

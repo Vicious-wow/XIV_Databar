@@ -47,8 +47,8 @@ function CoordinatesModule:UpdateModuleFrame()
   local xOffset = xb.db.profile.general.moduleSpacing
 
   local moduleInfo = {
-    { "tradeskill", "tradeskillFrame" },
     { "currency", "currencyFrame" },
+    { "tradeskill", "tradeskillFrame" },
     { "clock", "clockFrame" },
     { "bar", "bar" }
   }
