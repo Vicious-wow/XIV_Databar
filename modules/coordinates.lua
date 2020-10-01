@@ -23,10 +23,9 @@ function CoordinatesModule:OnEnable()
   else
     self.frame:Show()
     self:RegisterEvents()
+    self:UpdateModuleFrame()
   end
-  if true and self.tooltip == nil then
-    self.tooltip = GameTooltip
-  end
+  self:CreateTooltip()
   ticker = C_Timer.NewTicker(1,function() self:Coordinates_Update_value() end)
 end
 
@@ -34,8 +33,48 @@ function CoordinatesModule:OnDisable()
   if self.frame then
     self.frame:Hide()
     self.frame:UnregisterAllEvents()
+    self.frame = nil
+  end
+  if self.tooltip then
+    self.tooltip:Hide()
+    self.tooltip = nil
   end
   ticker:Cancel()
+end
+
+function CoordinatesModule:UpdateModuleFrame()
+  local relativeAnchorPoint = 'RIGHT'
+  local xOffset = xb.db.profile.general.moduleSpacing
+
+  local moduleInfo = {
+    { "tradeskill", "tradeskillFrame" },
+    { "currency", "currencyFrame" },
+    { "clock", "clockFrame" },
+    { "bar", "bar" }
+  }
+  local count = 0
+  for _ in pairs(moduleInfo) do count = count + 1 end
+
+  local moduleKey = ""
+  local lastModuleKey = ""
+  local frameName = ""
+  local parentFrame = nil
+
+  for i=1,count do
+    moduleKey = moduleInfo[i][1]
+    frameName = moduleInfo[i][2]
+    parentFrame = xb:GetFrame(frameName)
+    if (xb.db.profile.modules[lastModuleKey] and xb.db.profile.modules[lastModuleKey].enabled) or parentFrame ~= nil then
+      break
+    end
+    lastModuleKey = moduleKey
+  end
+  if moduleKey == "bar" then
+    relativeAnchorPoint = 'LEFT'
+    xOffset = 0
+  end
+
+  self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
 end
 
 function CoordinatesModule:CreateModuleFrame()
@@ -44,19 +83,7 @@ function CoordinatesModule:CreateModuleFrame()
   self.frame:EnableMouse(true)
   self.frame:RegisterForClicks("AnyUp")
 
-  local relativeAnchorPoint = 'RIGHT'
-  local xOffset = xb.db.profile.general.moduleSpacing
-  local parentFrame = xb:GetFrame('currencyFrame')
-  if not xb.db.profile.modules.currency.enabled then
-    parentFrame=xb:GetFrame('clockFrame')
-    if not xb.db.profile.modules.clock.enabled then
-      parentFrame=xb:GetFrame('bar')
-      relativeAnchorPoint = 'LEFT'
-      xOffset = 0
-    end
-  end
-
-  self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
+  self:UpdateModuleFrame()
 
   self.icon = self.frame:CreateTexture(nil,"OVERLAY",nil,7)
   self.icon:SetPoint("LEFT")
@@ -97,7 +124,7 @@ function CoordinatesModule:RegisterEvents()
     if InCombatLockdown() then return end
     self.icon:SetVertexColor(xb:GetColor('hover'))
     self.text:SetTextColor(xb:GetColor('hover'))
-    if true then
+    if xb.db.profile.modules.coordinates.showTooltip then
       self.tooltip:Show()
     end
   end)
@@ -113,7 +140,7 @@ function CoordinatesModule:RegisterEvents()
   self.frame:SetScript("OnLeave", function()
     self.icon:SetVertexColor(xb:GetColor('normal'))
     self.text:SetTextColor(xb:GetColor('inactive'))
-    if true then
+    if xb.db.profile.modules.coordinates.showTooltip then
       self.tooltip:Hide()
     end
   end)
@@ -129,19 +156,14 @@ function CoordinatesModule:Refresh()
 
   if self.frame then
     self.frame:Hide()
-    local relativeAnchorPoint = 'RIGHT'
-    local xOffset = xb.db.profile.general.moduleSpacing
-    local parentFrame = xb:GetFrame('currencyFrame')
-    if not xb.db.profile.modules.currency.enabled then
-      parentFrame=xb:GetFrame('clockFrame')
-      if not xb.db.profile.modules.clock.enabled then
-        parentFrame=xb:GetFrame('bar')
-        relativeAnchorPoint = 'LEFT'
-        xOffset = 0
-      end
-    end
-    self.frame:SetPoint('LEFT', parentFrame, relativeAnchorPoint, xOffset, 0)
+    self:UpdateModuleFrame()
     self.frame:Show()
+  end
+end
+
+function CoordinatesModule:CreateTooltip()
+  if xb.db.profile.modules.coordinates.showTooltip and CoordinatesModule.tooltip == nil then
+    CoordinatesModule.tooltip = GameTooltip
   end
 end
 
@@ -153,7 +175,7 @@ function CoordinatesModule:Coordinates_Update_value()
 		self.frame:SetSize(self.text:GetStringWidth()+18, 16)
 	end
 
-  if true then
+  if xb.db.profile.modules.coordinates.showTooltip then
     if xb.db.profile.general.barPosition == "TOP" then
       self.tooltip:SetOwner(self.frame, "ANCHOR_BOTTOM")
     else
@@ -192,6 +214,20 @@ function CoordinatesModule:GetConfig()
           end
         end,
         width = "full"
+      },
+      showTooltip = {
+        name = "Show Tooltip",
+        order = 0,
+        type = "toggle",
+        get = function() return xb.db.profile.modules.coordinates.showTooltip; end,
+        set = function(_, val)
+          xb.db.profile.modules.coordinates.showTooltip = val
+          if val then
+            self:CreateTooltip()
+          else
+            self.tooltip = nil
+          end
+        end
       }
     }
   }
