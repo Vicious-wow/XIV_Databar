@@ -51,6 +51,7 @@ L['Hover'] = "鼠标悬停";
 
 -------------------- MODULES ---------------------------
 
+-- MicroMenu Module
 L['Micromenu'] = "微型菜单";
 L['Show Social Tooltips'] = "显示社交提示";
 L['Main Menu Icon Right Spacing'] = "主菜单图标右间距";
@@ -81,13 +82,16 @@ L['Show Pets Button'] = "显示藏品按钮";
 L['Show Shop Button'] = "显示商城按钮";
 L['Show Help Button'] = "显示帮助按钮";
 
+-- Armor Module
 L['Always Show Item Level'] = "始终显示物品等级";
 L['Minimum Durability to Become Active'] = "当耐久度损失到多少时,变得活跃";
 L['Maximum Durability to Show Item Level'] = "当耐久度达到多少时,显示物品等级";
 
+-- MasterLevel Module
 L['Master Volume'] = "主音量";
 L["Volume step"] = "音量调节";
 
+-- Clock Module
 L['Time Format'] = "时间格式";
 L['Use Server Time'] = "使用服务器时间";
 L['New Event!'] = "新事件!";
@@ -97,12 +101,14 @@ L['Open Calendar'] = "打开日历";
 L['Open Clock'] = "打开时钟";
 L['Hide Event Text'] = "隐藏事件文字";
 
+-- Travel Module
 L['Travel'] = "传送";
 L['Port Options'] = "传送选项";
 L['Ready'] = "就绪";
 L['Travel Cooldowns'] = "传送冷却";
 L['Change Port Option'] = "更改传送选项";
 
+-- Gold Module
 L['Always Show Silver and Copper'] = "始终显示银币和铜币";
 L['Shorten Gold'] = "金钱缩写";
 L['Toggle Bags'] = "切换背包";
@@ -110,6 +116,7 @@ L['Session Total'] = "汇总";
 L['Daily Total'] = true;
 L['Gold rounded values'] = true;
 
+-- Currency Module
 L['Show XP Bar Below Max Level'] = "未满级时显示经验条";
 L['Use Class Colors for XP Bar'] = "经验条使用职业颜色";
 L['Show Tooltips'] = "显示提示";
@@ -120,6 +127,7 @@ L['Second Currency'] = "第二种货币";
 L['Third Currency'] = "第三种货币";
 L['Rested'] = "精力充沛";
 
+-- System Module
 L['Show World Ping'] = "显示世界延迟";
 L['Number of Addons To Show'] = "显示插件的数量";
 L['Addons to Show in Tooltip'] = "在提示中显示的插件";
@@ -128,11 +136,13 @@ L['Memory Usage'] = "内存占用";
 L['Garbage Collect'] = "垃圾收集";
 L['Cleaned'] = "已清理";
 
+-- Tradeskill Module
 L['Use Class Colors'] = "使用职业颜色";
 L['Cooldowns'] = "冷却";
 L['Toggle Profession Frame'] = '顯示職業框架';
 L['Toggle Profession Spellbook'] = '表演專業拼寫本';
 
+-- Talents Module
 L['Set Specialization'] = "设置专精";
 L['Set Loot Specialization'] = "设置拾取专精";
 L['Current Specialization'] = "当前专精";
@@ -143,4 +153,8 @@ L['Remaining'] = "剩余";
 L['Available Ranks'] = "神器等级";
 L['Artifact Knowledge'] = "神器知识";
 
+-- Coordinates Module
 L['Coordinates'] = "座标";
+L['Location'] = "位置";
+L['Zone'] = "区";
+L['Subzone'] = "分区";

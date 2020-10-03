@@ -51,6 +51,7 @@ L['Hover'] = "По наведению";
 
 -------------------- MODULES ---------------------------
 
+-- MicroMenu Module
 L['Micromenu'] = "Микроменю";
 L['Show Social Tooltips'] = "Показывать подсказки гильдии и друзей";
 L['Main Menu Icon Right Spacing'] = "Расстояние от кнопки меню до других кнопок";
@@ -81,13 +82,16 @@ L['Show Pets Button'] = "Коллекции";
 L['Show Shop Button'] = "Магазин";
 L['Show Help Button'] = "Помощь";
 
+-- Armor Module
 L['Always Show Item Level'] = "Всегда показывать уровень предметов";
 L['Minimum Durability to Become Active'] = "Прочность, до которой загораются цифры";
 L['Maximum Durability to Show Item Level'] = "Прочность, после которой показывается уровень предметов";
 
+-- MasterVolume Module
 L['Master Volume'] = "Громкость игры";
 L["Volume step"] = "Шаг изменения громкости";
 
+-- Clock Module
 L['Time Format'] = "Формат времени";
 L['Use Server Time'] = "Использовать серверное время";
 L['New Event!'] = "Новое событие!";
@@ -97,12 +101,14 @@ L['Open Calendar'] = "Открыть календарь";
 L['Open Clock'] = "Открыть часы";
 L['Hide Event Text'] = "Скрыть текст событий";
 
+-- Travel Module
 L['Travel'] = "Перемещение";
 L['Port Options'] = "Назначение телепорта";
 L['Ready'] = "Готово";
 L['Travel Cooldowns'] = "Способности для перемещения";
 L['Change Port Option'] = "Изменить назначение телепорта";
 
+-- Gold Module
 L['Always Show Silver and Copper'] = "Всегда показывать серебро и медь";
 L['Shorten Gold'] = "Сокращать число золота";
 L['Toggle Bags'] = "Переключить видимость сумок";
@@ -110,6 +116,7 @@ L['Session Total'] = "Всего за сессию";
 L['Daily Total'] = true;
 L['Gold rounded values'] = true;
 
+-- Currency Module
 L['Show XP Bar Below Max Level'] = "Показывать полоску опыта персонажам, не достигшим максимального уровня";
 L['Use Class Colors for XP Bar'] = "Использовать цвет класса для полоски опыта";
 L['Show Tooltips'] = "Показывать подсказки";
@@ -120,6 +127,7 @@ L['Second Currency'] = "Валюта №2";
 L['Third Currency'] = "Валюта №3";
 L['Rested'] = "Отдых";
 
+-- System Module
 L['Show World Ping'] = "Показывать задержку сервера";
 L['Number of Addons To Show'] = "Сколько аддонов показывать";
 L['Addons to Show in Tooltip'] = "Сколько аддонов показывать";
@@ -128,11 +136,13 @@ L['Memory Usage'] = "Использование памяти";
 L['Garbage Collect'] = "Очистить память";
 L['Cleaned'] = "Очищено";
 
+-- Tradeskill Module
 L['Use Class Colors'] = "Использовать цвет класса";
 L['Cooldowns'] = "Кулдауны";
 L['Toggle Profession Frame'] = 'Показать кадр профессии';
 L['Toggle Profession Spellbook'] = 'показать книгу заклинаний профессии';
 
+-- Talents Module
 L['Set Specialization'] = "Выбрать специализацию";
 L['Set Loot Specialization'] = "Выбрать специализацию для добычи";
 L['Current Specialization'] = "Текущая специализация";
@@ -143,4 +153,8 @@ L['Remaining'] = "Осталось";
 L['Available Ranks'] = "Доступно уровней";
 L['Artifact Knowledge'] = "Знание артефакта";
 
+-- Coordinates Module
 L['Coordinates'] = "координаты";
+L['Location'] = "положение";
+L['Zone'] = "Зона";
+L['Subzone'] = "Подзона";

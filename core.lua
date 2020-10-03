@@ -71,9 +71,9 @@ XIVBar.defaults = {
             font =  'Homizio Bold'
         },
         modulePos = {
-            left = { "microMenu", "armor", "volume" },                               -- Start at end, work backward
-            middle = { "talent", "clock", "tradeskill", "currency", "coordinates" }, -- Start at end, work backward
-            right = { "system", "gold", "travel" }                                   -- Start at beginning, work forward
+            left = { "bar", "microMenu", "armor", "volume" },                               -- Start at end, work backward
+            middle = { "bar", "talent", "clock", "tradeskill", "currency", "coordinates" }, -- Start at end, work backward
+            right = { "system", "gold", "travel", "bar" }                                   -- Start at beginning, work forward
         },
         modules = {
 

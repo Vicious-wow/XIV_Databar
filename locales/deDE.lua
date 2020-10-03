@@ -51,6 +51,7 @@ L['Hover'] = "Mouseover";
 
 -------------------- MODULES ---------------------------
 
+-- MicroMenu Module
 L['Micromenu'] = "Mikromenü";
 L['Show Social Tooltips'] = "Social Tooltips anzeigen";
 L['Main Menu Icon Right Spacing'] = "Hauptmenü Icon Abstand Rechts";
@@ -81,13 +82,16 @@ L['Show Pets Button'] = "Zeige Haustier Taste";
 L['Show Shop Button'] = "Zeige Shop Taste";
 L['Show Help Button'] = "Zeige Hilfe Taste";
 
+-- Armor Module
 L['Always Show Item Level'] = "Gegenstandsstufe immer anzeigen";
 L['Minimum Durability to Become Active'] = "Minimale Haltbarkeit für Anzeige";
 L['Maximum Durability to Show Item Level'] = "Maximale Haltbarkeit für Gegenstandsstufe-Anzeige";
 
+-- MasterVolume Module
 L['Master Volume'] = "Haupt-Lautstärke";
 L["Volume step"] = "Lautstärken-Schritte";
 
+-- Clock Module
 L['Time Format'] = "Uhrzeit-Format";
 L['Use Server Time'] = "Server-Zeit benutzen";
 L['New Event!'] = "Neue Veranstaltung!";
@@ -97,12 +101,14 @@ L['Open Calendar'] = "Kalendar öffnen";
 L['Open Clock'] = "Stoppuhr öffnen";
 L['Hide Event Text'] = "Event-Text verstecken";
 
+-- Travel Module
 L['Travel'] = "Reise";
 L['Port Options'] = "Teleport-Optionen";
 L['Ready'] = "Bereit";
 L['Travel Cooldowns'] = "Reise-Abklingzeiten";
 L['Change Port Option'] = "Teleport-Optionen ändern";
 
+-- Gold Module
 L['Always Show Silver and Copper'] = "Silber und Kupfer immer anzeigen";
 L['Shorten Gold'] = "Gold abkürzen";
 L['Toggle Bags'] = "Taschen anzeigen";
@@ -110,6 +116,7 @@ L['Session Total'] = "Sitzung total";
 L['Daily Total'] = "Heute total";
 L['Gold rounded values'] = "Gold runden";
 
+-- Currency Module
 L['Show XP Bar Below Max Level'] = "Erfahrungsleiste unter Levelcap anzeigen";
 L['Use Class Colors for XP Bar'] = "Klassenfarbe für Erfahrungsleiste benutzen";
 L['Show Tooltips'] = "Tooltips anzeigen";
@@ -120,6 +127,7 @@ L['Second Currency'] = "Währung #2";
 L['Third Currency'] = "Währung #3";
 L['Rested'] = "Ausgeruht";
 
+-- System Module
 L['Show World Ping'] = "World-Ping anzeigen";
 L['Number of Addons To Show'] = "Maximale Anzahl für Addon-Anzeige";
 L['Addons to Show in Tooltip'] = "Addons die im Tooltip angezeigt werden";
@@ -128,11 +136,13 @@ L['Memory Usage'] = "Speichernutzung";
 L['Garbage Collect'] = "Speicher säubern"; -- The expression "garbage collecor" only works in english
 L['Cleaned'] = "Gesäubert";
 
+-- Tradeskill Module
 L['Use Class Colors'] = "Klassenfarben benutzen";
 L['Cooldowns'] = "Abklingzeiten";
 L['Toggle Profession Frame'] = 'Berufsrahmen anzeigen';
 L['Toggle Profession Spellbook'] = 'Zauberbuch für Berufe anzeigen';
 
+-- Talents Module
 L['Set Specialization'] = "Spezialisierung auswählen";
 L['Set Loot Specialization'] = "Beute-Spezialisierung auswählen";
 L['Current Specialization'] = "Aktuelle Spezialisierung";
@@ -143,4 +153,8 @@ L['Remaining'] = "Verbleibend";
 L['Available Ranks'] = "Verfügbare Ränge";
 L['Artifact Knowledge'] = "Artefaktwissen";
 
+-- Coordinates Module
 L['Coordinates'] = "Koordinaten";
+L['Location'] = "Ort";
+L['Zone'] = "Bereich";
+L['Subzone'] = "Teirbereich";

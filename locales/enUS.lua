@@ -51,6 +51,7 @@ L['Hover'] = true;
 
 -------------------- MODULES ---------------------------
 
+-- MicroMenu Module
 L['Micromenu'] = true;
 L['Show Social Tooltips'] = true;
 L['Main Menu Icon Right Spacing'] = true;
@@ -81,13 +82,16 @@ L['Show Pets Button'] = true;
 L['Show Shop Button'] = true;
 L['Show Help Button'] = true;
 
+-- Armor Module
 L['Always Show Item Level'] = true;
 L['Minimum Durability to Become Active'] = true;
 L['Maximum Durability to Show Item Level'] = true;
 
+-- MasterVolume Module
 L['Master Volume'] = true;
 L["Volume step"] = true;
 
+-- Clock Module
 L['Time Format'] = true;
 L['Use Server Time'] = true;
 L['New Event!'] = true;
@@ -97,12 +101,14 @@ L['Open Calendar'] = true;
 L['Open Clock'] = true;
 L['Hide Event Text'] = true;
 
+-- Travel Module
 L['Travel'] = true;
 L['Port Options'] = true;
 L['Ready'] = true;
 L['Travel Cooldowns'] = true;
 L['Change Port Option'] = true;
 
+-- Gold Module
 L['Always Show Silver and Copper'] = true;
 L['Shorten Gold'] = true;
 L['Toggle Bags'] = true;
@@ -110,6 +116,7 @@ L['Session Total'] = true;
 L['Daily Total'] = true;
 L['Gold rounded values'] = true;
 
+-- Currency Module
 L['Show XP Bar Below Max Level'] = true;
 L['Use Class Colors for XP Bar'] = true;
 L['Show Tooltips'] = true;
@@ -120,6 +127,7 @@ L['Second Currency'] = true;
 L['Third Currency'] = true;
 L['Rested'] = true;
 
+-- System Module
 L['Show World Ping'] = true;
 L['Number of Addons To Show'] = true;
 L['Addons to Show in Tooltip'] = true;
@@ -128,11 +136,13 @@ L['Memory Usage'] = true;
 L['Garbage Collect'] = true;
 L['Cleaned'] = true;
 
+-- Tradeskill Module
 L['Use Class Colors'] = true;
 L['Cooldowns'] = true;
 L['Toggle Profession Frame'] = true;
 L['Toggle Profession Spellbook'] = true;
 
+-- Talents Module
 L['Set Specialization'] = true;
 L['Set Loot Specialization'] = true;
 L['Current Specialization'] = true;
@@ -143,4 +153,8 @@ L['Remaining'] = true;
 L['Available Ranks'] = true;
 L['Artifact Knowledge'] = true;
 
+-- Coordinates Module
 L['Coordinates'] = true;
+L['Location'] = true;
+L['Zone'] = true;
+L['Subzone'] = true;
