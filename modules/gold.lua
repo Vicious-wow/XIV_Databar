@@ -78,7 +78,7 @@ function GoldModule:OnInitialize()
   
   local playerData = xb.db.factionrealm[xb.constants.playerName]
 
-  local curDate = C_Calendar.GetDate()
+  local curDate = C_DateAndTime.GetCurrentCalendarTime()
   local today = ConvertDateToNumber(curDate.month, curDate.monthDay, curDate.year)
   
   if playerData.lastLoginDate then
