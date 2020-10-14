@@ -761,15 +761,10 @@ function MenuModule:GuildHover(hoverFunc)
         else status = '' end
 
         -- name is CharName-RealmName, extract CharName from the string
-        local charName = ''
-        local byteTable = { string.byte(name, 1, #name) }
-        for i = 1, #byteTable do
-          local c = string.char(byteTable[i])
-          if c == '-' then break
-          else charName = charName .. c end
-        end
+        local charName = name:match('%a+%f[-]')
 
-        local lineLeft = string.format('%s |c%s%s|r %s (|cffecd672%s|r)', level, colorHex, charName, status, note)
+        if note ~= '' then note = '|cffffffff(|r' .. note .. '|cffffffff)|r' end
+        local lineLeft = string.format('%s |c%s%s|r %s |cffecd672%s|r', level, colorHex, charName, status, note)
         local lineRight = string.format('%s|cffffffff %s', (isMobile and '|cffffffa0[M]|r ' or ''), zone or '')
         tooltip:AddLine(lineLeft, lineRight)
 		    tooltip:SetLineScript(tooltip:GetLineCount(),'OnEnter', function() self.glineHover = true end)
