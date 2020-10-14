@@ -1,8 +1,8 @@
-## Interface: 80000
+## Interface: 90001
 ## Title: XIV_Databar
 ## Author: Vicious
 ## Version: 2.0.2
-## Notes: Adds a bottombar by the request of |cffffffffu/sammojo|r on Reddit, Icons made by |cffffffffu/sammojo|r. Previously maintained by |cff00FF99Saxitoxin|r, then |cffbbbbbbMille|cff990000XIV|r and now |c03dbfcbbVicious|r.
+## Notes: Adds a databar by the request of |cffffffffu/sammojo|r on Reddit, Icons made by |cffffffffu/sammojo|r. Previously maintained by |cff00FF99Saxitoxin|r, then |cffbbbbbbMille|cff990000XIV|r and now |c03dbfcbbVicious|r.
 ## SavedVariables: TEST_CONFIG, XIVBarDB
 ## X-Issues: https://github.com/Vicious-wow/XIV_Databar/issues
 
