@@ -58,7 +58,7 @@ end
 
 function TravelModule:OnEnable()
   if self.hearthFrame == nil then
-    self.hearthFrame = CreateFrame("FRAME", nil, xb:GetFrame('bar'))
+    self.hearthFrame = CreateFrame('FRAME', nil, xb:GetFrame('bar'))
     xb:RegisterFrame('travelFrame', self.hearthFrame)
   end
   self.useElvUI = xb.db.profile.general.useElvUI and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui'))
@@ -76,15 +76,15 @@ function TravelModule:OnDisable()
 end
 
 function TravelModule:CreateFrames()
-  self.hearthButton = self.hearthButton or CreateFrame('BUTTON', "hearthButton", self.hearthFrame, "SecureActionButtonTemplate")
+  self.hearthButton = self.hearthButton or CreateFrame('BUTTON', 'hearthButton', self.hearthFrame, 'SecureActionButtonTemplate')
   self.hearthIcon = self.hearthIcon or self.hearthButton:CreateTexture(nil, 'OVERLAY')
   self.hearthText = self.hearthText or self.hearthButton:CreateFontString(nil, 'OVERLAY')
 
-  self.portButton = self.portButton or CreateFrame('BUTTON', "portButton", self.hearthFrame, "SecureActionButtonTemplate")
+  self.portButton = self.portButton or CreateFrame('BUTTON', 'portButton', self.hearthFrame, 'SecureActionButtonTemplate')
   self.portIcon = self.portIcon or self.portButton:CreateTexture(nil, 'OVERLAY')
   self.portText = self.portText or self.portButton:CreateFontString(nil, 'OVERLAY')
 
-  self.portPopup = self.portPopup or CreateFrame('BUTTON', "portPopup", self.portButton, BackdropTemplateMixin and "BackdropTemplate")
+  self.portPopup = self.portPopup or CreateFrame('BUTTON', 'portPopup', self.portButton, BackdropTemplateMixin and 'BackdropTemplate')
   local backdrop = GameTooltip:GetBackdrop()
   if backdrop and (not self.useElvUI) then
     self.portPopup:SetBackdrop(backdrop)
@@ -98,7 +98,7 @@ function TravelModule:RegisterFrameEvents()
   self:RegisterEvent('BAG_UPDATE_DELAYED', 'Refresh')
   self:RegisterEvent('HEARTHSTONE_BOUND', 'Refresh')
   self.hearthButton:EnableMouse(true)
-  self.hearthButton:RegisterForClicks("AnyUp")
+  self.hearthButton:RegisterForClicks('AnyUp')
   self.hearthButton:SetAttribute('type', 'macro')
 
   self.portButton:EnableMouse(true)

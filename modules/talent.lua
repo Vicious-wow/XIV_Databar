@@ -140,14 +140,14 @@ function TalentModule:Refresh()
 end
 
 function TalentModule:CreateFrames()
-  self.specFrame = self.specFrame or CreateFrame("BUTTON", nil, self.talentFrame, 'SecureActionButtonTemplate')
+  self.specFrame = self.specFrame or CreateFrame('BUTTON', nil, self.talentFrame, 'SecureActionButtonTemplate')
   self.specIcon = self.specIcon or self.specFrame:CreateTexture(nil, 'OVERLAY')
   self.specText = self.specText or self.specFrame:CreateFontString(nil, 'OVERLAY')
 
-  self.specPopup = self.specPopup or CreateFrame('BUTTON', "SpecPopup", self.specFrame, BackdropTemplateMixin and "BackdropTemplate")
-  self.specPopup:SetFrameStrata("TOOLTIP")
-  self.lootSpecPopup = self.lootSpecPopup or CreateFrame('BUTTON', "LootPopup", self.specFrame, BackdropTemplateMixin and "BackdropTemplate")
-  self.lootSpecPopup:SetFrameStrata("TOOLTIP")
+  self.specPopup = self.specPopup or CreateFrame('BUTTON', 'SpecPopup', self.specFrame, BackdropTemplateMixin and 'BackdropTemplate')
+  self.specPopup:SetFrameStrata('TOOLTIP')
+  self.lootSpecPopup = self.lootSpecPopup or CreateFrame('BUTTON', 'LootPopup', self.specFrame, BackdropTemplateMixin and 'BackdropTemplate')
+  self.lootSpecPopup:SetFrameStrata('TOOLTIP')
 
   local backdrop = GameTooltip:GetBackdrop()
   if backdrop and (not self.useElvUI) then
