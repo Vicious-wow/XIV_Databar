@@ -29,7 +29,7 @@ local UIParent = UIParent
 ------------------------------------------------------------------------------
 -- Tables and locals
 ------------------------------------------------------------------------------
-lib.frameMetatable = lib.frameMetatable or { __index = CreateFrame("Frame") }
+lib.frameMetatable = lib.frameMetatable or { __index = CreateFrame('Frame', nil, nil, BackdropTemplateMixin and 'BackdropTemplate') }
 
 lib.tipPrototype = lib.tipPrototype or setmetatable({}, lib.frameMetatable)
 lib.tipMetatable = lib.tipMetatable or { __index = lib.tipPrototype }
@@ -59,8 +59,8 @@ local cellMetatable = lib.cellMetatable
 
 local activeTooltips = lib.activeTooltips
 
-local highlightFrame = CreateFrame("Frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate")
-highlightFrame:SetFrameStrata("TOOLTIP")
+local highlightFrame = CreateFrame('Frame', nil, UIParent, BackdropTemplateMixin and 'BackdropTemplate')
+highlightFrame:SetFrameStrata('TOOLTIP')
 highlightFrame:Hide()
 
 local DEFAULT_HIGHLIGHT_TEXTURE_PATH = [[Interface\QuestFrame\UI-QuestTitleHighlight]]
@@ -156,7 +156,7 @@ end
 local frameHeap = lib.frameHeap
 
 local function AcquireFrame(parent)
-	local frame = tremove(frameHeap) or CreateFrame("Frame")
+	local frame = tremove(frameHeap) or CreateFrame('Frame', nil, nil, BackdropTemplateMixin and 'BackdropTemplate')
 	frame:SetParent(parent)
 	--[===[@debug@
 	usedFrames = usedFrames + 1
@@ -179,7 +179,7 @@ end
 ------------------------------------------------------------------------------
 -- Dirty layout handler
 ------------------------------------------------------------------------------
-lib.layoutCleaner = lib.layoutCleaner or CreateFrame('Frame')
+lib.layoutCleaner = lib.layoutCleaner or CreateFrame('Frame', nil, nil, BackdropTemplateMixin and 'BackdropTemplate')
 
 local layoutCleaner = lib.layoutCleaner
 layoutCleaner.registry = layoutCleaner.registry or {}
@@ -205,7 +205,7 @@ layoutCleaner:SetScript('OnUpdate', layoutCleaner.CleanupLayouts)
 function providerPrototype:AcquireCell()
 	local cell = tremove(self.heap)
 	if not cell then
-		cell = setmetatable(CreateFrame("Frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate"), self.cellMetatable)
+		cell = setmetatable(CreateFrame('Frame', nil, UIParent, BackdropTemplateMixin and 'BackdropTemplate'), self.cellMetatable)
 		if type(cell.InitializeCell) == 'function' then
 			cell:InitializeCell()
 		end
