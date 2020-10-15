@@ -760,8 +760,8 @@ function MenuModule:GuildHover(hoverFunc)
         elseif status == 2 then status = DEFAULT_DND_MESSAGE;
         else status = '' end
 
-        -- name is CharName-RealmName, extract CharName from the string
-        local charName = name:match('%a+%f[-]')
+        -- name is CharName-RealmName, extract CharName from the string 
+        local charName = name:match('.+%f[-]')
 
         if note ~= '' then note = '|cffffffff(|r' .. note .. '|cffffffff)|r' end
         local lineLeft = string.format('%s |c%s%s|r %s |cffecd672%s|r', level, colorHex, charName, status, note)
