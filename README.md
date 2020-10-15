@@ -6,6 +6,7 @@ Once I've finished my to-do list I intend to upload this AddOn to Curseforge so 
 
 #### TO-DO LIST:
 - Bugfixes as they come up
+- [Armor] Change average durability to lowest durability (I don't care if i have 10% average when 2 pieces are broken)
 - [Tradeskill] Allow user to show/hide first/second/cooking profession, able to show all 3
 - [Currency] Add important currencies to the currency tooltip
 - [Currency] Add better currency icons for SL currencies
