@@ -1,6 +1,6 @@
 # XIV_Databar
 #### !! ATTENTION !!
-When downloading from Github, you'll have to **rename the folder XIV_Databar-master to XIV_Databar** or WoW won't be able to detect the AddOn.
+When downloading from Github, you'll have to **rename the folder XIV_Databar-master in the .zip to XIV_Databar** or WoW won't be able to detect the AddOn.
 
 Once I've finished my to-do list I intend to upload this AddOn to Curseforge so the poor Twitch App users can auto-download again.
 
