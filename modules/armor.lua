@@ -154,11 +154,9 @@ function ArmorModule:UPDATE_INVENTORY_DURABILITY()
 end
 
 function ArmorModule:UpdateDurabilityText()
-  local lowest = 101
-  local total = 0
-  local maxTotal = 0
   local db =  xb.db.profile.modules.armor
   local text = ''
+  local lowest = 101 -- store the most broken armor piece's percentage
 
   for i,v in pairs(self.durabilityList) do
     local curDur, maxDur = GetInventoryItemDurability(i)
