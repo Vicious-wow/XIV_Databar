@@ -11,18 +11,18 @@ end
 
 function ArmorModule:OnInitialize()
   self.iconPath = xb.constants.mediaPath..'datatexts\\repair'
-  self.durabilityAverage = 0
+  self.durabilityLowest = 0
   self.durabilityList = {
-    [INVSLOT_HEAD] = { cur = 0, max = 0, text = HEADSLOT},
-    [INVSLOT_SHOULDER] =  { cur = 0, max = 0, text = SHOULDERSLOT},
-    [INVSLOT_CHEST] =  { cur = 0, max = 0, text = CHESTSLOT},
-    [INVSLOT_WAIST] =  { cur = 0, max = 0, text = WAISTSLOT},
-    [INVSLOT_LEGS] =  { cur = 0, max = 0, text = LEGSSLOT},
-    [INVSLOT_FEET] =  { cur = 0, max = 0, text = FEETSLOT},
-    [INVSLOT_WRIST] =  { cur = 0, max = 0, text = WRISTSLOT},
-    [INVSLOT_HAND] =  { cur = 0, max = 0, text = HANDSSLOT},
-    [INVSLOT_MAINHAND] =  { cur = 0, max = 0, text = MAINHANDSLOT},
-    [INVSLOT_OFFHAND] =  { cur = 0, max = 0, text = SECONDARYHANDSLOT}
+    [INVSLOT_HEAD] = { cur = 0, max = 0, pc = 0, text = HEADSLOT},
+    [INVSLOT_SHOULDER] =  { cur = 0, max = 0, pc = 0, text = SHOULDERSLOT},
+    [INVSLOT_CHEST] =  { cur = 0, max = 0, pc = 0, text = CHESTSLOT},
+    [INVSLOT_WAIST] =  { cur = 0, max = 0, pc = 0, text = WAISTSLOT},
+    [INVSLOT_LEGS] =  { cur = 0, max = 0, pc = 0, text = LEGSSLOT},
+    [INVSLOT_FEET] =  { cur = 0, max = 0, pc = 0, text = FEETSLOT},
+    [INVSLOT_WRIST] =  { cur = 0, max = 0, pc = 0, text = WRISTSLOT},
+    [INVSLOT_HAND] =  { cur = 0, max = 0, pc = 0, text = HANDSSLOT},
+    [INVSLOT_MAINHAND] =  { cur = 0, max = 0, pc = 0, text = MAINHANDSLOT},
+    [INVSLOT_OFFHAND] =  { cur = 0, max = 0, pc = 0, text = SECONDARYHANDSLOT}
   }
 end
 
@@ -59,12 +59,11 @@ function ArmorModule:RegisterFrameEvents()
     local r, g, b, _ = unpack(xb:HoverColors())
 		GameTooltip:AddLine("|cFFFFFFFF[|r"..AUCTION_CATEGORY_ARMOR.."|cFFFFFFFF]|r", r, g, b)
 		GameTooltip:AddLine(" ")
-		for i,v in pairs(ArmorModule.durabilityList) do
-		  if v.max ~= nil and v.max > 0 then
-      local perc = floor((v.cur / v.max)  * 100)
-      local u20G, u20B = 1, 1
-      if perc <= 20 then u20G, u20B = 0, 0 end
-			GameTooltip:AddDoubleLine(v.text, string.format('%d/%d (%d%%)', v.cur, v.max, perc), r, g, b, 1, u20G, u20B)
+    for i,v in pairs(ArmorModule.durabilityList) do
+      if v.max and v.max > 0 then
+        local u20G, u20B = 1, 1
+        if v.pc <= 20 then u20G, u20B = 0, 0 end
+        GameTooltip:AddDoubleLine(v.text, string.format('%d/%d (%d%%)', v.cur, v.max, v.pc), r, g, b, 1, u20G, u20B)
 		  end
 		end
 		GameTooltip:Show()
@@ -105,7 +104,7 @@ function ArmorModule:SetArmorColor()
     self.armorText:SetTextColor(unpack(xb:HoverColors()))
   else
     self.armorText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
-    if self.durabilityAverage >= db.modules.armor.durabilityMin then
+    if self.durabilityLowest >= db.modules.armor.durabilityMin then
       self.armorIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
     else
       self.armorIcon:SetVertexColor(1, 0, 0, 1)
@@ -155,6 +154,7 @@ function ArmorModule:UPDATE_INVENTORY_DURABILITY()
 end
 
 function ArmorModule:UpdateDurabilityText()
+  local lowest = 101
   local total = 0
   local maxTotal = 0
   local db =  xb.db.profile.modules.armor
@@ -162,24 +162,25 @@ function ArmorModule:UpdateDurabilityText()
 
   for i,v in pairs(self.durabilityList) do
     local curDur, maxDur = GetInventoryItemDurability(i)
-    if curDur ~= nil and maxDur ~= nil then
-      total = total + curDur
-      maxTotal = maxTotal + maxDur
+    if curDur and maxDur then
       v.cur = curDur
       v.max = maxDur
+      v.pc = math.floor((curDur / maxDur) * 100)
+      if v.pc < lowest then lowest = v.pc end
     end
   end
-  self.durabilityAverage = floor((total / maxTotal) * 100)
 
-  if self.durabilityAverage <= db.durabilityMin then
-    text = '|cFFFF0000'..text..self.durabilityAverage..'%|r'
+  self.durabilityLowest = lowest
+
+  if self.durabilityLowest <= db.durabilityMin then
+    text = '|cFFFF0000' .. text .. self.durabilityLowest .. '%|r'
   else
-    text = text..self.durabilityAverage..'%'
+    text = text .. self.durabilityLowest .. '%'
   end
 
-  if (self.durabilityAverage > db.durabilityMax) or db.alwaysShowIlvl then
+  if (self.durabilityLowest > db.durabilityMax) or db.alwaysShowIlvl then
     local _, equippedIlvl = GetAverageItemLevel()
-    text = text..' '..floor(equippedIlvl)..' ilvl'
+    text = text .. ' ' .. floor(equippedIlvl) .. ' ilvl'
   end
 
   self.armorText:SetText(text)
