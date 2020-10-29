@@ -54,15 +54,15 @@ function TalentModule:OnInitialize()
 end
 
 function TalentModule:OnEnable()
-  if not xb.db.profile.modules.talent.enabled then self:Disable(); return; end
+  if not xb.db.profile.modules.talent.enabled then self:Disable() return end
+  self.currentSpecID = GetSpecialization() --returns 5 for newly created characters in shadowlands
+  if self.currentSpecID == 5 then self:Disable() return end
+  self.currentLootSpecID = GetLootSpecialization()
   if self.talentFrame == nil then
     self.talentFrame = CreateFrame("FRAME", "talentFrame", xb:GetFrame('bar'))
     xb:RegisterFrame('talentFrame', self.talentFrame)
   end
   self.talentFrame:Show()
-
-  self.currentSpecID = GetSpecialization()
-  self.currentLootSpecID = GetLootSpecialization()
 
   self:CreateFrames()
   self:RegisterFrameEvents()
@@ -82,11 +82,11 @@ function TalentModule:OnDisable()
 end
 
 function TalentModule:Refresh()
-  if InCombatLockdown() then return; end
+  if InCombatLockdown() then return end
 
   local db = xb.db.profile
-  if self.talentFrame == nil then return; end
-  if not db.modules.talent.enabled then self:Disable(); return; end
+  if self.talentFrame == nil then return end
+  if not db.modules.talent.enabled then self:Disable() return end
 
   self.currentSpecID = GetSpecialization()
   self.currentLootSpecID = GetLootSpecialization()
