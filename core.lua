@@ -79,7 +79,7 @@ XIVBar.defaults = {
 XIVBar.LSM = LibStub('LibSharedMedia-3.0');
 
 function XIVBar:OnInitialize()
-    self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults)
+    self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults, true)
     self.LSM:Register(self.LSM.MediaType.FONT, 'Homizio Bold', self.constants.mediaPath.."homizio_bold.ttf")
     self.frames = {}
 
@@ -166,24 +166,31 @@ function XIVBar:SetColor(name, r, g, b, a)
 end
 
 function XIVBar:GetColor(name)
-    d = self.db.profile.color[name]
-    return d.r, d.g, d.b, d.a
+    local profile = self.db.profile.color
+    local a = profile[name].a
+    -- what a stupid hacky solution, the whole config part is kind of fucked and i dread having to come fix this eventually.
+    -- feel like just burning it all down and writing something from scratch when seeing shit like this. terrible library.
+    if name == 'normal' then
+        -- use class color for normal color
+        if profile.useTextCC then
+            local r, g, b = self:GetClassColors()
+            return r, g, b, a
+        end
+    end
+    -- use self-picked color for normal color
+    return profile[name].r, profile[name].g, profile[name].b, a
 end
 
 function XIVBar:HoverColors()
-    local colors = {
-        self.db.profile.color.hover.r,
-        self.db.profile.color.hover.g,
-        self.db.profile.color.hover.b,
-        self.db.profile.color.hover.a
-    }
-    if self.db.profile.color.useHoverCC then
-        colors = {
-            RAID_CLASS_COLORS[self.constants.playerClass].r,
-            RAID_CLASS_COLORS[self.constants.playerClass].g,
-            RAID_CLASS_COLORS[self.constants.playerClass].b,
-            self.db.profile.color.hover.a
-        }
+    local colors
+    local profile = self.db.profile.color
+    -- use self-picked color for hover color
+    if not profile.useHoverCC then
+        colors = { profile.hover.r, profile.hover.g, profile.hover.b, profile.hover.a }
+    -- use class color for hover color
+    else
+        local r, g, b = self:GetClassColors()
+        colors = { r, g, b, profile.hover.a }
     end
     return colors
 end
@@ -596,7 +603,7 @@ function XIVBar:GetTextColorOptions()
                     XIVBar:SetColor('normal', r, g, b, a)
                 end,
                 get = function() return XIVBar:GetColor('normal') end
-            }, -- normal
+            },
 			textCC = {
 				name = L["Use Class Color for Text"],
 				desc = L["Only the alpha can be set with the color picker"],
@@ -623,7 +630,7 @@ function XIVBar:GetTextColorOptions()
                     XIVBar:SetColor('hover', r, g, b, a)
                 end,
                 get = function() return XIVBar:GetColor('hover') end,
-            }, -- normal
+            },
             hoverCC = {
                 name = L['Use Class Colors for Hover'],
                 type = "toggle",
@@ -634,7 +641,7 @@ function XIVBar:GetTextColorOptions()
 					end
 				self.db.profile.color.useHoverCC = val; self:Refresh(); end,
                 get = function() return self.db.profile.color.useHoverCC end
-            }, -- normal
+            },
             inactive = {
                 name = L['Inactive'],
                 type = "color",
@@ -645,7 +652,7 @@ function XIVBar:GetTextColorOptions()
                     XIVBar:SetColor('inactive', r, g, b, a)
                 end,
                 get = function() return XIVBar:GetColor('inactive') end
-            }, -- normal
+            },
         }
     }
 end
