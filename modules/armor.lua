@@ -130,7 +130,8 @@ end
 
 function ArmorModule:Refresh()
   if self.armorFrame == nil then return; end
-  if not xb.db.profile.modules.armor.enabled then self:Disable(); return; end
+  local db = xb.db.profile.modules.armor
+  if not db.enabled then self:Disable(); return; end
 
   if InCombatLockdown() then
     self:UpdateDurabilityText()
@@ -149,7 +150,11 @@ function ArmorModule:Refresh()
   self.coordText:SetFont(xb:GetFont(xb.db.profile.text.fontSize))
   self.coordText:SetPoint('LEFT', self.armorText, 'RIGHT', 5, 0)
 
-  if (self.coordTicker or self.coordTicker:IsCancelled()) and xb.db.profile.modules.armor.showCoords then
+  if self.coordTicker then
+    if self.coordTicker:IsCancelled() and db.showCoords then
+      self:RegisterCoordTicker()
+    end
+  elseif db.showCoords then
     self:RegisterCoordTicker()
   end
 
