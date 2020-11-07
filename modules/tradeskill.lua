@@ -151,10 +151,10 @@ function TradeskillModule:StyleTradeskillFrame(prefix)
   self[prefix..'Icon']:SetTexture(icon)
   self[prefix..'Icon']:SetSize(iconSize, iconSize)
   self[prefix..'Icon']:SetPoint('LEFT')
-  self[prefix..'Icon']:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self[prefix..'Icon']:SetVertexColor(xb:GetColor('normal'))
 
   self[prefix..'Text']:SetFont(xb:GetFont(textHeight))
-  self[prefix..'Text']:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self[prefix..'Text']:SetTextColor(xb:GetColor('normal'))
   self[prefix..'Text']:SetText(string.upper(self[prefix].name))
 
   if self[prefix].lvl == self[prefix].maxLvl then
@@ -165,7 +165,7 @@ function TradeskillModule:StyleTradeskillFrame(prefix)
     if db.modules.tradeskill.barCC then
       self[prefix..'Bar']:SetStatusBarColor(xb:GetClassColors())
     else
-      self[prefix..'Bar']:SetStatusBarColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+      self[prefix..'Bar']:SetStatusBarColor(xb:GetColor('normal'))
     end
     self[prefix..'Bar']:SetSize(self[prefix..'Text']:GetStringWidth(), barHeight)
     self[prefix..'Bar']:SetPoint('BOTTOMLEFT', self[prefix..'Icon'], 'BOTTOMRIGHT', 5, 0)
@@ -213,7 +213,7 @@ function TradeskillModule:SetProfScripts(prefix)
   self[prefix..'Frame']:SetScript('OnLeave', function()
     if InCombatLockdown() then return; end
     local db = xb.db.profile
-    self[prefix..'Text']:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    self[prefix..'Text']:SetTextColor(xb:GetColor('normal'))
     if xb.db.profile.modules.tradeskill.showTooltip then
       GameTooltip:Hide()
     end

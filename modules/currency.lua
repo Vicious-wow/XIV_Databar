@@ -80,10 +80,10 @@ function CurrencyModule:Refresh()
     self.xpIcon:SetTexture(xb.constants.mediaPath..'datatexts\\exp')
     self.xpIcon:SetSize(iconSize, iconSize)
     self.xpIcon:SetPoint('LEFT')
-    self.xpIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    self.xpIcon:SetVertexColor(xb:GetColor('normal'))
 
     self.xpText:SetFont(xb:GetFont(textHeight))
-    self.xpText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    self.xpText:SetTextColor(xb:GetColor('normal'))
     self.xpText:SetText(string.upper(LEVEL..' '..UnitLevel("player")..' '..UnitClass('player')))
     self.xpText:SetPoint('TOPLEFT', self.xpIcon, 'TOPRIGHT', 5, 0)
 
@@ -91,7 +91,7 @@ function CurrencyModule:Refresh()
     if db.modules.currency.xpBarCC then
       self.xpBar:SetStatusBarColor(xb:GetClassColors())
     else
-      self.xpBar:SetStatusBarColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+      self.xpBar:SetStatusBarColor(xb:GetColor('normal'))
     end
     self.xpBar:SetMinMaxValues(0, UnitXPMax('player'))
     self.xpBar:SetValue(UnitXP('player'))
@@ -158,10 +158,10 @@ function CurrencyModule:StyleCurrencyFrame(curId, i)
   self.curIcons[i]:SetTexture(icon)
   self.curIcons[i]:SetSize(iconSize, iconSize)
   self.curIcons[i]:SetPoint(iconPoint)
-  self.curIcons[i]:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self.curIcons[i]:SetVertexColor(xb:GetColor('normal'))
 
   self.curText[i]:SetFont(xb:GetFont(db.text.fontSize))
-  self.curText[i]:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self.curText[i]:SetTextColor(xb:GetColor('normal'))
   self.curText[i]:SetText(curInfo.quantity)
   self.curText[i]:SetPoint(iconPoint, self.curIcons[i], textPoint, padding, 0)
 
@@ -202,7 +202,7 @@ function CurrencyModule:RegisterFrameEvents()
     self.curButtons[i]:SetScript('OnLeave', function()
       if InCombatLockdown() then return; end
       local db = xb.db.profile
-      self.curText[i]:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+      self.curText[i]:SetTextColor(xb:GetColor('normal'))
       if db.modules.currency.showTooltip then
         GameTooltip:Hide()
       end
@@ -240,7 +240,7 @@ function CurrencyModule:RegisterFrameEvents()
   self.xpFrame:SetScript('OnLeave', function()
     if InCombatLockdown() then return; end
     local db = xb.db.profile
-    self.xpText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    self.xpText:SetTextColor(xb:GetColor('normal'))
 	if xb.db.profile.modules.currency.showTooltip then
       GameTooltip:Hide()
     end

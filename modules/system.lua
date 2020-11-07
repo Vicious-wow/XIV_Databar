@@ -1,3 +1,4 @@
+
 local AddOnName, XIVBar = ...;
 local _G = _G;
 local xb = XIVBar;
@@ -45,7 +46,7 @@ function SystemModule:Refresh()
   self.fpsIcon:SetTexture(xb.constants.mediaPath..'datatexts\\fps')
   self.fpsIcon:SetSize(iconSize, iconSize)
   self.fpsIcon:SetPoint('LEFT')
-  self.fpsIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self.fpsIcon:SetVertexColor(xb:GetColor('normal'))
 
   self.fpsText:SetFont(xb:GetFont(db.text.fontSize))
 
@@ -56,17 +57,17 @@ function SystemModule:Refresh()
   self.pingIcon:SetTexture(xb.constants.mediaPath..'datatexts\\ping')
   self.pingIcon:SetSize(iconSize, iconSize)
   self.pingIcon:SetPoint('LEFT')
-  self.pingIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self.pingIcon:SetVertexColor(xb:GetColor('normal'))
 
   self.pingText:SetFont(xb:GetFont(db.text.fontSize))
   if db.modules.system.showWorld then
 	  self.worldPingText:SetFont(xb:GetFont(db.text.fontSize))
   end
 
-  self.fpsText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
-  self.pingText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self.fpsText:SetTextColor(xb:GetColor('normal'))
+  self.pingText:SetTextColor(xb:GetColor('normal'))
   if db.modules.system.showWorld then
-	  self.worldPingText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+	  self.worldPingText:SetTextColor(xb:GetColor('normal'))
   end
 
   if self.fpsFrame:IsMouseOver() then
@@ -163,10 +164,10 @@ end
 function SystemModule:LeaveFunction()
   if InCombatLockdown() then return end
   local db = xb.db.profile
-  self.fpsText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
-  self.pingText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self.fpsText:SetTextColor(xb:GetColor('normal'))
+  self.pingText:SetTextColor(xb:GetColor('normal'))
   if xb.db.profile.modules.system.showWorld then
-	self.worldPingText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+	self.worldPingText:SetTextColor(xb:GetColor('normal'))
   end
   if xb.db.profile.modules.system.showTooltip then
     GameTooltip:Hide()

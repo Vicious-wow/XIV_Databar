@@ -214,7 +214,7 @@ function TravelModule:SetHearthColor()
   if self.hearthButton:IsMouseOver() then
     self.hearthText:SetTextColor(unpack(xb:HoverColors()))
   else
-    self.hearthIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    self.hearthIcon:SetVertexColor(xb:GetColor('normal'))
     local hearthName = ''
     local hearthActive = true
     for i,v in ipairs(self.hearthstones) do
@@ -240,7 +240,7 @@ function TravelModule:SetHearthColor()
       self.hearthIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
       self.hearthText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
     else
-      self.hearthText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+      self.hearthText:SetTextColor(xb:GetColor('normal'))
     end
   end --else
 end
@@ -288,8 +288,8 @@ function TravelModule:SetPortColor()
       self.portIcon:SetVertexColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
       self.portText:SetTextColor(db.color.inactive.r, db.color.inactive.g, db.color.inactive.b, db.color.inactive.a)
     else
-      self.portIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
-      self.portText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+      self.portIcon:SetVertexColor(xb:GetColor('normal'))
+      self.portText:SetTextColor(xb:GetColor('normal'))
     end
   end --else
 end
@@ -316,7 +316,7 @@ function TravelModule:CreatePortPopup()
         local buttonText = button:CreateFontString(nil, 'OVERLAY')
 
         buttonText:SetFont(xb:GetFont(db.text.fontSize))
-        buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+        buttonText:SetTextColor(xb:GetColor('normal'))
         buttonText:SetText(v.text)
         buttonText:SetPoint('LEFT')
         local textWidth = buttonText:GetStringWidth()
@@ -330,11 +330,11 @@ function TravelModule:CreatePortPopup()
         button:RegisterForClicks('LeftButtonUp')
 
         button:SetScript('OnEnter', function()
-          buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+          buttonText:SetTextColor(xb:GetColor('normal'))
         end)
 
         button:SetScript('OnLeave', function()
-          buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+          buttonText:SetTextColor(xb:GetColor('normal'))
         end)
 
         button:SetScript('OnClick', function(self)

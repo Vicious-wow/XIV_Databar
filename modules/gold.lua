@@ -138,10 +138,10 @@ function GoldModule:Refresh()
   self.goldIcon:SetTexture(xb.constants.mediaPath..'datatexts\\gold')
   self.goldIcon:SetSize(iconSize, iconSize)
   self.goldIcon:SetPoint('LEFT')
-  self.goldIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self.goldIcon:SetVertexColor(xb:GetColor('normal'))
 
   self.goldText:SetFont(xb:GetFont(db.text.fontSize))
-  self.goldText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self.goldText:SetTextColor(xb:GetColor('normal'))
   self.goldText:SetText(self:FormatCoinText(GetMoney()))
   self.goldText:SetPoint('LEFT', self.goldIcon, 'RIGHT', 5, 0)
 
@@ -152,7 +152,7 @@ function GoldModule:Refresh()
       freeSpace = freeSpace + GetContainerNumFreeSlots(i)
     end
     self.bagText:SetFont(xb:GetFont(db.text.fontSize))
-    self.bagText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    self.bagText:SetTextColor(xb:GetColor('normal'))
     self.bagText:SetText('('..tostring(freeSpace)..')')
     self.bagText:SetPoint('LEFT', self.goldText, 'RIGHT', 5, 0)
     bagWidth = self.bagText:GetStringWidth()
@@ -231,8 +231,8 @@ function GoldModule:RegisterFrameEvents()
   self.goldButton:SetScript('OnLeave', function()
     if InCombatLockdown() then return; end
     local db = xb.db.profile
-    self.goldText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
-    self.bagText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    self.goldText:SetTextColor(xb:GetColor('normal'))
+    self.bagText:SetTextColor(xb:GetColor('normal'))
     GameTooltip:Hide()
   end)
 

@@ -100,10 +100,10 @@ function TalentModule:Refresh()
 
   self.specIcon:SetSize(iconSize, iconSize)
   self.specIcon:SetPoint('LEFT')
-  self.specIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self.specIcon:SetVertexColor(xb:GetColor('normal'))
 
   self.specText:SetFont(xb:GetFont(textHeight))
-  self.specText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+  self.specText:SetTextColor(xb:GetColor('normal'))
   self.specText:SetText(string.upper(name or ""))
 
   self.specText:SetPoint('LEFT', self.specIcon, 'RIGHT', 5, 0)
@@ -184,7 +184,7 @@ function TalentModule:RegisterFrameEvents()
   self.specFrame:SetScript('OnLeave', function()
     if InCombatLockdown() then return end
     local db = xb.db.profile
-    self.specText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    self.specText:SetTextColor(xb:GetColor('normal'))
     if xb.db.profile.modules.talent.showTooltip then
       if self.LTip:IsAcquired("TalentTooltip") then
 		    self.LTip:Release(self.LTip:Acquire("TalentTooltip"))
@@ -261,10 +261,10 @@ function TalentModule:CreateSpecPopup()
       buttonIcon:SetTexCoord(unpack(self.specCoords[i]))
       buttonIcon:SetSize(iconSize, iconSize)
       buttonIcon:SetPoint('LEFT')
-      buttonIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+      buttonIcon:SetVertexColor(xb:GetColor('normal'))
 
       buttonText:SetFont(xb:GetFont(db.text.fontSize))
-      buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+      buttonText:SetTextColor(xb:GetColor('normal'))
       buttonText:SetText(name)
       buttonText:SetPoint('LEFT', buttonIcon, 'RIGHT', 5, 0)
       local textWidth = iconSize + 5 + buttonText:GetStringWidth()
@@ -281,7 +281,7 @@ function TalentModule:CreateSpecPopup()
       end)
 
       button:SetScript('OnLeave', function()
-        buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+        buttonText:SetTextColor(xb:GetColor('normal'))
       end)
 
       button:SetScript('OnClick', function(self, button)
@@ -368,10 +368,10 @@ function TalentModule:CreateLootSpecPopup()
       buttonIcon:SetTexCoord(unpack(self.specCoords[specId]))
       buttonIcon:SetSize(iconSize, iconSize)
       buttonIcon:SetPoint('LEFT')
-      buttonIcon:SetVertexColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+      buttonIcon:SetVertexColor(xb:GetColor('normal'))
 
       buttonText:SetFont(xb:GetFont(db.text.fontSize))
-      buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+      buttonText:SetTextColor(xb:GetColor('normal'))
       buttonText:SetText(name)
       buttonText:SetPoint('LEFT', buttonIcon, 'RIGHT', 5, 0)
       local textWidth = iconSize + 5 + buttonText:GetStringWidth()
@@ -390,7 +390,7 @@ function TalentModule:CreateLootSpecPopup()
       end)
 
       button:SetScript('OnLeave', function()
-        buttonText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+        buttonText:SetTextColor(xb:GetColor('normal'))
       end)
 
       button:SetScript('OnClick', function(self, button)

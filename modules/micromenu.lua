@@ -183,157 +183,157 @@ end
 
 function MenuModule:CreateFrames()
   parentFrame = xb:GetFrame('microMenuFrame')
+  local mm = xb.db.profile.modules.microMenu
 
-  if xb.db.profile.modules.microMenu.menu then
+  if mm.menu then
     self.frames.menu = CreateFrame("BUTTON", "menu", parentFrame)
     parentFrame = self.frames.menu
   else
-	if self.frames.menu then
-		self.frames.menu = nil
-	end
+    if self.frames.menu then
+      self.frames.menu = nil
+    end
   end
 
-  if xb.db.profile.modules.microMenu.chat then
+  if mm.chat then
     self.frames.chat = CreateFrame("BUTTON", "chat", parentFrame)
     parentFrame = self.frames.chat
   else
-	if self.frames.chat then
-		self.frames.chat = nil
-	end
+    if self.frames.chat then
+      self.frames.chat = nil
+    end
   end
 
-  if xb.db.profile.modules.microMenu.guild then
+  if mm.guild then
     self.frames.guild = CreateFrame("BUTTON", "guild", parentFrame)
     parentFrame = self.frames.guild
-	self.text.guild = self.frames.guild:CreateFontString(nil, 'OVERLAY')
+	  self.text.guild = self.frames.guild:CreateFontString(nil, 'OVERLAY')
     self.bgTexture.guild = self.frames.guild:CreateTexture(nil, "OVERLAY")
   else
-	if self.frames.guild then
-		self.frames.guild = nil
-		self.text.guild = nil
-		self.bgTexture.guild = nil
-	end
+    if self.frames.guild then
+      self.frames.guild = nil
+      self.text.guild = nil
+      self.bgTexture.guild = nil
+    end
   end
 
-  if xb.db.profile.modules.microMenu.social then
+  if mm.social then
     self.frames.social = CreateFrame("BUTTON", "social", parentFrame)
     parentFrame = self.frames.social
-	self.text.social = self.frames.social:CreateFontString(nil, 'OVERLAY')
+	  self.text.social = self.frames.social:CreateFontString(nil, 'OVERLAY')
     self.bgTexture.social = self.frames.social:CreateTexture(nil, "OVERLAY")
   else
-	if self.frames.social then
-		self.frames.social = nil
-		self.text.social = nil
-		self.bgTexture.social = nil
-	end
+    if self.frames.social then
+      self.frames.social = nil
+      self.text.social = nil
+      self.bgTexture.social = nil
+    end
   end
 
-  if xb.db.profile.modules.microMenu.char then
+  if mm.char then
     self.frames.char = CreateFrame("BUTTON", "char", parentFrame)
     parentFrame = self.frames.char
   else
-	if self.frames.char then
-		self.frames.char = nil
-	end
+    if self.frames.char then
+      self.frames.char = nil
+    end
   end
 
-  if xb.db.profile.modules.microMenu.spell then
+  if mm.spell then
     self.frames.spell = CreateFrame("BUTTON", "spell", parentFrame)
     parentFrame = self.frames.spell
   else
-	if self.frames.spell then
-		self.frames.spell = nil
-	end
+    if self.frames.spell then
+      self.frames.spell = nil
+    end
   end
 
-  if xb.db.profile.modules.microMenu.talent then
+  if mm.talent then
     self.frames.talent = CreateFrame("BUTTON", "talent", parentFrame)
     parentFrame = self.frames.talent
   else
-	if self.frames.talent then
-		self.frames.talent = nil
-	end
+    if self.frames.talent then
+      self.frames.talent = nil
+    end
   end
 
-  if xb.db.profile.modules.microMenu.ach then
+  if mm.ach then
     self.frames.ach = CreateFrame("BUTTON", "ach", parentFrame)
     parentFrame = self.frames.ach
   else
-	if self.frames.ach then
-		self.frames.ach = nil
-	end
+    if self.frames.ach then
+      self.frames.ach = nil
+    end
   end
 
-  if xb.db.profile.modules.microMenu.quest then
+  if mm.quest then
     self.frames.quest = CreateFrame("BUTTON", "quest", parentFrame)
     parentFrame = self.frames.quest
   else
-	if self.frames.quest then
-		self.frames.quest = nil
-	end
+    if self.frames.quest then
+      self.frames.quest = nil
+    end
   end
 
-  if xb.db.profile.modules.microMenu.lfg then
+  if mm.lfg then
     self.frames.lfg = CreateFrame("BUTTON", "lfg", parentFrame)
     parentFrame = self.frames.lfg
   else
-	if self.frames.lfg then
-		self.frames.lfg = nil
-	end
+    if self.frames.lfg then
+      self.frames.lfg = nil
+    end
   end
 
-  if xb.db.profile.modules.microMenu.journal then
+  if mm.journal then
     self.frames.journal = CreateFrame("BUTTON", "journal", parentFrame)
     parentFrame = self.frames.journal
   else
-	if self.frames.journal then
-		self.frames.journal = nil
-	end
+    if self.frames.journal then
+      self.frames.journal = nil
+    end
   end
 
-  if xb.db.profile.modules.microMenu.pvp then
+  if mm.pvp then
     self.frames.pvp = CreateFrame("BUTTON", "pvp", parentFrame)
     parentFrame = self.frames.pvp
   else
-	if self.frames.pvp then
-		self.frames.pvp = nil
-	end
+    if self.frames.pvp then
+      self.frames.pvp = nil
+    end
   end
 
-  if xb.db.profile.modules.microMenu.pet then
+  if mm.pet then
     self.frames.pet = CreateFrame("BUTTON", "pet", parentFrame)
     parentFrame = self.frames.pet
   else
-	if self.frames.pet then
-		self.frames.pet = nil
-	end
+    if self.frames.pet then
+      self.frames.pet = nil
+    end
   end
 
-  if xb.db.profile.modules.microMenu.shop then
+  if mm.shop then
     self.frames.shop = CreateFrame("BUTTON", "shop", parentFrame)
     parentFrame = self.frames.shop
   else
-	if self.frames.shop then
-		self.frames.shop = nil
-	end
+	  if self.frames.shop then
+		  self.frames.shop = nil
+	  end
   end
 
-  if xb.db.profile.modules.microMenu.help then
+  if mm.help then
     self.frames.help = CreateFrame("BUTTON", "help", parentFrame)
     parentFrame = self.frames.help
   else
-	if self.frames.help then
-		self.frames.help = nil
-	end
+	  if self.frames.help then
+		  self.frames.help = nil
+	  end
   end
-
 end
 
 function MenuModule:CreateIcons()
   for name, frame in pairs(self.frames) do
     if frame['Click'] ~= nil then --Odd way of checking if it's a button
         self.icons[name] = frame:CreateTexture(nil, "OVERLAY")
-        self.icons[name]:SetTexture(self.mediaFolder..name)
+        self.icons[name]:SetTexture(self.mediaFolder .. name)
     end
   end
 end
@@ -350,7 +350,7 @@ function MenuModule:IconDefaults(name)
   if self.icons[name] == nil then return; end
   self.icons[name]:SetPoint('CENTER')
   self.icons[name]:SetSize(self.iconSize, self.iconSize)
-  self.icons[name]:SetVertexColor(colors.normal.r, colors.normal.g, colors.normal.b, colors.normal.a)
+  self.icons[name]:SetVertexColor(xb:GetColor('normal'))
 end
 
 function MenuModule:RegisterFrameEvents()
@@ -363,6 +363,7 @@ function MenuModule:RegisterFrameEvents()
         frame:SetScript('OnClick', self.functions[name])
       end
     end
+
     if name == 'guild' then
       local leaveFunc = self:DefaultLeave(name)
       frame:SetScript("OnEnter", self:GuildHover(self:DefaultHover(name)))
@@ -380,13 +381,6 @@ function MenuModule:RegisterFrameEvents()
     end
   end
 
-  self:RegisterEvent('GUILD_ROSTER_UPDATE', function()
-    self:UpdateGuildText()
-  end)
-  self:RegisterEvent('CHAT_MSG_GUILD', function()
-    self:UpdateGuildText()
-  end)
-
   self:RegisterEvent('GUILD_ROSTER_UPDATE', 'UpdateGuildText')
   self:RegisterEvent('CHAT_MSG_GUILD', 'UpdateGuildText')
   self:RegisterEvent('BN_FRIEND_ACCOUNT_ONLINE', 'UpdateFriendText')
@@ -396,6 +390,7 @@ end
 
 function MenuModule:UnregisterFrameEvents()
   self:UnregisterEvent('GUILD_ROSTER_UPDATE')
+  self:UnregisterEvent('CHAT_MSG_GUILD')
   self:UnregisterEvent('BN_FRIEND_ACCOUNT_ONLINE')
   self:UnregisterEvent('BN_FRIEND_ACCOUNT_OFFLINE')
   self:UnregisterEvent('FRIENDLIST_UPDATE')
@@ -479,7 +474,7 @@ function MenuModule:DefaultLeave(name)
   return function()
     if (not xb.db.profile.modules.microMenu.combatEn) and InCombatLockdown() then return; end
     if self.icons[name] ~= nil then
-      self.icons[name]:SetVertexColor(xb.db.profile.color.normal.r, xb.db.profile.color.normal.g, xb.db.profile.color.normal.b, xb.db.profile.color.normal.a)
+      self.icons[name]:SetVertexColor(xb:GetColor('normal'))
     end
   end
 end
@@ -760,8 +755,8 @@ function MenuModule:GuildHover(hoverFunc)
         elseif status == 2 then status = DEFAULT_DND_MESSAGE;
         else status = '' end
 
-        -- name is CharName-RealmName, extract CharName from the string 
-        local charName = name:match('.+%f[-]')
+        -- name is CharName-RealmName, extract CharName from the string
+        local charName = name:match('%a+%f[-]')
 
         if note ~= '' then note = '|cffffffff(|r' .. note .. '|cffffffff)|r' end
         local lineLeft = string.format('%s |c%s%s|r %s |cffecd672%s|r', level, colorHex, charName, status, note)

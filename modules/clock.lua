@@ -176,7 +176,7 @@ function ClockModule:SetClockColor()
   if self.clockTextFrame:IsMouseOver() then
     self.clockText:SetTextColor(unpack(xb:HoverColors()))
   else
-    self.clockText:SetTextColor(db.color.normal.r, db.color.normal.g, db.color.normal.b, db.color.normal.a)
+    self.clockText:SetTextColor(xb:GetColor('normal'))
   end
 end
 
