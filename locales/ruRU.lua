@@ -81,9 +81,9 @@ L['Show Pets Button'] = "Коллекции";
 L['Show Shop Button'] = "Магазин";
 L['Show Help Button'] = "Помощь";
 
-L['Always Show Item Level'] = "Всегда показывать уровень предметов";
-L['Minimum Durability to Become Active'] = "Прочность, до которой загораются цифры";
-L['Maximum Durability to Show Item Level'] = "Прочность, после которой показывается уровень предметов";
+L['Durability Warning Threshold'] = "Порог предупреждения о долговечности";
+L['Show Item Level'] = "Показать уровень элемента";
+L['Show Coordinates'] = "Показать координаты";
 
 L['Master Volume'] = "Громкость игры";
 L["Volume step"] = "Шаг изменения громкости";

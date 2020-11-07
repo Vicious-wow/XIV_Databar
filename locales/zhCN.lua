@@ -81,9 +81,9 @@ L['Show Pets Button'] = "显示藏品按钮";
 L['Show Shop Button'] = "显示商城按钮";
 L['Show Help Button'] = "显示帮助按钮";
 
-L['Always Show Item Level'] = "始终显示物品等级";
-L['Minimum Durability to Become Active'] = "当耐久度损失到多少时,变得活跃";
-L['Maximum Durability to Show Item Level'] = "当耐久度达到多少时,显示物品等级";
+L['Durability Warning Threshold'] = "耐久性警告閾值";
+L['Show Item Level'] = "顯示物品等級";
+L['Show Coordinates'] = "顯示坐標";
 
 L['Master Volume'] = "主音量";
 L["Volume step"] = "音量调节";

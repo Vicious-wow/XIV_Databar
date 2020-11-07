@@ -81,9 +81,9 @@ L['Show Pets Button'] = "Montrer le bouton Mascottes";
 L['Show Shop Button'] = "Montrer le bouton Boutique";
 L['Show Help Button'] = "Montrer le bouton Aide";
 
-L['Always Show Item Level'] = "Toujours montrer le niveau d'objet";
-L['Minimum Durability to Become Active'] = "Activation au minimum de durabilité";
-L['Maximum Durability to Show Item Level'] = "Durabilité maximum pour montrer le niveau d'item";
+L['Durability Warning Threshold'] = "Seuil d'avertissement de durabilité";
+L['Show Item Level'] = "Afficher le niveau d'équipement";
+L['Show Coordinates'] = "Afficher les coordonnées";
 
 L['Master Volume'] = "Volume principal";
 L["Volume step"] = "Incrément de volume";
