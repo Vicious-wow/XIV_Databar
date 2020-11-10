@@ -759,7 +759,7 @@ function MenuModule:GuildHover(hoverFunc)
         local charName = name:match('%a+%f[-]')
 
         if note ~= '' then note = '|cffffffff(|r' .. note .. '|cffffffff)|r' end
-        local lineLeft = string.format('%s |c%s%s|r %s |cffecd672%s|r', level, colorHex, charName, status, note)
+        local lineLeft = string.format('%s |c%s%s|r %s |cffecd672%s|r', level, colorHex, charName or name, status, note)
         local lineRight = string.format('%s|cffffffff %s', (isMobile and '|cffffffa0[M]|r ' or ''), zone or '')
         tooltip:AddLine(lineLeft, lineRight)
 		    tooltip:SetLineScript(tooltip:GetLineCount(),'OnEnter', function() self.glineHover = true end)
