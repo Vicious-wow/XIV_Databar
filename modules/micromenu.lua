@@ -563,8 +563,8 @@ function MenuModule:SocialHover(hoverFunc)
             -- friend is playing retail WoW and is of the same faction as the player
             elseif faction == playerFaction then
               if realmName then charNameFormat = "(|cffecd672" .. charName .. "-" .. realmName .. "|r)" end
-            else
             -- friend is playing retail WoW but is playing on the player's opposite faction
+            else
               charNameFormat = "(|cffecd672" .. faction .. " - " .. charName .. "|r)"
             end
           end
@@ -755,8 +755,8 @@ function MenuModule:GuildHover(hoverFunc)
         elseif status == 2 then status = DEFAULT_DND_MESSAGE;
         else status = '' end
 
-        -- name is CharName-RealmName, extract CharName from the string
-        local charName = name:match('%a+%f[-]')
+        -- name given by Blizzard is CharName-RealmName, truncate to CharName
+        local charName = name:match('[^-]+')
 
         if note ~= '' then note = '|cffffffff(|r' .. note .. '|cffffffff)|r' end
         local lineLeft = string.format('%s |c%s%s|r %s |cffecd672%s|r', level, colorHex, charName or name, status, note)
