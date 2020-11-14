@@ -80,6 +80,10 @@ L['Show PVP Button'] = "Zeige PVP Taste";
 L['Show Pets Button'] = "Zeige Haustier Taste";
 L['Show Shop Button'] = "Zeige Shop Taste";
 L['Show Help Button'] = "Zeige Hilfe Taste";
+L['No Info'] = "Keine Informationen";
+L['Classic'] = true;
+L['Alliance'] = "Allianz";
+L['Horde'] = true;
 
 L['Durability Warning Threshold'] = "Haltbarkeitswarnschwelle";
 L['Show Item Level'] = "Gegenstandslevel anzeigen";

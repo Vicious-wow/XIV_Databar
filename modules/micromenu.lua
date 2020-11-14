@@ -558,14 +558,15 @@ function MenuModule:SocialHover(hoverFunc)
           if gameClient == BNET_CLIENT_WOW then
             isWoW = true
             -- checks if the friend is logged into classic or retail
-            if richPresence:find("Classic") then
+            if richPresence:find(L['Classic']) then
               isClassic = true 
             -- friend is playing retail WoW and is of the same faction as the player
             elseif faction == playerFaction then
-              if realmName then charNameFormat = "(|cffecd672" .. charName .. "-" .. realmName .. "|r)" end
+              if realmName then charNameFormat = "(|cffecd672" .. (charName or L['No Info']) .. "-" .. realmName .. "|r)" end
             -- friend is playing retail WoW but is playing on the player's opposite faction
             else
-              charNameFormat = "(|cffecd672" .. faction .. " - " .. charName .. "|r)"
+              local factionColors = { ['Alliance'] = "ff008ee8", ['Horde'] = "ffc80000" }
+              charNameFormat = "(|c" .. factionColors[faction] .. L[faction] .. "|r - |cffecd672" .. (charName or L['No Info']) .. "|r)"
             end
           end
 
@@ -759,7 +760,7 @@ function MenuModule:GuildHover(hoverFunc)
         local charName = name:match('[^-]+')
 
         if note ~= '' then note = '|cffffffff(|r' .. note .. '|cffffffff)|r' end
-        local lineLeft = string.format('%s |c%s%s|r %s |cffecd672%s|r', level, colorHex, charName or name, status, note)
+        local lineLeft = string.format('%s |c%s%s|r %s |cffecd672%s|r', level, colorHex, charName or name or L['No Info'], status, note)
         local lineRight = string.format('%s|cffffffff %s', (isMobile and '|cffffffa0[M]|r ' or ''), zone or '')
         tooltip:AddLine(lineLeft, lineRight)
 		    tooltip:SetLineScript(tooltip:GetLineCount(),'OnEnter', function() self.glineHover = true end)

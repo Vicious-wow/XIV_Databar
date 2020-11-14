@@ -80,6 +80,10 @@ L['Show PVP Button'] = "显示PVP按钮";
 L['Show Pets Button'] = "显示藏品按钮";
 L['Show Shop Button'] = "显示商城按钮";
 L['Show Help Button'] = "显示帮助按钮";
+L['No Info'] = "暂无信息";
+L['Classic'] = "经典怀旧服";
+L['Alliance'] = "联盟";
+L['Horde'] = "部落";
 
 L['Durability Warning Threshold'] = "耐久性警告閾值";
 L['Show Item Level'] = "顯示物品等級";

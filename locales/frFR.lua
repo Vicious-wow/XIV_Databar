@@ -80,6 +80,10 @@ L['Show PVP Button'] = "Montrer le bouton PVP";
 L['Show Pets Button'] = "Montrer le bouton Mascottes";
 L['Show Shop Button'] = "Montrer le bouton Boutique";
 L['Show Help Button'] = "Montrer le bouton Aide";
+L['No Info'] = "Pas d'information";
+L['Classic'] = true;
+L['Alliance'] = true;
+L['Horde'] = true;
 
 L['Durability Warning Threshold'] = "Seuil d'avertissement de durabilité";
 L['Show Item Level'] = "Afficher le niveau d'équipement";

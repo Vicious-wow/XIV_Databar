@@ -80,6 +80,10 @@ L['Show PVP Button'] = "Игрок против игрока";
 L['Show Pets Button'] = "Коллекции";
 L['Show Shop Button'] = "Магазин";
 L['Show Help Button'] = "Помощь";
+L['No Info'] = "Нет информации";
+L['Classic'] = true;
+L['Alliance'] = "Альянс";
+L['Horde'] = "Орда";
 
 L['Durability Warning Threshold'] = "Порог предупреждения о долговечности";
 L['Show Item Level'] = "Показать уровень элемента";
