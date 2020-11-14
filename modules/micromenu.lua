@@ -56,13 +56,16 @@ function MenuModule:OnInitialize()
       text = 'Destiny 2'
     },
     VIPR = {
-      text = 'Call of Duty'
+      text = 'Call of Duty: BO4'
     },
     ODIN = {
-      text = 'Call of Duty MW'
+      text = 'Call of Duty: MW'
     },
     LAZR = {
-      text = 'Call of Duty MW2'
+      text = 'Call of Duty: MW2'
+    },
+    ZEUS = {
+      text = 'Call of Duty: BOCW'
     },
     W3 = {
       text = 'Warcraft 3 Reforged'
@@ -582,7 +585,8 @@ function MenuModule:SocialHover(hoverFunc)
             BNET_CLIENT_DESTINY2, 
             BNET_CLIENT_COD, 
             BNET_CLIENT_COD_MW, 
-            BNET_CLIENT_COD_MW2, 
+            BNET_CLIENT_COD_MW2,
+            BNET_CLIENT_COD_BOCW,
             BNET_CLIENT_WC3 
           }
 
