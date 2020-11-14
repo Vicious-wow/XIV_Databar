@@ -66,12 +66,15 @@ function MenuModule:OnInitialize()
     },
     W3 = {
       text = 'Warcraft 3 Reforged'
-    }
+    },
+    ZEUS = {
+      text = 'Call of Duty: Black Ops Cold War'
+    },
   }
 end
 
 -- Skin Support for ElvUI/TukUI
--- Make sure to disable "Tooltip" in the Skins section of ElvUI together with 
+-- Make sure to disable "Tooltip" in the Skins section of ElvUI together with
 -- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
 function MenuModule:SkinFrame(frame, name)
 	if xb.db.profile.general.useElvUI and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui')) then
@@ -121,7 +124,7 @@ end
 
 function MenuModule:Refresh()
   if not xb.db.profile.modules.microMenu.enabled then self:Disable(); return; end
-  
+
   if self.frames.menu == nil then return; end
 
   if InCombatLockdown() then
@@ -419,10 +422,10 @@ function MenuModule:UpdateGuildText()
 
   local osTopBottom
   -- databar is at the bottom, take the social text offset
-  if xb.db.profile.general.barPosition == 'BOTTOM' then 
+  if xb.db.profile.general.barPosition == 'BOTTOM' then
     osTopBottom = db.osSocialText
   -- databar is at the top, inverse the social text offset
-  elseif xb.db.profile.general.barPosition == 'TOP' then 
+  elseif xb.db.profile.general.barPosition == 'TOP' then
     osTopBottom = -db.osSocialText
   end
 
@@ -447,10 +450,10 @@ function MenuModule:UpdateFriendText()
 
   local osTopBottom
   -- databar is at the bottom, take the social text offset
-  if xb.db.profile.general.barPosition == 'BOTTOM' then 
+  if xb.db.profile.general.barPosition == 'BOTTOM' then
     osTopBottom = db.osSocialText
   -- databar is at the top, inverse the social text offset
-  elseif xb.db.profile.general.barPosition == 'TOP' then 
+  elseif xb.db.profile.general.barPosition == 'TOP' then
     osTopBottom = -db.osSocialText
   end
 
@@ -494,7 +497,7 @@ function MenuModule:SocialHover(hoverFunc)
 
     -- if the social tooltip already exists, deletus fetus it
 	  if self.LTip:IsAcquired("SocialToolTip") then self.LTip:Release(self.LTip:Acquire("SocialToolTip")) end
-    
+
     -- declare our LTip tooltip with 2 columns and mouse interaction when hovering/leaving/updating the tooltip
     local tooltip = self.LTip:Acquire("SocialToolTip", 2, "LEFT", "RIGHT")
 	  tooltip:EnableMouse(true)
@@ -532,7 +535,7 @@ function MenuModule:SocialHover(hoverFunc)
           if not friendAccInfo.battleTag then
             friendAccInfo.battleTag = '[' .. L['No Tag'] .. ']'
           end
-          
+
           local charName = gameAccount.characterName               --gets the friend's character name
           local gameClient = gameAccount.clientProgram             --the application that the friend is online with - can be any game or 'App'/'Mobile'
           local realmName = gameAccount.realmName                  --gets the realm name the friend's char is on
@@ -559,7 +562,7 @@ function MenuModule:SocialHover(hoverFunc)
             isWoW = true
             -- checks if the friend is logged into classic or retail
             if richPresence:find("Classic") then
-              isClassic = true 
+              isClassic = true
             -- friend is playing retail WoW and is of the same faction as the player
             elseif faction == playerFaction then
               if realmName then charNameFormat = "(|cffecd672" .. charName .. "-" .. realmName .. "|r)" end
@@ -570,19 +573,19 @@ function MenuModule:SocialHover(hoverFunc)
           end
 
           -- clientsList contains all game related clients a bnet friend can have - being on mobile or just in the app is excluded from this list
-          local clientsList = { 
+          local clientsList = {
             BNET_CLIENT_WOW,
-            BNET_CLIENT_SC2, 
-            BNET_CLIENT_D3, 
-            BNET_CLIENT_WTCG, 
-            BNET_CLIENT_HEROES, 
-            BNET_CLIENT_OVERWATCH, 
-            BNET_CLIENT_SC, 
-            BNET_CLIENT_DESTINY2, 
-            BNET_CLIENT_COD, 
-            BNET_CLIENT_COD_MW, 
-            BNET_CLIENT_COD_MW2, 
-            BNET_CLIENT_WC3 
+            BNET_CLIENT_SC2,
+            BNET_CLIENT_D3,
+            BNET_CLIENT_WTCG,
+            BNET_CLIENT_HEROES,
+            BNET_CLIENT_OVERWATCH,
+            BNET_CLIENT_SC,
+            BNET_CLIENT_DESTINY2,
+            BNET_CLIENT_COD,
+            BNET_CLIENT_COD_MW,
+            BNET_CLIENT_COD_MW2,
+            BNET_CLIENT_WC3
           }
 
           -- set up tooltip line for the friend unless he's not logged into a game and 'hide bnet app friends' is true
@@ -601,7 +604,7 @@ function MenuModule:SocialHover(hoverFunc)
             else
               lineRight = string.format("%s %s |T%s:16|t", charNameFormat, zone, socialIcon)
             end
-            
+
             -- add left and right line to the tooltip
             tooltip:AddLine(lineLeft, lineRight)
             -- set up mouse events when the player hovers over/clicks on/leaves the friend's line in the tooltip
@@ -715,7 +718,7 @@ function MenuModule:GuildHover(hoverFunc)
 
     -- if the guild tooltip already exists, deletus fetus it
     if self.LTip:IsAcquired("GuildToolTip") then self.LTip:Release(self.LTip:Acquire("GuildToolTip")) end
-    
+
     -- declare our LTip tooltip with 2 columns and mouse interaction when hovering/leaving/updating the tooltip
     local tooltip = self.LTip:Acquire("GuildToolTip", 2, "LEFT", "RIGHT")
 	  tooltip:EnableMouse(true)
@@ -1005,7 +1008,7 @@ function MenuModule:GetConfig()
 		    get = function() return xb.db.profile.modules.microMenu.showGMOTD end,
 		    set = function(_,val) xb.db.profile.modules.microMenu.showGMOTD = val; self:Refresh(); end
       },
-      
+
 	    modifierTooltip = {
 		    name = L["Modifier for friend invite"],
 		    order = 7,
