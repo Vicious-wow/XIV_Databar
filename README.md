@@ -6,9 +6,9 @@ Once I've finished my to-do list I intend to upload this AddOn to Curseforge so 
 
 #### TO-DO LIST:
 - Bugfixes as they come up
-- ~~[Armor] Change average durability to lowest durability~~
-- [Tradeskill] Allow user to show/hide first/second/cooking profession, able to show all 3
-- [Currency] Add important currencies to the currency tooltip
-- [Currency] Add better currency icons for SL currencies
-- [Currency] Move currency module to the left side, between the armor and talent modules
+- [Currency] Move currency module to the left of the talent module
+- [Currency] Add currencies to table, display currencies of the table in currency tooltip
+- [Currency] Track 0 - 1 currencies in the bar, tracking 0 just displays the icon or icon + "CURRENCIES"
+- [Currency] Add the option use XP bar at max level for tracked reputations instead
+- [Tradeskill] Complete code to display up to 3 professions (first, second, cooking)
 - [Travel] Add teleport options and fix various bugs and inconsistencies of the travel module
