@@ -6,6 +6,7 @@ Once I've finished my to-do list I intend to upload this AddOn to Curseforge so 
 
 #### TO-DO LIST:
 - Bugfixes as they come up
+- [System] Move fps to the left of local latency, remove its icon and default world latency as disabled
 - [Currency] Move currency module to the left of the talent module
 - [Currency] Add currencies to table, display currencies of the table in currency tooltip
 - [Currency] Track 0 - 1 currencies in the bar, tracking 0 just displays the icon or icon + "CURRENCIES"
