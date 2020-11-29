@@ -563,8 +563,8 @@ function MenuModule:SocialHover(hoverFunc)
             -- checks if the friend is logged into classic or retail
             if richPresence:find(L['Classic']) then
               isClassic = true 
-            -- friend is playing retail WoW and is of the same faction as the player
-            elseif faction == playerFaction then
+            -- friend is playing retail WoW and is of the same faction as the player, or faction is nil which for some reason happens sometimes
+            elseif (not faction) or (faction == playerFaction) then
               if realmName then charNameFormat = "(|cffecd672" .. (charName or L['No Info']) .. "-" .. realmName .. "|r)" end
             -- friend is playing retail WoW but is playing on the player's opposite faction
             else
