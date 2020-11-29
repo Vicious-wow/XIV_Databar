@@ -565,7 +565,7 @@ function MenuModule:SocialHover(hoverFunc)
               isClassic = true 
             -- friend is playing retail WoW and is of the same faction as the player, or faction is nil which for some reason happens sometimes
             elseif (not faction) or (faction == playerFaction) then
-              if realmName then charNameFormat = "(|cffecd672" .. (charName or L['No Info']) .. "-" .. realmName .. "|r)" end
+              charNameFormat = "(|cffecd672" .. (charName or L['No Info']) .. "-" .. (realmName or L['No Info']) .. "|r)" end
             -- friend is playing retail WoW but is playing on the player's opposite faction
             else
               local factionColors = { ['Alliance'] = "ff008ee8", ['Horde'] = "ffc80000" }
