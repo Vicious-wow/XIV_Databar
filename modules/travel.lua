@@ -13,16 +13,30 @@ function TravelModule:OnInitialize()
   self.iconPath = xb.constants.mediaPath..'datatexts\\repair'
   self.garrisonHearth = 110560
   self.hearthstones = {
-    64488, -- Innkeeper's Daughter
-    54452, -- Ethereal Portal
-    93672, -- Dark Portal
-    6948,  -- Hearthstone
-    556,   -- Astral Recall
-    28585, -- Ruby Slippers
-    37118, -- Scroll of Recall 1
-    44314, -- Scroll of Recall 2
-    44315, -- Scroll of Recall 3
+    64488,  -- Innkeeper's Daughter
+    54452,  -- Ethereal Portal
+    93672,  -- Dark Portal
+    6948,   -- Hearthstone
+    556,    -- Astral Recall
+    28585,  -- Ruby Slippers
+    37118,  -- Scroll of Recall 1
+    44314,  -- Scroll of Recall 2
+    44315,  -- Scroll of Recall 3
     142542, -- Tome of Town Portal
+    172179, -- Eternal Traveler's Hearthstone
+    168907, -- Holographic Digitalization Hearthstone
+    163045, -- Headless Horseman's Hearthstone
+    162973, -- Greatfather Winter's Hearthstone
+    166746, -- Fire Eater's Hearthstone
+    166747, -- Brewfest Reveler's Hearthstone
+    165670, -- Peddlefeet's Lovely Hearthstone
+    165802, -- Noble Gardener's Hearthstone
+    165669, -- Lunar Elder's Hearthstone
+    142298, -- Astonishingly Scarlet Slippers
+    184353, -- Kyrian Hearthstone
+    183716, -- Venthyr Sinstone
+    182773, -- Necrolord Hearthstone
+    180290, -- Night Fae Hearthstone
   }
 
   self.portButtons = {}
