@@ -45,7 +45,7 @@ function TravelModule:OnInitialize()
 end
 
 -- Skin Support for ElvUI/TukUI
--- Make sure to disable "Tooltip" in the Skins section of ElvUI together with 
+-- Make sure to disable "Tooltip" in the Skins section of ElvUI together with
 -- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
 function TravelModule:SkinFrame(frame, name)
 	if self.useElvUI then
@@ -99,7 +99,7 @@ function TravelModule:CreateFrames()
   self.portText = self.portText or self.portButton:CreateFontString(nil, 'OVERLAY')
 
   self.portPopup = self.portPopup or CreateFrame('BUTTON', 'portPopup', self.portButton, BackdropTemplateMixin and 'BackdropTemplate')
-  local backdrop = GameTooltip:GetBackdrop()
+  local backdrop = TooltipBackdropTemplateMixin:GetBackdrop()
   if backdrop and (not self.useElvUI) then
     self.portPopup:SetBackdrop(backdrop)
     self.portPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
@@ -396,7 +396,7 @@ end
 function TravelModule:Refresh()
   if self.hearthFrame == nil then return; end
 
-  if not xb.db.profile.modules.travel.enabled then self:Disable(); return; end 
+  if not xb.db.profile.modules.travel.enabled then self:Disable(); return; end
   if InCombatLockdown() then
     self.hearthText:SetText(GetBindLocation())
     self.portText:SetText(xb.db.char.portItem.text)

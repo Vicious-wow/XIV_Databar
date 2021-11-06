@@ -10,7 +10,7 @@ function TalentModule:GetName()
 end
 
 -- Skin Support for ElvUI/TukUI
--- Make sure to disable "Tooltip" in the Skins section of ElvUI together with 
+-- Make sure to disable "Tooltip" in the Skins section of ElvUI together with
 -- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
 function TalentModule:SkinFrame(frame, name)
 	if self.useElvUI then
@@ -112,7 +112,7 @@ function TalentModule:Refresh()
   self.lootSpecButtons[0].icon:SetTexCoord(unpack(self.specCoords[self.currentSpecID]))
 
   self.specText:Show()
-  
+
 	self.specFrame:SetSize(iconSize + self.specText:GetWidth() + 5, xb:GetHeight())
   self.specFrame:SetPoint('LEFT')
 
@@ -149,7 +149,7 @@ function TalentModule:CreateFrames()
   self.lootSpecPopup = self.lootSpecPopup or CreateFrame('BUTTON', 'LootPopup', self.specFrame, BackdropTemplateMixin and 'BackdropTemplate')
   self.lootSpecPopup:SetFrameStrata('TOOLTIP')
 
-  local backdrop = GameTooltip:GetBackdrop()
+  local backdrop = TooltipBackdropTemplateMixin:GetBackdrop()
   if backdrop and (not self.useElvUI) then
     self.specPopup:SetBackdrop(backdrop)
     self.specPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
