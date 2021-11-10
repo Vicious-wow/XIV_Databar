@@ -1,4 +1,4 @@
-Libs/
+/Libs
 
 # LibDataBroker explicitly states it must be hard embedded.
-!Libs/LibDataBroker-1.1/
+!/Libs/LibDataBroker-1.1/
