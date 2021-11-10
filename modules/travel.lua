@@ -45,7 +45,7 @@ function TravelModule:OnInitialize()
 end
 
 -- Skin Support for ElvUI/TukUI
--- Make sure to disable "Tooltip" in the Skins section of ElvUI together with 
+-- Make sure to disable "Tooltip" in the Skins section of ElvUI together with
 -- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
 function TravelModule:SkinFrame(frame, name)
 	if self.useElvUI then
@@ -98,12 +98,27 @@ function TravelModule:CreateFrames()
   self.portIcon = self.portIcon or self.portButton:CreateTexture(nil, 'OVERLAY')
   self.portText = self.portText or self.portButton:CreateFontString(nil, 'OVERLAY')
 
-  self.portPopup = self.portPopup or CreateFrame('BUTTON', 'portPopup', self.portButton, BackdropTemplateMixin and 'BackdropTemplate')
-  local backdrop = GameTooltip:GetBackdrop()
-  if backdrop and (not self.useElvUI) then
-    self.portPopup:SetBackdrop(backdrop)
-    self.portPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
-    self.portPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+  local template = (TooltipBackdropTemplateMixin and "TooltipBackdropTemplate") or (BackdropTemplateMixin and "BackdropTemplate")
+  self.portPopup = self.portPopup or CreateFrame('BUTTON', 'portPopup', self.portButton, template)
+
+  if TooltipBackdropTemplateMixin then
+    self.portPopup.layoutType = GameTooltip.layoutType
+    NineSlicePanelMixin.OnLoad(self.portPopup.NineSlice)
+
+    if GameTooltip.layoutType then
+      self.portPopup.NineSlice:SetCenterColor(GameTooltip.NineSlice:GetCenterColor())
+      self.portPopup.NineSlice:SetBorderColor(GameTooltip.NineSlice:GetBorderColor())
+    end
+  else
+    local backdrop = GameTooltip:GetBackdrop()
+    if backdrop and (not self.useElvUI) then
+      self.specPopup:SetBackdrop(backdrop)
+      self.specPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
+      self.specPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+      self.lootSpecPopup:SetBackdrop(backdrop)
+      self.lootSpecPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
+      self.lootSpecPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+    end
   end
 end
 
@@ -396,7 +411,7 @@ end
 function TravelModule:Refresh()
   if self.hearthFrame == nil then return; end
 
-  if not xb.db.profile.modules.travel.enabled then self:Disable(); return; end 
+  if not xb.db.profile.modules.travel.enabled then self:Disable(); return; end
   if InCombatLockdown() then
     self.hearthText:SetText(GetBindLocation())
     self.portText:SetText(xb.db.char.portItem.text)
