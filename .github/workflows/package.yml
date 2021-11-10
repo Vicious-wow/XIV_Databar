@@ -1,0 +1,26 @@
+name: Package and Release
+
+# Run only on tags
+on:
+  push:
+    tags:
+      - '**'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+
+    strategy:
+      matrix:
+        gameVersion: ['retail'] #, 'bcc', 'classic']
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Package and release
+        uses: BigWigsMods/packager@v1
+        with:
+          args: -g ${{ matrix.gameVersion }}
