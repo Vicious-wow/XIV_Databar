@@ -10,7 +10,7 @@ function TalentModule:GetName()
 end
 
 -- Skin Support for ElvUI/TukUI
--- Make sure to disable "Tooltip" in the Skins section of ElvUI together with 
+-- Make sure to disable "Tooltip" in the Skins section of ElvUI together with
 -- unchecking "Use ElvUI for tooltips" in XIV options to not have ElvUI fuck with tooltips
 function TalentModule:SkinFrame(frame, name)
 	if self.useElvUI then
@@ -112,7 +112,7 @@ function TalentModule:Refresh()
   self.lootSpecButtons[0].icon:SetTexCoord(unpack(self.specCoords[self.currentSpecID]))
 
   self.specText:Show()
-  
+
 	self.specFrame:SetSize(iconSize + self.specText:GetWidth() + 5, xb:GetHeight())
   self.specFrame:SetPoint('LEFT')
 
@@ -144,19 +144,36 @@ function TalentModule:CreateFrames()
   self.specIcon = self.specIcon or self.specFrame:CreateTexture(nil, 'OVERLAY')
   self.specText = self.specText or self.specFrame:CreateFontString(nil, 'OVERLAY')
 
-  self.specPopup = self.specPopup or CreateFrame('BUTTON', 'SpecPopup', self.specFrame, BackdropTemplateMixin and 'BackdropTemplate')
+  local template = (TooltipBackdropTemplateMixin and "TooltipBackdropTemplate") or (BackdropTemplateMixin and "BackdropTemplate")
+  self.specPopup = self.specPopup or CreateFrame('BUTTON', 'SpecPopup', self.specFrame, template)
   self.specPopup:SetFrameStrata('TOOLTIP')
-  self.lootSpecPopup = self.lootSpecPopup or CreateFrame('BUTTON', 'LootPopup', self.specFrame, BackdropTemplateMixin and 'BackdropTemplate')
+  self.lootSpecPopup = self.lootSpecPopup or CreateFrame('BUTTON', 'LootPopup', self.specFrame, template)
   self.lootSpecPopup:SetFrameStrata('TOOLTIP')
 
-  local backdrop = GameTooltip:GetBackdrop()
-  if backdrop and (not self.useElvUI) then
-    self.specPopup:SetBackdrop(backdrop)
-    self.specPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
-    self.specPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
-    self.lootSpecPopup:SetBackdrop(backdrop)
-    self.lootSpecPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
-    self.lootSpecPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+  if TooltipBackdropTemplateMixin then
+    self.specPopup.layoutType = GameTooltip.layoutType
+    NineSlicePanelMixin.OnLoad(self.specPopup.NineSlice)
+
+    self.lootSpecPopup.layoutType = GameTooltip.layoutType
+    NineSlicePanelMixin.OnLoad(self.lootSpecPopup.NineSlice)
+
+    if GameTooltip.layoutType then
+      self.specPopup.NineSlice:SetCenterColor(GameTooltip.NineSlice:GetCenterColor())
+      self.specPopup.NineSlice:SetBorderColor(GameTooltip.NineSlice:GetBorderColor())
+
+      self.lootSpecPopup.NineSlice:SetCenterColor(GameTooltip.NineSlice:GetCenterColor())
+      self.lootSpecPopup.NineSlice:SetBorderColor(GameTooltip.NineSlice:GetBorderColor())
+    end
+  else
+    local backdrop = GameTooltip:GetBackdrop()
+    if backdrop and (not self.useElvUI) then
+      self.specPopup:SetBackdrop(backdrop)
+      self.specPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
+      self.specPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+      self.lootSpecPopup:SetBackdrop(backdrop)
+      self.lootSpecPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
+      self.lootSpecPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+    end
   end
 
   self:CreateSpecPopup()
