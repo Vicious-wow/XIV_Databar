@@ -15,7 +15,7 @@ externals:
   Libs/AceGUI-3.0-SharedMediaWidgets: https://repos.curseforge.com/wow/ace-gui-3-0-shared-media-widgets/trunk
   Libs/AceHook-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceHook-3.0
   Libs/AceLocale-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceLocale-3.0
-  Libs/LibQTip-1.0: https://repos.curseforge.com/wow/libqtip-1-0/trunk
+  Libs/LibQTip-1.0: https://repos.curseforge.com/wow/libqtip-1-0
   Libs/LibSharedMedia-3.0: https://repos.curseforge.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
 
 tools-used:
