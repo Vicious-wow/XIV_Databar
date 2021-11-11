@@ -5,7 +5,8 @@ enable-nolib-creation: no
 externals:
   Libs/LibStub: https://repos.curseforge.com/wow/libstub/trunk
   Libs/CallbackHandler-1.0: https://repos.curseforge.com/wow/callbackhandler/trunk/CallbackHandler-1.0
-  Libs/AceAddon-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceConfig-3.0
+  Libs/LibDataBroker-1.1: https://repos.curseforge.com/wow/libdatabroker-1-1
+  Libs/AceAddon-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceAddon-3.0
   Libs/AceConfig-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceConfig-3.0
   Libs/AceConsole-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceConsole-3.0
   Libs/AceDB-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceDB-3.0
