@@ -3,9 +3,10 @@ name: Beta Release
 # Run only on tags with no -beta or -alpha designations
 on:
   push:
-    branches:
-      - 'main'
-      - '!feature/**'
+    tags:
+      - '**-beta'
+      - '!**-alpha'
+      - '!**'
 
 jobs:
   release:
