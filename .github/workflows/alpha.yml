@@ -1,0 +1,24 @@
+name: Alpha Release
+
+# Run only on tags with no -beta or -alpha designations
+on:
+  push:
+    branches:
+      - 'feature/**'
+      - '!main'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Package and release
+        uses: BigWigsMods/packager@v2
+        env:
+          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: -n "{package-name}-{project-version}{nolib}{classic}{alpha}"
