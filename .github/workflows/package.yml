@@ -1,16 +1,17 @@
-name: Stable Release
+name: Package and Release
 
-# Run only on tags with no -beta or -alpha designations
+# Run only on tags
 on:
   push:
     tags:
-      - '*'
-      - '!**-beta'
-      - '!**-alpha'
+      - '**'
 
 jobs:
   release:
     runs-on: ubuntu-latest
+
+    env:
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@v3
@@ -19,5 +20,3 @@ jobs:
 
       - name: Package and release
         uses: BigWigsMods/packager@v2
-        env:
-          GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
