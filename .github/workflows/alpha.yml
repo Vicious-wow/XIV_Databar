@@ -5,6 +5,8 @@ on:
   push:
     tags:
       - '**-alpha'
+      - '!**'
+      - '!**-beta'
 
 jobs:
   release:
