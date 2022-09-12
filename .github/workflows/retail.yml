@@ -1,10 +1,13 @@
-name: Package and Release
+name: Package and Release for Retail
 
-# Run only on tags
+# Run on tags coming from main
 on:
   push:
+    branches:
+      - main
     tags:
       - '**'
+      - '!**-classic'
 
 jobs:
   release:
