@@ -1,0 +1,24 @@
+name: Package and Release for Retail
+
+# Run on tags coming from classic
+on:
+  push:
+    branches:
+      - classic
+    tags:
+      - '**-classic'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Package and release
+        uses: BigWigsMods/packager@v2
