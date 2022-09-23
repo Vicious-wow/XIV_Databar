@@ -1,20 +1,37 @@
-local AddOnName, XIVBar = ...;
+-- Get the addon name and namespace from the client
+local AddonName, XIV_Databar = ...;
+
+-- Create a local version of the WoW global environment
 local _G = _G;
-local pairs, unpack, select = pairs, unpack, select
-LibStub("AceAddon-3.0"):NewAddon(XIVBar, AddOnName, "AceConsole-3.0", "AceEvent-3.0");
-local L = LibStub("AceLocale-3.0"):GetLocale(AddOnName, true);
-local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject(AddOnName, {
+
+-- Create local versions of the Lua functions
+local pairs, unpack, select = pairs, unpack, select;
+
+-- Get the needed libraries
+local LibStub = LibStub;
+local AceAddon = LibStub:GetLibrary("AceAddon-3.0"); ---@type AceAddon-3.0
+local AceLocale = LibStub:GetLibrary("AceLocale-3.0"); ---@type AceLocale-3.0
+
+-- Create the addon
+AceAddon:NewAddon(XIV_Databar, AddonName, "AceConsole-3.0", "AceEvent-3.0");
+local L = AceLocale:GetLocale(AddonName, true); ---@type XIV_DatabarLocale
+
+
+--[[  NOT REFACTORED BELOW THIS COMMENT  ]]--
+
+
+local ldb = LibStub:GetLibrary("LibDataBroker-1.1"):NewDataObject(AddonName, {
     type = "launcher",
     icon = "Interface\\Icons\\Spell_Nature_StormReach",
     OnClick = function(clickedframe, button)
-        XIVBar:ToggleConfig()
+        XIV_Databar:ToggleConfig()
     end,
 })
 
-XIVBar.L = L
+XIV_Databar.L = L
 
-XIVBar.constants = {
-    mediaPath = "Interface\\AddOns\\"..AddOnName.."\\media\\",
+XIV_Databar.constants = {
+    mediaPath = "Interface\\AddOns\\"..AddonName.."\\media\\",
     playerName = UnitName("player"),
     playerClass = select(2, UnitClass("player")),
     playerLevel = UnitLevel("player"),
@@ -23,7 +40,7 @@ XIVBar.constants = {
     popupPadding = 10,
 }
 
-XIVBar.defaults = {
+XIV_Databar.defaults = {
     profile = {
         general = {
             barPosition = "BOTTOM",
@@ -59,10 +76,10 @@ XIVBar.defaults = {
 			useTextCC = false,
             useHoverCC = true,
             hover = {
-				r = RAID_CLASS_COLORS[XIVBar.constants.playerClass].r,
-				g = RAID_CLASS_COLORS[XIVBar.constants.playerClass].g,
-				b = RAID_CLASS_COLORS[XIVBar.constants.playerClass].b,
-				a = RAID_CLASS_COLORS[XIVBar.constants.playerClass].a
+				r = RAID_CLASS_COLORS[XIV_Databar.constants.playerClass].r,
+				g = RAID_CLASS_COLORS[XIV_Databar.constants.playerClass].g,
+				b = RAID_CLASS_COLORS[XIV_Databar.constants.playerClass].b,
+				a = RAID_CLASS_COLORS[XIV_Databar.constants.playerClass].a
 			}
         },
         text = {
@@ -76,9 +93,9 @@ XIVBar.defaults = {
     }
 };
 
-XIVBar.LSM = LibStub('LibSharedMedia-3.0');
+XIV_Databar.LSM = LibStub('LibSharedMedia-3.0');
 
-function XIVBar:OnInitialize()
+function XIV_Databar:OnInitialize()
     self.db = LibStub("AceDB-3.0"):New("XIVBarDB", self.defaults, true)
     self.LSM:Register(self.LSM.MediaType.FONT, 'Homizio Bold', self.constants.mediaPath.."homizio_bold.ttf")
     self.frames = {}
@@ -87,7 +104,7 @@ function XIVBar:OnInitialize()
 
     local options = {
         name = "XIV Bar",
-        handler = XIVBar,
+        handler = XIV_Databar,
         type = 'group',
         args = {
             general = {
@@ -119,14 +136,14 @@ function XIVBar:OnInitialize()
 
     self.db:RegisterDefaults(self.defaults)
 
-    LibStub("AceConfig-3.0"):RegisterOptionsTable(AddOnName, options)
-    self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AddOnName, "XIV Bar", nil, "general")
+    LibStub("AceConfig-3.0"):RegisterOptionsTable(AddonName, options)
+    self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AddonName, "XIV Bar", nil, "general")
 
     --options.args.modules = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-    self.modulesOptionFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AddOnName, L['Modules'], "XIV Bar", "modules")
+    self.modulesOptionFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AddonName, L['Modules'], "XIV Bar", "modules")
 
     options.args.profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-    self.profilesOptionFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AddOnName, 'Profiles', "XIV Bar", "profiles")
+    self.profilesOptionFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(AddonName, 'Profiles', "XIV Bar", "profiles")
 
     self.timerRefresh = false
 
@@ -134,7 +151,7 @@ function XIVBar:OnInitialize()
     self:RegisterChatCommand('xb', 'ToggleConfig')
 end
 
-function XIVBar:OnEnable()
+function XIV_Databar:OnEnable()
     self:CreateMainBar()
     self:Refresh()
 
@@ -150,13 +167,13 @@ function XIVBar:OnEnable()
     end
 end
 
-function XIVBar:ToggleConfig()
+function XIV_Databar:ToggleConfig()
     InterfaceOptionsFrame.selectedTab = 2;
 	InterfaceOptionsFrame:Show()--weird hack ; options registration is wrong in some way
 	InterfaceOptionsFrame_OpenToCategory("XIV Bar")
 end
 
-function XIVBar:SetColor(name, r, g, b, a)
+function XIV_Databar:SetColor(name, r, g, b, a)
     self.db.profile.color[name].r = r
     self.db.profile.color[name].g = g
     self.db.profile.color[name].b = b
@@ -165,7 +182,7 @@ function XIVBar:SetColor(name, r, g, b, a)
     self:Refresh()
 end
 
-function XIVBar:GetColor(name)
+function XIV_Databar:GetColor(name)
     local profile = self.db.profile.color
     local a = profile[name].a
     -- what a stupid hacky solution, the whole config part is kind of fucked and i dread having to come fix this eventually.
@@ -181,7 +198,7 @@ function XIVBar:GetColor(name)
     return profile[name].r, profile[name].g, profile[name].b, a
 end
 
-function XIVBar:HoverColors()
+function XIV_Databar:HoverColors()
     local colors
     local profile = self.db.profile.color
     -- use self-picked color for hover color
@@ -195,7 +212,7 @@ function XIVBar:HoverColors()
     return colors
 end
 
-function XIVBar:RegisterFrame(name, frame)
+function XIV_Databar:RegisterFrame(name, frame)
     frame:SetScript('OnHide', function()
         self:SendMessage('XIVBar_FrameHide', name)
     end)
@@ -205,18 +222,18 @@ function XIVBar:RegisterFrame(name, frame)
     self.frames[name] = frame
 end
 
-function XIVBar:GetFrame(name)
+function XIV_Databar:GetFrame(name)
     return self.frames[name]
 end
 
-function XIVBar:CreateMainBar()
+function XIV_Databar:CreateMainBar()
     if self.frames.bar == nil then
         self:RegisterFrame('bar', CreateFrame("FRAME", "XIV_Databar", UIParent))
         self.frames.bgTexture = self.frames.bgTexture or self.frames.bar:CreateTexture(nil, "BACKGROUND")
     end
 end
 
-function XIVBar:HideBarEvent()
+function XIV_Databar:HideBarEvent()
 	local bar = self:GetFrame("bar")
 	local vehiculeIsFlight = false;
 
@@ -275,18 +292,18 @@ function XIVBar:HideBarEvent()
 	end
 end
 
-function XIVBar:GetHeight()
+function XIV_Databar:GetHeight()
     return (self.db.profile.text.fontSize * 2) + self.db.profile.general.barPadding
 end
 
-function XIVBar:Refresh()
+function XIV_Databar:Refresh()
     if self.frames.bar == nil then return; end
 	
 	self:HideBarEvent()
     self.miniTextPosition = "TOP"
     if self.db.profile.general.barPosition == 'TOP' then
 		hooksecurefunc("UIParent_UpdateTopFramePositions", function(self)
-			if(XIVBar.db.profile.general.barPosition == 'TOP') then
+			if(XIV_Databar.db.profile.general.barPosition == 'TOP') then
 				OffsetUI()
 			end
 		end)
@@ -321,15 +338,15 @@ function XIVBar:Refresh()
     end
 end
 
-function XIVBar:GetFont(size)
+function XIV_Databar:GetFont(size)
     return self.LSM:Fetch(self.LSM.MediaType.FONT, self.db.profile.text.font), size, self.fontFlags[self.db.profile.text.flags]
 end
 
-function XIVBar:GetClassColors()
+function XIV_Databar:GetClassColors()
     return RAID_CLASS_COLORS[self.constants.playerClass].r, RAID_CLASS_COLORS[self.constants.playerClass].g, RAID_CLASS_COLORS[self.constants.playerClass].b, self.db.profile.color.barColor.a
 end
 
-function XIVBar:RGBAToHex(r, g, b, a)
+function XIV_Databar:RGBAToHex(r, g, b, a)
     a = a or 1
     r = r <= 1 and r >= 0 and r or 0
     g = g <= 1 and g >= 0 and g or 0
@@ -338,7 +355,7 @@ function XIVBar:RGBAToHex(r, g, b, a)
     return string.format("%02x%02x%02x%02x", r*255, g*255, b*255, a*255)
 end
 
-function XIVBar:HexToRGBA(hex)
+function XIV_Databar:HexToRGBA(hex)
     local rhex, ghex, bhex, ahex = string.sub(hex, 1, 2), string.sub(hex, 3, 4), string.sub(hex, 5, 6), string.sub(hex, 7, 8)
     if not (rhex and ghex and bhex and ahex) then
         return 0, 0, 0, 0
@@ -346,7 +363,7 @@ function XIVBar:HexToRGBA(hex)
     return (tonumber(rhex, 16) / 255), (tonumber(ghex, 16) / 255), (tonumber(bhex, 16) / 255), (tonumber(ahex, 16) / 255)
 end
 
-function XIVBar:PrintTable(table, prefix)
+function XIV_Databar:PrintTable(table, prefix)
     for k,v in pairs(table) do
         if type(v) == 'table' then
             self:PrintTable(v, prefix..'.'..k)
@@ -357,7 +374,7 @@ function XIVBar:PrintTable(table, prefix)
 end
 
 function OffsetUI()
-    local offset=XIVBar.frames.bar:GetHeight();
+    local offset=XIV_Databar.frames.bar:GetHeight();
     local buffsAreaTopOffset = offset;
 
     if (PlayerFrame and not PlayerFrame:IsUserPlaced() and not PlayerFrame_IsAnimatedOut(PlayerFrame)) then
@@ -385,14 +402,14 @@ function OffsetUI()
     BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -205, 0 - buffsAreaTopOffset);
 end
 
-function XIVBar:ResetUI()
+function XIV_Databar:ResetUI()
 	if topOffsetBlizz then
 		UIParent_UpdateTopFramePositions = topOffsetBlizz
 	end
 	UIParent_UpdateTopFramePositions();
 end
 
-function XIVBar:GetGeneralOptions()
+function XIV_Databar:GetGeneralOptions()
     return {
         name = GENERAL_LABEL,
         type = "group",
@@ -474,14 +491,14 @@ function XIVBar:GetGeneralOptions()
 								self:SetColor('barColor',cr,cg,cb,a)
 							end
 						end,
-						get = function() return XIVBar:GetColor('barColor') end,
+						get = function() return XIV_Databar:GetColor('barColor') end,
 					},
 					barCC = {
 						name = L['Use Class Color for Bar'],
 						desc = L["Only the alpha can be set with the color picker"],
 						type = "toggle",
 						order = 2,
-						set = function(info, val) XIVBar:SetColor('barColor',self:GetClassColors()); self.db.profile.color.useCC = val; self:Refresh(); end,
+						set = function(info, val) XIV_Databar:SetColor('barColor',self:GetClassColors()); self.db.profile.color.useCC = val; self:Refresh(); end,
 						get = function() return self.db.profile.color.useCC end
 					},
 					textColors = self:GetTextColorOptions()
@@ -533,7 +550,7 @@ function XIVBar:GetGeneralOptions()
     }
 end
 
-function XIVBar:GetTextOptions()
+function XIV_Databar:GetTextOptions()
     return {
         name = LOCALE_TEXT_LABEL,
         type = "group",
@@ -583,7 +600,7 @@ function XIVBar:GetTextOptions()
     }
 end
 
-function XIVBar:GetTextColorOptions()
+function XIV_Databar:GetTextColorOptions()
     return {
         name = L['Text Colors'],
         type = "group",
@@ -600,9 +617,9 @@ function XIVBar:GetTextColorOptions()
 					if self.db.profile.color.useTextCC then
 						r,g,b,_=self:GetClassColors()
 					end
-                    XIVBar:SetColor('normal', r, g, b, a)
+                    XIV_Databar:SetColor('normal', r, g, b, a)
                 end,
-                get = function() return XIVBar:GetColor('normal') end
+                get = function() return XIV_Databar:GetColor('normal') end
             },
 			textCC = {
 				name = L["Use Class Color for Text"],
@@ -611,7 +628,7 @@ function XIVBar:GetTextColorOptions()
 				order = 2,
 				set = function(_,val) 
 					if val then
-						XIVBar:SetColor("normal",self:GetClassColors())
+						XIV_Databar:SetColor("normal",self:GetClassColors())
 					end 
 					self.db.profile.color.useTextCC = val 
 				end,
@@ -627,9 +644,9 @@ function XIVBar:GetTextColorOptions()
 					if self.db.profile.color.useHoverCC then
 						r,g,b,_=self:GetClassColors()
 					end
-                    XIVBar:SetColor('hover', r, g, b, a)
+                    XIV_Databar:SetColor('hover', r, g, b, a)
                 end,
-                get = function() return XIVBar:GetColor('hover') end,
+                get = function() return XIV_Databar:GetColor('hover') end,
             },
             hoverCC = {
                 name = L['Use Class Colors for Hover'],
@@ -637,7 +654,7 @@ function XIVBar:GetTextColorOptions()
                 order = 4,
                 set = function(_, val)
 					if val then
-						XIVBar:SetColor("hover",self:GetClassColors())
+						XIV_Databar:SetColor("hover",self:GetClassColors())
 					end
 				self.db.profile.color.useHoverCC = val; self:Refresh(); end,
                 get = function() return self.db.profile.color.useHoverCC end
@@ -649,9 +666,9 @@ function XIVBar:GetTextColorOptions()
                 hasAlpha = true,
                 width = "double",
                 set = function(info, r, g, b, a)
-                    XIVBar:SetColor('inactive', r, g, b, a)
+                    XIV_Databar:SetColor('inactive', r, g, b, a)
                 end,
-                get = function() return XIVBar:GetColor('inactive') end
+                get = function() return XIV_Databar:GetColor('inactive') end
             },
         }
     }
