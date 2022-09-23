@@ -1,10 +1,15 @@
 ## Interface: 90207
+## Interface-Wrath: 30400
+## Interface-Classic: 11403
+
 ## Title: XIV_Databar
-## Author: @{project-author}
-## Version: @{project-version}
+## Author: @project-author@
+## Version: @project-version@
+
 ## Notes: Adds a databar by the request of |cffffffffu/sammojo|r on Reddit, Icons made by |cffffffffu/sammojo|r. Previously maintained by |cff00FF99Saxitoxin|r, |cffbbbbbbMille|r|cff990000XIV|r, |c03dbfcbbVicious|r, and now |cffbab86cKozoaku|r.
 ## SavedVariables: TEST_CONFIG, XIVBarDB
-## X-Issues: https://github.com/@{project-author}/XIV_Databar/issues
+
+## X-Issues: https://github.com/@project-author@/XIV_Databar/issues
 
 embeds.xml
 
