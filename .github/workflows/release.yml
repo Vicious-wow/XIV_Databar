@@ -1,11 +1,9 @@
-name: Package and Release for Retail
+name: Package and Release
 
-# Run on tags without -classic
 on:
   push:
     tags:
       - '**'
-      - '!**-classic'
 
 jobs:
   release:
@@ -22,3 +20,5 @@ jobs:
 
       - name: Package and release
         uses: BigWigsMods/packager@v2
+        with:
+          args: -S
