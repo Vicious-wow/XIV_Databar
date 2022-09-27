@@ -1,4 +1,4 @@
-name: Package and Release for Retail
+name: Package and Release for Classic
 
 # Run on tags specified with -classic
 on:
