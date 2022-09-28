@@ -22,20 +22,38 @@ function MenuModule:OnInitialize()
   self.iconSize = xb:GetHeight();
   self:CreateClickFunctions()
   self.socialIcons = {
+    CLNT = {
+      text = ''
+    },
     BSAp = {
       text = BNET_CLIENT_APP
     },
     App = {
       text = BNET_CLIENT_APP
     },
-    D3 = {
-      text = 'Diablo 3'
+    W3 = {
+      text = 'Warcraft 3 Reforged'
+    },
+    WoW = {
+      text = CINEMATIC_NAME_1
+    },
+    GRY = {
+      text = 'Warcraft Arclight Rumble'
     },
     S1 = {
       text = 'Starcraft Remastered'
     },
     S2 = {
       text = 'Starcraft 2'
+    },
+    OSI = {
+      text = 'Diablo II: Resurrected'
+    },
+    D3 = {
+      text = 'Diablo 3'
+    },
+    ANBS = {
+      text = 'Diablo Immortal'
     },
     WTCG = {
       text = 'Hearthstone'
@@ -45,12 +63,6 @@ function MenuModule:OnInitialize()
     },
     Pro = {
       text = 'Overwatch'
-    },
-    CLNT = {
-      text = ''
-    },
-    WoW = {
-      text = CINEMATIC_NAME_1
     },
     DST2 = {
       text = 'Destiny 2'
@@ -67,9 +79,15 @@ function MenuModule:OnInitialize()
     ZEUS = {
       text = 'Call of Duty: BOCW'
     },
-    W3 = {
-      text = 'Warcraft 3 Reforged'
-    }
+    FORE = {
+      text = 'Call of Duty: Vanguard'
+    },
+    RTRO = {
+      text = 'Blizzard Arcade Collection'
+    },
+    WLBY = {
+      text = 'Crash Bandicoot 4'
+    },
   }
 end
 
