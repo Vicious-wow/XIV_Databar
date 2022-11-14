@@ -196,8 +196,8 @@ function TradeskillModule:SetProfScripts(prefix)
     if button == 'LeftButton' then
       --workaround, toggling spellbooks for tailoring / engineering / inscription is bugged on blizzard's side
       --i prefer this over the alternative of casting a spell via SecureActionButtonTemplate frames anyway
-      local _, _, _, _, _, openSkillLine, _ = C_TradeSkillUI.GetTradeSkillLine()
-      if openSkillLine == self[prefix].id then C_TradeSkillUI.CloseTradeSkill() return end
+      local currentProfessionInfo = C_TradeSkillUI.GetBaseProfessionInfo()
+      if currentProfessionInfo.professionID == self[prefix].id then C_TradeSkillUI.CloseTradeSkill() return end
       C_TradeSkillUI.OpenTradeSkill(self[prefix].id)
     elseif button == 'RightButton' then ToggleSpellBook(BOOKTYPE_PROFESSION) end
   end)
