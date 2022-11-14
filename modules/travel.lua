@@ -13,30 +13,32 @@ function TravelModule:OnInitialize()
   self.iconPath = xb.constants.mediaPath..'datatexts\\repair'
   self.garrisonHearth = 110560
   self.hearthstones = {
+    6948,   -- Hearthstone
     64488,  -- Innkeeper's Daughter
+    28585,  -- Ruby Slippers
     54452,  -- Ethereal Portal
     93672,  -- Dark Portal
-    6948,   -- Hearthstone
-    556,    -- Astral Recall
-    28585,  -- Ruby Slippers
+    142542, -- Tome of Town Portal
+    163045, -- Headless Horseman's Hearthstone
+    162973, -- Greatfather Winter's Hearthstone
+    165669, -- Lunar Elder's Hearthstone
+    165670, -- Peddlefeet's Lovely Hearthstone
+    165802, -- Noble Gardener's Hearthstone
+    166746, -- Fire Eater's Hearthstone
+    166747, -- Brewfest Reveler's Hearthstone
+    40582,  -- Scourgestone (Death Knight Starting Campaign)
+    172179, -- Eternal Traveler's Hearthstone
+    184353, -- Kyrian Hearthstone
+    182773, -- Necrolord Hearthstone
+    180290, -- Night Fae Hearthstone
+    183716, -- Venthyr Sinstone
+    142543, -- Scroll of Town Portal
     37118,  -- Scroll of Recall 1
     44314,  -- Scroll of Recall 2
     44315,  -- Scroll of Recall 3
-    142542, -- Tome of Town Portal
-    172179, -- Eternal Traveler's Hearthstone
+    556,    -- Astral Recall
     168907, -- Holographic Digitalization Hearthstone
-    163045, -- Headless Horseman's Hearthstone
-    162973, -- Greatfather Winter's Hearthstone
-    166746, -- Fire Eater's Hearthstone
-    166747, -- Brewfest Reveler's Hearthstone
-    165670, -- Peddlefeet's Lovely Hearthstone
-    165802, -- Noble Gardener's Hearthstone
-    165669, -- Lunar Elder's Hearthstone
     142298, -- Astonishingly Scarlet Slippers
-    184353, -- Kyrian Hearthstone
-    183716, -- Venthyr Sinstone
-    182773, -- Necrolord Hearthstone
-    180290, -- Night Fae Hearthstone
   }
 
   self.portButtons = {}
@@ -72,7 +74,7 @@ end
 
 function TravelModule:OnEnable()
   if self.hearthFrame == nil then
-    self.hearthFrame = CreateFrame('FRAME', nil, xb:GetFrame('bar'))
+    self.hearthFrame = CreateFrame('FRAME', "TravelModule", xb:GetFrame('bar'))
     xb:RegisterFrame('travelFrame', self.hearthFrame)
   end
   self.useElvUI = xb.db.profile.general.useElvUI and (IsAddOnLoaded('ElvUI') or IsAddOnLoaded('Tukui'))
@@ -100,6 +102,7 @@ function TravelModule:CreateFrames()
 
   local template = (TooltipBackdropTemplateMixin and "TooltipBackdropTemplate") or (BackdropTemplateMixin and "BackdropTemplate")
   self.portPopup = self.portPopup or CreateFrame('BUTTON', 'portPopup', self.portButton, template)
+  self.portPopup:SetFrameStrata("TOOLTIP")
 
   if TooltipBackdropTemplateMixin then
     self.portPopup.layoutType = GameTooltip.layoutType
@@ -112,12 +115,9 @@ function TravelModule:CreateFrames()
   else
     local backdrop = GameTooltip:GetBackdrop()
     if backdrop and (not self.useElvUI) then
-      self.specPopup:SetBackdrop(backdrop)
-      self.specPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
-      self.specPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
-      self.lootSpecPopup:SetBackdrop(backdrop)
-      self.lootSpecPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
-      self.lootSpecPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+      self.portPopup:SetBackdrop(backdrop)
+      self.portPopup:SetBackdropColor(GameTooltip:GetBackdropColor())
+      self.portPopup:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
     end
   end
 end
@@ -126,12 +126,13 @@ function TravelModule:RegisterFrameEvents()
   self:RegisterEvent('SPELLS_CHANGED', 'Refresh')
   self:RegisterEvent('BAG_UPDATE_DELAYED', 'Refresh')
   self:RegisterEvent('HEARTHSTONE_BOUND', 'Refresh')
+
   self.hearthButton:EnableMouse(true)
-  self.hearthButton:RegisterForClicks('AnyUp')
+  self.hearthButton:RegisterForClicks('AnyUp', 'AnyDown')
   self.hearthButton:SetAttribute('type', 'macro')
 
   self.portButton:EnableMouse(true)
-  self.portButton:RegisterForClicks("AnyUp")
+  self.portButton:RegisterForClicks("AnyUp", "AnyDown")
   self.portButton:SetAttribute('*type1', 'macro')
   self.portButton:SetAttribute('*type2', 'portFunction')
 
@@ -176,12 +177,11 @@ function TravelModule:RegisterFrameEvents()
 end
 
 function TravelModule:UpdatePortOptions()
-  local compassName, _ = GetItemInfo(128353)
   if not self.portOptions then
     self.portOptions = {}
   end
   if IsUsableItem(128353) and not self.portOptions[128353] then
-    self.portOptions[128353] = {portId = 128353, text = compassName} -- admiral's compass
+    self.portOptions[128353] = {portId = 128353, text = GetItemInfo(128353)} -- admiral's compass
   end
   if IsUsableItem(140192) and not self.portOptions[140192] then
     self.portOptions[140192] = {portId = 140192, text = GetItemInfo(140192)} -- dalaran hearthstone
@@ -197,7 +197,7 @@ function TravelModule:UpdatePortOptions()
       end
     else
       if not self.portOptions[18960] then
-        self.portOptions[18960] = {portId = 18960, text = C_Map.GetMapInfo(241)}
+        self.portOptions[18960] = {portId = 18960, text = C_Map.GetMapInfo(1471).name}
       end
     end
   end
