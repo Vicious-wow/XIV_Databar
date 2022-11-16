@@ -76,6 +76,9 @@ function MenuModule:OnInitialize()
     LAZR = {
       text = 'Call of Duty: MW2'
     },
+    AUKS = {
+      text = 'Call of Duty: MW2'
+    },
     ZEUS = {
       text = 'Call of Duty: BOCW'
     },
@@ -554,19 +557,19 @@ function MenuModule:SocialHover(hoverFunc)
             friendAccInfo.battleTag = '[' .. L['No Tag'] .. ']'
           end
           
-          local charName = gameAccount.characterName               --gets the friend's character name
-          local gameClient = gameAccount.clientProgram             --the application that the friend is online with - can be any game or 'App'/'Mobile'
-          local realmName = gameAccount.realmName                  --gets the realm name the friend's char is on
-          local faction = gameAccount.factionName                  --gets the friend's currently logged in char's faction
-          local zone = gameAccount.areaName                        --zone name to be displayed when the friend is playing retail WoW
-          local richPresence = gameAccount.richPresence            --rich presence is used here to determine whether a friend logged into WoW is playing classic
-          local isWoW = false                                      --tracks whether the friend is playing WoW or not, default being that the friend isn't
-          local isClassic = false                                  --tracks whether the friend is logged into classic or not, default being that the friend isn't
-          local statusIcon = FRIENDS_TEXTURE_ONLINE                --get icon for online friends, might later be changed to afk/dnd icons
-          local socialIcon = BNet_GetClientTexture(gameClient)     --get icon for the friend's application
-          local gameName = MenuModule.socialIcons[gameClient].text --name of the application the friend is currently using - can be any game or 'App'/'Mobile'
-          local note = friendAccInfo.note                          --note of the friend, if there is no note it's an empty string
-          local charNameFormat = ''                                --format in which the friend's character is displayed - is '' if not playing WoW, 'Char - Realm' or 'FACTION - Char' if playing WoW
+          local charName = gameAccount.characterName                     --gets the friend's character name
+          local gameClient = gameAccount.clientProgram                   --the application that the friend is online with - can be any game or 'App'/'Mobile'
+          local realmName = gameAccount.realmName                        --gets the realm name the friend's char is on
+          local faction = gameAccount.factionName                        --gets the friend's currently logged in char's faction
+          local zone = gameAccount.areaName                              --zone name to be displayed when the friend is playing retail WoW
+          local richPresence = gameAccount.richPresence                  --rich presence is used here to determine whether a friend logged into WoW is playing classic
+          local isWoW = false                                            --tracks whether the friend is playing WoW or not, default being that the friend isn't
+          local isClassic = false                                        --tracks whether the friend is logged into classic or not, default being that the friend isn't
+          local statusIcon = FRIENDS_TEXTURE_ONLINE                      --get icon for online friends, might later be changed to afk/dnd icons
+          local socialIcon = BNet_GetClientEmbeddedAtlas(gameClient)     --get icon for the friend's application
+          local gameName = MenuModule.socialIcons[gameClient].text       --name of the application the friend is currently using - can be any game or 'App'/'Mobile'
+          local note = friendAccInfo.note                                --note of the friend, if there is no note it's an empty string
+          local charNameFormat = ''                                      --format in which the friend's character is displayed - is '' if not playing WoW, 'Char - Realm' or 'FACTION - Char' if playing WoW
 
           -- if the friend is afk, set the icon left to the friend's name to afk
           if friendAccInfo.isAFK or gameAccount.isGameAFK then statusIcon = FRIENDS_TEXTURE_AFK end
