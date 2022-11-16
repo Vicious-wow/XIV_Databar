@@ -3,6 +3,17 @@ local _G = _G;
 local xb = XIVBar;
 local L = XIVBar.L;
 
+if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+  ---Proxy for C_Containter.GetContainerNumFreeSlots
+  ---@paramsig bagIndex
+  ---@param bagIndex number
+  ---@return number numFreeSlots
+  ---@return number bagFamily
+  function GetContainerNumFreeSlots(bagIndex)
+    return C_Container.GetContainerNumFreeSlots(bagIndex)
+  end
+end
+
 local GoldModule = xb:NewModule("GoldModule", 'AceEvent-3.0')
 
 local isSessionNegative, isDailyNegative = false, false
