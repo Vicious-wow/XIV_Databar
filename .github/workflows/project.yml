@@ -1,0 +1,19 @@
+name: Add issues to backlog
+
+on:
+  issues:
+    types:
+      - opened
+  pull_request:
+    types:
+      - opened
+
+jobs:
+  add-to-project:
+    name: Add issue to project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@v0
+        with:
+          project-url: https://github.com/users/Kozoaku/projects/1
+          github-token: ${{ secrets.PROJECT_MANAGEMENT }}
