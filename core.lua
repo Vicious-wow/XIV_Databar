@@ -205,6 +205,9 @@ function XIVBar:RegisterFrame(name, frame)
     self.frames[name] = frame
 end
 
+--- Get the frame with the specified name
+---@param name string name of the frame as supplied to RegisterFrame
+---@return Frame
 function XIVBar:GetFrame(name)
     return self.frames[name]
 end
@@ -228,13 +231,14 @@ function XIVBar:HideBarEvent()
     bar:RegisterEvent("VEHICLE_POWER_SHOW")
 
 	bar:SetScript("OnEvent", function(_, event, ...)
+        local barFrame = XIVBar:GetFrame("bar")
         if self.db.profile.general.barFlightHide then
             if event == "VEHICLE_POWER_SHOW" then
-                if not XIVBar:IsVisible() then
-                    XIVBar:Show()
+                if not barFrame:IsVisible() then
+                    barFrame:Show()
                 end
-                if vehiculeIsFlight and XIVBar:IsVisible() then
-                    XIVBar:Hide()
+                if vehiculeIsFlight and barFrame:IsVisible() then
+                    barFrame:Hide()
                 end
             end
 
@@ -246,11 +250,11 @@ function XIVBar:HideBarEvent()
             end
         end
 
-		if event=="PET_BATTLE_OPENING_START" and XIVBar:IsVisible() then
-			XIVBar:Hide()
+		if event=="PET_BATTLE_OPENING_START" and barFrame:IsVisible() then
+			barFrame:Hide()
 		end
-		if event=="PET_BATTLE_CLOSE" and not XIVBar:IsVisible() then
-			XIVBar:Show()
+		if event=="PET_BATTLE_CLOSE" and not barFrame:IsVisible() then
+			barFrame:Show()
 		end
 	end)
 
@@ -259,11 +263,12 @@ function XIVBar:HideBarEvent()
 		bar:RegisterEvent("PLAYER_REGEN_DISABLED")
 
 		bar:HookScript("OnEvent", function(_, event, ...)
-			if event=="PLAYER_REGEN_DISABLED" and XIVBar:IsVisible() then
-				XIVBar:Hide()
+            local barFrame = XIVBar:GetFrame("bar")
+			if event=="PLAYER_REGEN_DISABLED" and barFrame:IsVisible() then
+				barFrame:Hide()
 			end
-			if event=="PLAYER_REGEN_ENABLED" and not XIVBar:IsVisible() then
-				XIVBar:Show()
+			if event=="PLAYER_REGEN_ENABLED" and not barFrame:IsVisible() then
+				barFrame:Show()
 			end
 		end)
 	else
