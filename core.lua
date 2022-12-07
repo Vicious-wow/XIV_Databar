@@ -373,23 +373,23 @@ function OffsetUI()
         if (TargetFrame and not TargetFrame:IsUserPlaced()) then
             TargetFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 250, -4 - offset);
         end
-    end
 
-    local ticketStatusFrameShown = TicketStatusFrame and TicketStatusFrame:IsShown();
-    local gmChatStatusFrameShown = GMChatStatusFrame and GMChatStatusFrame:IsShown();
-    if (ticketStatusFrameShown) then
-        TicketStatusFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -180, 0 - offset);
-        buffsAreaTopOffset = buffsAreaTopOffset + TicketStatusFrame:GetHeight();
+        local ticketStatusFrameShown = TicketStatusFrame and TicketStatusFrame:IsShown();
+        local gmChatStatusFrameShown = GMChatStatusFrame and GMChatStatusFrame:IsShown();
+        if (ticketStatusFrameShown) then
+            TicketStatusFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -180, 0 - offset);
+            buffsAreaTopOffset = buffsAreaTopOffset + TicketStatusFrame:GetHeight();
+        end
+        if (gmChatStatusFrameShown) then
+            GMChatStatusFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -170, -5 - offset);
+            buffsAreaTopOffset = buffsAreaTopOffset + GMChatStatusFrame:GetHeight() + 5;
+        end
+        if (not ticketStatusFrameShown and not gmChatStatusFrameShown) then
+            buffsAreaTopOffset = buffsAreaTopOffset + 13;
+        end
+
+        BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -205, 0 - buffsAreaTopOffset);
     end
-    if (gmChatStatusFrameShown) then
-        GMChatStatusFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -170, -5 - offset);
-        buffsAreaTopOffset = buffsAreaTopOffset + GMChatStatusFrame:GetHeight() + 5;
-    end
-    if (not ticketStatusFrameShown and not gmChatStatusFrameShown) then
-        buffsAreaTopOffset = buffsAreaTopOffset + 13;
-    end
-		
-    BuffFrame:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -205, 0 - buffsAreaTopOffset);
 end
 
 function XIVBar:ResetUI()
