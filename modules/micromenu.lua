@@ -566,7 +566,7 @@ function MenuModule:SocialHover(hoverFunc)
           local isWoW = false                                            --tracks whether the friend is playing WoW or not, default being that the friend isn't
           local isClassic = false                                        --tracks whether the friend is logged into classic or not, default being that the friend isn't
           local statusIcon = FRIENDS_TEXTURE_ONLINE                      --get icon for online friends, might later be changed to afk/dnd icons
-          local socialIcon = BNet_GetClientEmbeddedAtlas(gameClient)     --get icon for the friend's application
+          local socialIcon = BNet_GetClientEmbeddedAtlas(gameClient, 16) --get icon for the friend's application
           local gameName = MenuModule.socialIcons[gameClient].text       --name of the application the friend is currently using - can be any game or 'App'/'Mobile'
           local note = friendAccInfo.note                                --note of the friend, if there is no note it's an empty string
           local charNameFormat = ''                                      --format in which the friend's character is displayed - is '' if not playing WoW, 'Char - Realm' or 'FACTION - Char' if playing WoW
@@ -619,13 +619,13 @@ function MenuModule:SocialHover(hoverFunc)
 
             -- friend is not playing wow, format is "GameName [Icon]"
             if not isWoW then
-              lineRight = string.format("%s |T%s:16|t", gameName, socialIcon)
+              lineRight = string.format("%s %s", gameName, socialIcon)
             -- friend is playing classic WoW, format is "WoW Classic [Icon]"
             elseif isClassic then
-              lineRight = string.format("%s |T%s:16|t", richPresence, socialIcon)
+              lineRight = string.format("%s %s", richPresence, socialIcon)
             -- friend is playing retail WoW, format is "(Name-Realm) Zone [Icon]"
             else
-              lineRight = string.format("%s %s |T%s:16|t", charNameFormat, zone, socialIcon)
+              lineRight = string.format("%s %s %s", charNameFormat, zone, socialIcon)
             end
             
             -- add left and right line to the tooltip
