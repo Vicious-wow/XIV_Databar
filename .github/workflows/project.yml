@@ -4,11 +4,17 @@ on:
   issues:
     types:
       - opened
-  pull_request:
-    types:
-      - opened
 
 jobs:
+  label-issue:
+    name: Add triage label to issue
+    runs-on: ubuntu-latest
+    steps:
+      - uses: github/issue-labeler@v2.5
+        with:
+          repo-token: ${{ secrets.PROJECT_MANAGEMENT }}
+          configuration-path: .github/labeler.yml
+
   add-to-project:
     name: Add issue to project
     runs-on: ubuntu-latest
@@ -17,3 +23,4 @@ jobs:
         with:
           project-url: https://github.com/users/Kozoaku/projects/1
           github-token: ${{ secrets.PROJECT_MANAGEMENT }}
+          labeled: needs-triage
