@@ -2,10 +2,11 @@
 
 #### !! ATTENTION !!
 There are currently no plans to upload this to Curse or WoWInterface. If
-you would like to have an auto-updater, then I would suggest WoWUp. It supports
+you would like to have an auto-updater, then I would suggest [WoWUp](https://github.com/WowUp/WowUp). It supports
 downloading from several providers like WoWInterface, Wago, TukUI and
-GitHub. Simply provide the repo's clone address to WoWUp and it will track when
-new GitHub Releases are made and trigger an update.
+GitHub. Alternatively there is also [CurseBreaker](https://github.com/AcidWeb/CurseBreaker), 
+which is CLI-based with similar functionality. Simply provide the repo's clone address to WoWUp 
+or CurseBreaker and it will track when new GitHub Releases are made and trigger an update.
 
 If you wish to contribute to the project, please fork and submit a pull request. 
 To get a working development copy, simply copy the Libs folder from the
