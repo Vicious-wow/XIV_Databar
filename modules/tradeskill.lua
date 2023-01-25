@@ -161,9 +161,10 @@ function TradeskillModule:StyleTradeskillFrame(prefix)
     self[prefix..'Text']:SetPoint('LEFT', self[prefix..'Icon'], 'RIGHT', 5, 0)
   else
     self[prefix..'Text']:SetPoint('TOPLEFT', self[prefix..'Icon'], 'TOPRIGHT', 5, 0)
-    self[prefix..'Bar']:SetStatusBarTexture(1, 1, 1)
+    self[prefix..'Bar']:SetStatusBarTexture("Interface/BUTTONS/WHITE8X8")
     if db.modules.tradeskill.barCC then
-      self[prefix..'Bar']:SetStatusBarColor(xb:GetClassColors())
+      rPerc, gPerc, bPerc, argbHex = xb:GetClassColors()
+      self[prefix..'Bar']:SetStatusBarColor(rPerc, gPerc, bPerc, 1)
     else
       self[prefix..'Bar']:SetStatusBarColor(xb:GetColor('normal'))
     end

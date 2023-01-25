@@ -15,6 +15,9 @@ function TravelModule:OnInitialize()
   self.hearthstones = {
     6948,   -- Hearthstone
     64488,  -- Innkeeper's Daughter
+    193588, -- Timewalker's Hearthstone
+    190237, -- Broker Translocation Matrix
+    188952, -- Dominated Hearthstone
     28585,  -- Ruby Slippers
     54452,  -- Ethereal Portal
     93672,  -- Dark Portal
