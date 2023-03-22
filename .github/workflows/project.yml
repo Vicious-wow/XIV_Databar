@@ -1,4 +1,4 @@
-name: Add issues to backlog
+name: Project Managment
 
 on:
   issues:
