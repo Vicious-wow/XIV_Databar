@@ -19,8 +19,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "lts/*"
-      - name: Install Dependencies
-        run: npm ci
       - name: Import GPG Key
         uses: crazy-max/ghaction-import-gpg@v5
         with:
