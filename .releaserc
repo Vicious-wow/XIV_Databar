@@ -2,11 +2,6 @@
   "branches": ["main"],
   "plugins": [
     "@semantic-release/commit-analyzer", 
-    "@semantic-release/release-notes-generator",
-    ["@semantic-release/exec", {
-      "prepareCmd": "git tag -a v${nextRelease.version} -m \"Release v${nextRelease.version}\"",
-      "publishCmd": "git push --tags && echo \"{\"name\": \"v${nextRelease.version}\", \"url\": \"https://github.com/Kozoaku/XIV_Databar/releases/tag/v${nextRelease.version}\"}",
-      "successCmd": "Pushed next release tag"
-    }]
+    "@semantic-release/release-notes-generator"
   ]
 }
