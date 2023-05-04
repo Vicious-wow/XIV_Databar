@@ -1,11 +1,21 @@
-name: Create Release
+name: Create new version
 
 on:
   push:
-    branches:
-      - 'main'
+    branches: ['main', 'beta', 'alpha']
 
 jobs:
+  luacheck:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Luacheck
+        uses: nebularg/actions-luacheck@v1
+
   release:
     runs-on: ubuntu-latest
 
@@ -19,20 +29,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "lts/*"
-      - run: npm install @semantic-release/exec -D
-      - run: npm ci
-      - name: Import GPG Key
-        id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v3
-        with:
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          git-user-signingkey: true
-          git-commit-gpgsign: true
-          git-tag-gpgsign: true
-          git-push-gpgsign: true
-      - name: Release
+      - name: Install Semantic Release
+        run: |
+          npm install semantic-release @semantic-release/git @sementic-release/changelog -D
+      - name: Create new version
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          GIT_AUTHOR_NAME: ${{ steps.import_gpg.outputs.name }}
-          GIT_AUTHOR_EMAIL: ${{ steps.import_gpg.outputs.email }}
-        run: npx semantic-release
+          GIT_AUTHOR_NAME: ${{ github.event.pusher.name }}
+          GIT_AUTHOR_EMAIL: ${{ github.event.pusher.email }}
+        run: |
+          npx semantic-release

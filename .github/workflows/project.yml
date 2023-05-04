@@ -10,7 +10,7 @@ jobs:
     name: Add triage label to issue
     runs-on: ubuntu-latest
     steps:
-      - uses: github/issue-labeler@v2.5
+      - uses: github/issue-labeler@v3.1
         with:
           repo-token: ${{ secrets.PROJECT_MANAGEMENT }}
           configuration-path: .github/labeler.yml
@@ -20,7 +20,7 @@ jobs:
     name: Add issue to project
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/add-to-project@v0.4.0
+      - uses: actions/add-to-project@v0.5.0
         with:
           project-url: https://github.com/users/Kozoaku/projects/1
           github-token: ${{ secrets.PROJECT_MANAGEMENT }}
